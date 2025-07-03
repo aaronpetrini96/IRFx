@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="b0NU9j" name="IRFx" projectType="audioplug" useAppConfig="0"
+              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" cppLanguageStandard="20"
+              companyName="Aaron Petrini">
+  <MAINGROUP id="YWPSGD" name="IRFx">
+    <GROUP id="{CB8DDF6B-6843-253E-84F4-ADDA0FA5C9EE}" name="Source">
+      <GROUP id="{D65F6F65-620F-1C0C-07AD-46F626E13518}" name="DSP">
+        <FILE id="ZqecNa" name="Fifo.h" compile="0" resource="0" file="Source/DSP/Fifo.h"/>
+        <FILE id="R4IeDy" name="SingleChannelSampleFifo.h" compile="0" resource="0"
+              file="Source/DSP/SingleChannelSampleFifo.h"/>
+      </GROUP>
+      <FILE id="EBhMrY" name="ParamNames.h" compile="0" resource="0" file="Source/ParamNames.h"/>
+      <GROUP id="{3C0DDFA1-EB46-77A8-9C4C-9C6E1BAC9197}" name="GUI">
+        <FILE id="De5Osc" name="ImageKnob.cpp" compile="1" resource="0" file="Source/GUI/ImageKnob.cpp"/>
+        <FILE id="zap4tN" name="ImageKnob.h" compile="0" resource="0" file="Source/GUI/ImageKnob.h"/>
+        <FILE id="S60s6Q" name="ImageKnobLookAndFeel.cpp" compile="1" resource="0"
+              file="Source/GUI/ImageKnobLookAndFeel.cpp"/>
+        <FILE id="b4oi5r" name="ImageKnobLookAndFeel.h" compile="0" resource="0"
+              file="Source/GUI/ImageKnobLookAndFeel.h"/>
+        <FILE id="dG0cPY" name="BypassButton.cpp" compile="1" resource="0"
+              file="Source/GUI/BypassButton.cpp"/>
+        <FILE id="GygegQ" name="BypassButton.h" compile="0" resource="0" file="Source/GUI/BypassButton.h"/>
+        <FILE id="coaW4r" name="LookAndFeel.cpp" compile="1" resource="0" file="Source/GUI/LookAndFeel.cpp"/>
+        <FILE id="nTj0tf" name="LookAndFeel.h" compile="0" resource="0" file="Source/GUI/LookAndFeel.h"/>
+        <FILE id="nbi8tN" name="LookAndFeelHelpers.h" compile="0" resource="0"
+              file="Source/GUI/LookAndFeelHelpers.h"/>
+      </GROUP>
+      <GROUP id="{BD30F1D7-2636-5161-5ED9-A5996BD373F9}" name="Assets">
+        <FILE id="QnazfN" name="Bypass.png" compile="0" resource="1" file="Source/Assets/Bypass.png"/>
+        <FILE id="lEmgWc" name="Knob_10-brighter.png" compile="0" resource="1"
+              file="Source/Assets/Knob_10-brighter.png"/>
+        <FILE id="VT8CXl" name="Knob_10.png" compile="0" resource="1" file="Source/Assets/Knob_10.png"/>
+        <FILE id="SYOTc9" name="Lato-Medium.ttf" compile="0" resource="1" file="Source/Assets/Lato-Medium.ttf"/>
+        <FILE id="XHI532" name="Lato-Regular.ttf" compile="0" resource="1"
+              file="Source/Assets/Lato-Regular.ttf"/>
+        <FILE id="tPWTTQ" name="Ver_flat_slider.png" compile="0" resource="1"
+              file="Source/Assets/Ver_flat_slider.png"/>
+        <FILE id="GavFrW" name="Ver_slider.png" compile="0" resource="1" file="Source/Assets/Ver_slider.png"/>
+      </GROUP>
+      <FILE id="swHVWK" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
+      <FILE id="HTufZ7" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
+      <FILE id="izYPLE" name="PluginEditor.cpp" compile="1" resource="0"
+            file="Source/PluginEditor.cpp"/>
+      <FILE id="gcYWpN" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_dsp" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+  </MODULES>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"/>
+  <EXPORTFORMATS>
+    <XCODE_MAC targetFolder="Builds/MacOSX">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="IRFx"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="IRFx"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../Project13/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../Project13/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../Project13/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../Project13/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../Project13/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../Project13/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../Project13/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../Project13/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../Project13/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../Project13/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../Project13/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../Project13/JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="../Project13/JUCE/modules"/>
+      </MODULEPATHS>
+    </XCODE_MAC>
+  </EXPORTFORMATS>
+</JUCERPROJECT>
