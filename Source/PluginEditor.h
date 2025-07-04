@@ -95,9 +95,16 @@ private:
     juce::ImageButton unloadIR1Button, unloadIR2Button;
     std::vector<juce::ImageButton*> unloadIRButtons
     {
-      &unloadIR1Button, &unloadIR2Button,
+        &unloadIR1Button, &unloadIR2Button,
     };
     juce::Image unloadIRImage = juce::ImageCache::getFromMemory(BinaryData::CancelX_png, BinaryData::CancelX_pngSize);
+//    Mute IR Buttons
+    juce::ImageButton muteIR1Button, muteIR2Button;
+    std::vector<juce::ImageButton*> muteIRButtons
+    {
+        &muteIR1Button, &muteIR2Button
+    };
+    juce::Image muteIRImage = juce::ImageCache::getFromMemory(BinaryData::Mute_png, BinaryData::Mute_pngSize);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (IRFxAudioProcessorEditor)
 };

@@ -374,44 +374,55 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     updateSmootherFromParams(buffer.getNumSamples(), SmootherUpdateMode::liveInRealTime);
     updateParams();
     
-    
     if (irLoaderBypassParam->get() == false)
     {
-        if (isIR1Loaded && isIR2Loaded)
+        // Evaluate effective loading states after mute
+        const bool useIR1 = isIR1Loaded && !isIR1Muted;
+        const bool useIR2 = isIR2Loaded && !isIR2Muted;
+
+        if (useIR1 && useIR2)
         {
             tempBuffer.setSize(buffer.getNumChannels(), buffer.getNumSamples());
             tempBuffer.makeCopyOf(buffer, true);
-            juce::dsp::AudioBlock<float> block1 (buffer);
-            juce::dsp::AudioBlock<float> block2 (tempBuffer);
+
+            juce::dsp::AudioBlock<float> block1(buffer);
+            juce::dsp::AudioBlock<float> block2(tempBuffer);
+
             irLoader1.process(juce::dsp::ProcessContextReplacing<float>(block1));
             irLoader2.process(juce::dsp::ProcessContextReplacing<float>(block2));
-            
+
             for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
                 buffer.addFrom(ch, 0, tempBuffer, ch, 0, buffer.getNumSamples());
-            
+
             buffer.applyGain(juce::Decibels::decibelsToGain(3.f));
         }
-        else if (isIR1Loaded)
+        else if (useIR1)
         {
+            juce::dsp::AudioBlock<float> block(buffer);
             irLoader1.process(juce::dsp::ProcessContextReplacing<float>(block));
+
             buffer.applyGain(juce::Decibels::decibelsToGain(9.f));
         }
-        else if (isIR2Loaded)
+        else if (useIR2)
         {
+            juce::dsp::AudioBlock<float> block(buffer);
             irLoader2.process(juce::dsp::ProcessContextReplacing<float>(block));
+
             buffer.applyGain(juce::Decibels::decibelsToGain(9.f));
         }
 
-        
+        // Apply EQ to final buffer
         juce::dsp::AudioBlock<float> eqBlock(buffer);
         auto eqBlockLeft = eqBlock.getSingleChannelBlock(0);
         auto eqBlockRight = eqBlock.getSingleChannelBlock(1);
-        
-        juce::dsp::ProcessContextReplacing<float> eqContextLeft(eqBlockLeft), eqContextRight (eqBlockRight);
-        
+
+        juce::dsp::ProcessContextReplacing<float> eqContextLeft(eqBlockLeft);
+        juce::dsp::ProcessContextReplacing<float> eqContextRight(eqBlockRight);
+
         irEQMonoChainArray[0].process(eqContextLeft);
         irEQMonoChainArray[1].process(eqContextRight);
     }
+    
     
     if (eqBypassParam->get() == false)
     {

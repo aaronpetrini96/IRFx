@@ -117,6 +117,7 @@
 		6EF8EB98E892CB6EB19807C3 /* Bypass.png */ /* Bypass.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Bypass.png; path = ../../Source/Assets/Bypass.png; sourceTree = SOURCE_ROOT; };
 		70B7E176CAD68E5CD1B35F65 /* LookAndFeel.h */ /* LookAndFeel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = LookAndFeel.h; path = ../../Source/GUI/LookAndFeel.h; sourceTree = SOURCE_ROOT; };
 		731F5E76C15319B12214E212 /* CoreAudioKit.framework */ /* CoreAudioKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudioKit.framework; path = System/Library/Frameworks/CoreAudioKit.framework; sourceTree = SDKROOT; };
+		781E44880D713B3E10626340 /* Mute.png */ /* Mute.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Mute.png; path = ../../Source/Assets/Mute.png; sourceTree = SOURCE_ROOT; };
 		786E01AD3826CD1A4DA8BDB8 /* juce_audio_processors */ /* juce_audio_processors */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_processors; path = /Users/aaronpetrini/Programming/JUCEProjects/Project13/JUCE/modules/juce_audio_processors; sourceTree = "<absolute>"; };
 		7D3543EC7D27E358A4C36867 /* ImageKnobLookAndFeel.h */ /* ImageKnobLookAndFeel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ImageKnobLookAndFeel.h; path = ../../Source/GUI/ImageKnobLookAndFeel.h; sourceTree = SOURCE_ROOT; };
 		81EC3536C57452D5104B94EF /* include_juce_audio_plugin_client_ARA.cpp */ /* include_juce_audio_plugin_client_ARA.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = include_juce_audio_plugin_client_ARA.cpp; path = ../../JuceLibraryCode/include_juce_audio_plugin_client_ARA.cpp; sourceTree = SOURCE_ROOT; };
@@ -365,6 +366,7 @@
 				C312CC9E5A3F12FFBEF810AA,
 				893DB364A2A248AB06FE77E5,
 				85E29FFBBACF2CCF54D85B1C,
+				781E44880D713B3E10626340,
 				C339C51757F596096FC6D0F7,
 				58756169392109D3D2DBE50A,
 			);

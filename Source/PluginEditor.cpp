@@ -46,6 +46,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     irLoader1Button.onClick = [this](){loadIRFile(1);};
     irLoader2Button.onClick = [this](){loadIRFile(2);};
     
+//    IR UNLOAD BUTTONS
     for(auto button : unloadIRButtons)
     {
         button -> setClickingTogglesState(true);
@@ -83,11 +84,34 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
         }
     };
     
+//    IR MUTE BUTTONS
+    for(auto button : muteIRButtons)
+    {
+        button -> setClickingTogglesState(true);
+        button -> setBounds(0, 0, 30, 30);
+        button -> setImages(false, true, true,
+                            muteIRImage, 1.f, juce::Colours::white.darker(0.5f),
+                            muteIRImage, 1.f, juce::Colours::yellow.darker(0.1f),
+                            muteIRImage, 1.f, juce::Colours::yellow.darker(0.5f),
+                            0.f);
+        button -> setSize(35, 35);
+    }
+    muteIR1Button.onClick = [this]
+    {
+        audioProcessor.isIR1Muted = !audioProcessor.isIR1Muted;
+    };
+    muteIR2Button.onClick = [this]
+    {
+        audioProcessor.isIR2Muted = !audioProcessor.isIR2Muted;
+    };
+    
     IRGroup.addAndMakeVisible(irBypassButton);
     IRGroup.addAndMakeVisible(irLoader1Button);
     IRGroup.addAndMakeVisible(irLoader2Button);
     IRGroup.addAndMakeVisible(unloadIR1Button);
     IRGroup.addAndMakeVisible(unloadIR2Button);
+    IRGroup.addAndMakeVisible(muteIR1Button);
+    IRGroup.addAndMakeVisible(muteIR2Button);
     
     IRGroup.addAndMakeVisible(lowCutSlider);
     IRGroup.addAndMakeVisible(lowCutSliderLabel);
@@ -139,6 +163,7 @@ void IRFxAudioProcessorEditor::resized()
     auto irLoaderButtonWidth = irLoader1Button.getWidth();
     auto irLoaderButtonHeight = irLoader1Button.getHeight();
     auto unloadIRButtonSize = unloadIR1Button.getWidth();
+    auto muteIRButtonSize = muteIR1Button.getWidth();
     
     IRGroup.setBounds(leftMargin, y, groupWidth, height);
     EQGroup.setBounds(IRGroup.getRight() + leftMargin, IRGroup.getY(), groupWidth, height);
@@ -150,8 +175,10 @@ void IRFxAudioProcessorEditor::resized()
 
     irLoader1Button.setBounds(IRGroup.getWidth() * 0.1, IRGroup.getHeight() * 0.16, irLoaderButtonWidth , irLoaderButtonHeight);
     unloadIR1Button.setBounds(irLoader1Button.getRight() * 1.05, irLoader1Button.getY() + (irLoaderButtonHeight - unloadIRButtonSize) * 0.5, unloadIRButtonSize, unloadIRButtonSize);
+    muteIR1Button.setBounds(unloadIR1Button.getRight() * 1.05, irLoader1Button.getY() + (irLoaderButtonHeight - muteIRButtonSize) * 0.5, muteIRButtonSize, muteIRButtonSize);
     irLoader2Button.setBounds(irLoader1Button.getX(), irLoader1Button.getBottom() * 1.1, irLoaderButtonWidth, irLoaderButtonHeight);
     unloadIR2Button.setBounds(unloadIR1Button.getX(), irLoader2Button.getY() + (irLoaderButtonHeight - unloadIRButtonSize) * 0.5, unloadIRButtonSize, unloadIRButtonSize);
+    muteIR2Button.setBounds(unloadIR2Button.getRight() * 1.05, irLoader2Button.getY() + (irLoaderButtonHeight - muteIRButtonSize) * 0.5, muteIRButtonSize, muteIRButtonSize);
     
     lowCutSlider.setBounds(IRGroup.getWidth() * 0.1, IRGroup.getHeight() * 0.65, dialSize, dialSize);
     lowCutSliderLabel.setBounds(lowCutSlider.getX(), lowCutSlider.getY() * 0.85, labelWidth, labelHeight);

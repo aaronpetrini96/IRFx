@@ -59,6 +59,7 @@ public:
     void loadIR1(const juce::File&);
     void loadIR2(const juce::File&);
     bool isIR1Loaded {false}, isIR2Loaded {false};
+    bool isIR1Muted {false}, isIR2Muted {false};
     
     void updateParams();
     
