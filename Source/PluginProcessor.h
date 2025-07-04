@@ -104,6 +104,10 @@ private:
     using Filter = juce::dsp::IIR::Filter<float>;
     using irEQMonoChain = juce::dsp::ProcessorChain<Filter, Filter>;
     std::array<irEQMonoChain, 2> irEQMonoChainArray;
+//    juce::LinearSmoothedValue<float> smoothedIRBypassValue {1.f},
+//                                     smoothedEQBypassValue {1.f},
+//                                     smoothedDistBypassValue {1.f},
+//                                     smoothedDelayBypassValue {1.f};
     
     using toneStackMonoChain = juce::dsp::ProcessorChain<Filter, Filter, Filter>;
     std::array<toneStackMonoChain, 3> toneStackMonoChainAray;
