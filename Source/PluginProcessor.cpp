@@ -350,44 +350,46 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     updateSmootherFromParams(buffer.getNumSamples(), SmootherUpdateMode::liveInRealTime);
     updateParams();
     
+//    auto irBypassed = irLoaderBypassParam->get();
     
-//    Bypass off -> 0 (true)
-//    Bypass on -> 1 (False)
+    if (irLoaderBypassParam->get() == false)
+    {
+        if (isIR1Loaded && isIR2Loaded)
+        {
+            juce::dsp::AudioBlock<float> block1 (buffer);
+            juce::dsp::AudioBlock<float> block2 (tempBuffer);
+            irLoader1.process(juce::dsp::ProcessContextReplacing<float>(block1));
+            irLoader2.process(juce::dsp::ProcessContextReplacing<float>(block2));
+            
+            for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
+                buffer.addFrom(ch, 0, tempBuffer, ch, 0, buffer.getNumSamples());
+            
+            buffer.applyGain(juce::Decibels::decibelsToGain(3.f));
+        }
+        else if (isIR1Loaded)
+        {
+            irLoader1.process(juce::dsp::ProcessContextReplacing<float>(block));
+            buffer.applyGain(juce::Decibels::decibelsToGain(9.f));
+        }
+        else if (isIR2Loaded)
+        {
+            irLoader2.process(juce::dsp::ProcessContextReplacing<float>(block));
+            buffer.applyGain(juce::Decibels::decibelsToGain(9.f));
+        }
 
-    if (isIR1Loaded && isIR2Loaded)
-    {
-//        tempBuffer.applyGain(0.5f);
-//        buffer.applyGain(0.5f);
-        juce::dsp::AudioBlock<float> block1 (buffer);
-        juce::dsp::AudioBlock<float> block2 (tempBuffer);
-        irLoader1.process(juce::dsp::ProcessContextReplacing<float>(block1));
-        irLoader2.process(juce::dsp::ProcessContextReplacing<float>(block2));
         
-        for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
-            buffer.addFrom(ch, 0, tempBuffer, ch, 0, buffer.getNumSamples());
+        juce::dsp::AudioBlock<float> eqBlock(buffer);
+        auto eqBlockLeft = eqBlock.getSingleChannelBlock(0);
+        auto eqBlockRight = eqBlock.getSingleChannelBlock(1);
         
-        buffer.applyGain(juce::Decibels::decibelsToGain(3.f));
+        juce::dsp::ProcessContextReplacing<float> eqContextLeft(eqBlockLeft), eqContextRight (eqBlockRight);
+        
+        monoChains[0].process(eqContextLeft);
+        monoChains[1].process(eqContextRight);
     }
-    else if (isIR1Loaded)
-    {
-        irLoader1.process(juce::dsp::ProcessContextReplacing<float>(block));
-        buffer.applyGain(juce::Decibels::decibelsToGain(9.f));
-    }
-    else if (isIR2Loaded)
-    {
-        irLoader2.process(juce::dsp::ProcessContextReplacing<float>(block));
-        buffer.applyGain(juce::Decibels::decibelsToGain(9.f));
-    }
+     
 
     
-    juce::dsp::AudioBlock<float> eqBlock(buffer);
-    auto eqBlockLeft = eqBlock.getSingleChannelBlock(0);
-    auto eqBlockRight = eqBlock.getSingleChannelBlock(1);
-    
-    juce::dsp::ProcessContextReplacing<float> eqContextLeft(eqBlockLeft), eqContextRight (eqBlockRight);
-    
-    monoChains[0].process(eqContextLeft);
-    monoChains[1].process(eqContextRight);
     
 }
 
