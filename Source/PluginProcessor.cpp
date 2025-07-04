@@ -202,7 +202,7 @@ void IRFxAudioProcessor::updateParams()
     auto lowCutCoefficients = Coefficients::makeHighPass(sampleRate, lowCutFreqParamSmoother.getCurrentValue());
     auto highCutCoefficients = Coefficients::makeLowPass(sampleRate, highCutFreqParamSmoother.getCurrentValue());
 
-    for (auto& chain : monoChains)
+    for (auto& chain : irEQMonoChainArray)
     {
         auto& lowCut = chain.template get<0>();
         auto& highCut = chain.template get<1>();
@@ -212,7 +212,26 @@ void IRFxAudioProcessor::updateParams()
     }
     
 //    EQ STACK
+    lowShelfGain = juce::Decibels::decibelsToGain(lowEQGainParamSmoother.getCurrentValue());
+    midPeakGain = juce::Decibels::decibelsToGain(midEQGainParamSmoother.getCurrentValue());
+    midPeakFreq = midEQFreqParamSmoother.getCurrentValue();
+    highShelfGain = juce::Decibels::decibelsToGain(highEQGainParamSmoother.getCurrentValue());
     
+    auto lowEQCoefficients = Coefficients::makeLowShelf(sampleRate, 110.f, 0.707f, lowShelfGain);
+    
+    auto midEQCoefficients = Coefficients::makePeakFilter(sampleRate, midPeakFreq, 1.f, midPeakGain);
+    auto highEQCoefficients = Coefficients::makeHighShelf(sampleRate, 4500.f, 0.707f, highShelfGain);
+    
+    for (auto& chain : toneStackMonoChainAray)
+    {
+        auto& lowShelf = chain.template get<0>();
+        auto& midPeak = chain.template get<1>();
+        auto& highShelf = chain.template get<2>();
+        
+        *lowShelf.coefficients = *lowEQCoefficients;
+        *midPeak.coefficients = *midEQCoefficients;
+        *highShelf.coefficients = *highEQCoefficients;
+    }
     
 //    SATURATION
     
@@ -237,8 +256,10 @@ void IRFxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     
     for (int i = 0; i < getTotalNumOutputChannels(); ++i)
     {
-        monoChains[i].reset();
-        monoChains[i].prepare(monoSpec);
+        irEQMonoChainArray[i].reset();
+        irEQMonoChainArray[i].prepare(monoSpec);
+        toneStackMonoChainAray[i].reset();
+        toneStackMonoChainAray[i].prepare(monoSpec);
     }
    
     for(auto smoother : getSmoothers())
@@ -350,7 +371,6 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     updateSmootherFromParams(buffer.getNumSamples(), SmootherUpdateMode::liveInRealTime);
     updateParams();
     
-//    auto irBypassed = irLoaderBypassParam->get();
     
     if (irLoaderBypassParam->get() == false)
     {
@@ -384,10 +404,26 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         
         juce::dsp::ProcessContextReplacing<float> eqContextLeft(eqBlockLeft), eqContextRight (eqBlockRight);
         
-        monoChains[0].process(eqContextLeft);
-        monoChains[1].process(eqContextRight);
+        irEQMonoChainArray[0].process(eqContextLeft);
+        irEQMonoChainArray[1].process(eqContextRight);
     }
-     
+    
+    if (eqBypassParam->get() == false)
+    {
+        juce::dsp::AudioBlock<float> toneStackBlock(buffer);
+        auto toneStackBlockLeft = toneStackBlock.getSingleChannelBlock(0);
+        auto toneStackBlockRight = toneStackBlock.getSingleChannelBlock(1);
+        
+        juce::dsp::ProcessContextReplacing<float> toneStackContextLeft (toneStackBlockLeft), toneStackContextRight (toneStackBlockRight);
+        
+        toneStackMonoChainAray[0].process(toneStackContextLeft);
+        toneStackMonoChainAray[1].process(toneStackContextRight);
+    }
+    
+    
+    
+    
+    
 
     
     

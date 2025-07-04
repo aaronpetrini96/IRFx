@@ -60,6 +60,8 @@ public:
     void loadIR2(const juce::File&);
     bool isIR1Loaded {false}, isIR2Loaded {false};
     
+    void updateParams();
+    
     //==============================================================================
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     juce::AudioProcessorValueTreeState apvts {*this, nullptr, "Parameters", createParameterLayout()};
@@ -91,20 +93,23 @@ public:
     midEQFreqParamSmoother,
     highEQGainParamSmoother;
     
-    
-    SingleChannelSampleFifo<juce::AudioBuffer<float>> leftSCSF {Channel::Left}, rightSCSF {Channel::Right};
-    
-    
-    using Filter = juce::dsp::IIR::Filter<float>;
-    using MonoChain = juce::dsp::ProcessorChain<Filter, Filter>;
-    std::array<MonoChain, 2> monoChains;
-    
-    void updateParams();
+
+
 private:
     juce::dsp::ProcessSpec spec;
     juce::dsp::Convolution irLoader1, irLoader2;
     
     float mixIR1, mixIR2;
+    
+    using Filter = juce::dsp::IIR::Filter<float>;
+    using irEQMonoChain = juce::dsp::ProcessorChain<Filter, Filter>;
+    std::array<irEQMonoChain, 2> irEQMonoChainArray;
+    
+    using toneStackMonoChain = juce::dsp::ProcessorChain<Filter, Filter, Filter>;
+    std::array<toneStackMonoChain, 3> toneStackMonoChainAray;
+    
+    float lowShelfGain, midPeakGain, midPeakFreq, highShelfGain;
+    
     
     template<typename ParamType, typename Params, typename Funcs>
     void initCachedParams(Params paramsArray, Funcs funcsArray)
