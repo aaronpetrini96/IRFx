@@ -143,6 +143,7 @@
 		B4A068B60CB1D57DCCF1465A /* LookAndFeelHelpers.h */ /* LookAndFeelHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = LookAndFeelHelpers.h; path = ../../Source/GUI/LookAndFeelHelpers.h; sourceTree = SOURCE_ROOT; };
 		B6B277E2344316E346E3A453 /* juce_audio_devices */ /* juce_audio_devices */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_devices; path = /Users/aaronpetrini/Programming/JUCEProjects/Project13/JUCE/modules/juce_audio_devices; sourceTree = "<absolute>"; };
 		BD4A9FBEF074DD57EC6CF8B7 /* RecentFilesMenuTemplate.nib */ /* RecentFilesMenuTemplate.nib */ = {isa = PBXFileReference; lastKnownFileType = file.nib; name = RecentFilesMenuTemplate.nib; path = RecentFilesMenuTemplate.nib; sourceTree = SOURCE_ROOT; };
+		BD7D8AE4A1047D862E4F0DBB /* CancelX.png */ /* CancelX.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = CancelX.png; path = ../../Source/Assets/CancelX.png; sourceTree = SOURCE_ROOT; };
 		C312CC9E5A3F12FFBEF810AA /* Knob_10.png */ /* Knob_10.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Knob_10.png; path = ../../Source/Assets/Knob_10.png; sourceTree = SOURCE_ROOT; };
 		C339C51757F596096FC6D0F7 /* Ver_flat_slider.png */ /* Ver_flat_slider.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Ver_flat_slider.png; path = ../../Source/Assets/Ver_flat_slider.png; sourceTree = SOURCE_ROOT; };
 		C418D09A45D13551C7875E17 /* juce_gui_extra */ /* juce_gui_extra */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_gui_extra; path = /Users/aaronpetrini/Programming/JUCEProjects/Project13/JUCE/modules/juce_gui_extra; sourceTree = "<absolute>"; };
@@ -359,6 +360,7 @@
 			isa = PBXGroup;
 			children = (
 				6EF8EB98E892CB6EB19807C3,
+				BD7D8AE4A1047D862E4F0DBB,
 				382AAB66033063D4F33CBB9F,
 				C312CC9E5A3F12FFBEF810AA,
 				893DB364A2A248AB06FE77E5,

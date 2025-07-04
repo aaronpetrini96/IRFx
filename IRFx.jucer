@@ -28,6 +28,7 @@
       </GROUP>
       <GROUP id="{BD30F1D7-2636-5161-5ED9-A5996BD373F9}" name="Assets">
         <FILE id="QnazfN" name="Bypass.png" compile="0" resource="1" file="Source/Assets/Bypass.png"/>
+        <FILE id="J3vP2n" name="CancelX.png" compile="0" resource="1" file="Source/Assets/CancelX.png"/>
         <FILE id="lEmgWc" name="Knob_10-brighter.png" compile="0" resource="1"
               file="Source/Assets/Knob_10-brighter.png"/>
         <FILE id="VT8CXl" name="Knob_10.png" compile="0" resource="1" file="Source/Assets/Knob_10.png"/>

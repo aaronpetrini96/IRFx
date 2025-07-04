@@ -265,6 +265,9 @@ void IRFxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     for(auto smoother : getSmoothers())
         smoother->reset(sampleRate, 0.05);
     
+//    tempBuffer.setSize(getTotalNumOutputChannels(), samplesPerBlock);
+//        tempBuffer.clear();
+    
     updateSmootherFromParams(1, SmootherUpdateMode::initialize);
 }
 
@@ -366,7 +369,7 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     
     juce::dsp::AudioBlock<float> block(buffer);
     juce::AudioBuffer<float> tempBuffer;
-    tempBuffer.makeCopyOf(buffer);
+    
     
     updateSmootherFromParams(buffer.getNumSamples(), SmootherUpdateMode::liveInRealTime);
     updateParams();
@@ -376,6 +379,8 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     {
         if (isIR1Loaded && isIR2Loaded)
         {
+            tempBuffer.setSize(buffer.getNumChannels(), buffer.getNumSamples());
+            tempBuffer.makeCopyOf(buffer, true);
             juce::dsp::AudioBlock<float> block1 (buffer);
             juce::dsp::AudioBlock<float> block2 (tempBuffer);
             irLoader1.process(juce::dsp::ProcessContextReplacing<float>(block1));

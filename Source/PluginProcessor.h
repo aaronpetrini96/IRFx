@@ -93,11 +93,11 @@ public:
     midEQFreqParamSmoother,
     highEQGainParamSmoother;
     
-
-
-private:
     juce::dsp::ProcessSpec spec;
     juce::dsp::Convolution irLoader1, irLoader2;
+
+private:
+    
     
     float mixIR1, mixIR2;
     

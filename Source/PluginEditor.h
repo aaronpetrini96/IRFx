@@ -44,11 +44,11 @@ private:
     };
     
 //    IR Loader Buttons
-    juce::TextButton irLoader1{"Load IR1"};
-    juce::TextButton irLoader2{"Load IR2"};
+    juce::TextButton irLoader1Button{"Load IR1"};
+    juce::TextButton irLoader2Button{"Load IR2"};
     std::vector<juce::TextButton*> irLoaderButtons
     {
-        &irLoader1, &irLoader2
+        &irLoader1Button, &irLoader2Button
     };
     
     std::unique_ptr<juce::File> loadedIRFile1 {nullptr}, loadedIRFile2 {nullptr};
@@ -90,6 +90,14 @@ private:
     BypassButton eqBypassButton{"EQ Bypass Button", audioProcessor.apvts, juce::ParameterID(ParamNames::getEQBypassName(),versionHint)};
     BypassButton distBypassButton{"Dist Bypass Button", audioProcessor.apvts, juce::ParameterID(ParamNames::getDistBypassName(),versionHint)};
     BypassButton delayBypassButton{"Delay Bypass Button", audioProcessor.apvts, juce::ParameterID(ParamNames::getDelayBypassName(),versionHint)};
+    
+//  Unload IR Buttons
+    juce::ImageButton unloadIR1Button, unloadIR2Button;
+    std::vector<juce::ImageButton*> unloadIRButtons
+    {
+      &unloadIR1Button, &unloadIR2Button,
+    };
+    juce::Image unloadIRImage = juce::ImageCache::getFromMemory(BinaryData::CancelX_png, BinaryData::CancelX_pngSize);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (IRFxAudioProcessorEditor)
 };

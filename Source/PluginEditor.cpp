@@ -43,13 +43,51 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
         button->setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white.withAlpha(0.5f));
     }
     restoreLoadedIRFiles();
-    irLoader1.onClick = [this](){loadIRFile(1);};
-    irLoader2.onClick = [this](){loadIRFile(2);};
+    irLoader1Button.onClick = [this](){loadIRFile(1);};
+    irLoader2Button.onClick = [this](){loadIRFile(2);};
     
-
+    for(auto button : unloadIRButtons)
+    {
+        button -> setClickingTogglesState(true);
+        button -> setBounds(0, 0, 25, 25);
+        button -> setImages(false, true, true,
+                            unloadIRImage, 1.f, juce::Colours::red.darker(0.5f),
+                            unloadIRImage, 1.f, juce::Colours::red.darker(0.1f),
+                            unloadIRImage, 1.f, juce::Colours::red.darker(0.5f),
+                            0.f);
+        button -> setSize(30, 30);
+    }
+    unloadIR1Button.onClick = [this]
+    {
+        if(audioProcessor.isIR1Loaded)
+        {
+            loadedIRFile1 = nullptr;
+            audioProcessor.irLoader1.loadImpulseResponse(juce::AudioBuffer<float>(), audioProcessor.getSampleRate(), juce::dsp::Convolution::Stereo::yes, juce::dsp::Convolution::Trim::no, juce::dsp::Convolution::Normalise::no);
+            audioProcessor.isIR1Loaded = false;
+            audioProcessor.apvts.state.removeProperty("IR1FilePath", nullptr);
+            irLoader1Button.setButtonText("Load IR1");
+            irLoader1Button.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white.withAlpha(0.5f));
+        }
+        
+    };
+    unloadIR2Button.onClick = [this]
+    {
+        if (audioProcessor.isIR2Loaded)
+        {
+            loadedIRFile2 = nullptr;
+            audioProcessor.irLoader2.loadImpulseResponse(juce::AudioBuffer<float>(), audioProcessor.getSampleRate(), juce::dsp::Convolution::Stereo::yes, juce::dsp::Convolution::Trim::no, juce::dsp::Convolution::Normalise::no);
+            audioProcessor.isIR2Loaded = false;
+            audioProcessor.apvts.state.removeProperty("IR2FilePath", nullptr);
+            irLoader2Button.setButtonText("Load IR2");
+            irLoader2Button.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white.withAlpha(0.5f));
+        }
+    };
+    
     IRGroup.addAndMakeVisible(irBypassButton);
-    IRGroup.addAndMakeVisible(irLoader1);
-    IRGroup.addAndMakeVisible(irLoader2);
+    IRGroup.addAndMakeVisible(irLoader1Button);
+    IRGroup.addAndMakeVisible(irLoader2Button);
+    IRGroup.addAndMakeVisible(unloadIR1Button);
+    IRGroup.addAndMakeVisible(unloadIR2Button);
     
     IRGroup.addAndMakeVisible(lowCutSlider);
     IRGroup.addAndMakeVisible(lowCutSliderLabel);
@@ -69,7 +107,6 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     distGroup.addAndMakeVisible(distBypassButton);
     
     delayGroup.addAndMakeVisible(delayBypassButton);
-   
    
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -99,8 +136,9 @@ void IRFxAudioProcessorEditor::resized()
     auto labelWidth = lowCutSliderLabel.getWidth();
     auto labelHeight = lowCutSliderLabel.getHeight();
     auto bypassButtonSize = bounds.getWidth() * 0.10;
-    auto irLoaderButtonWidth = irLoader1.getWidth();
-    auto irLoaderButtonHeight = irLoader1.getHeight();
+    auto irLoaderButtonWidth = irLoader1Button.getWidth();
+    auto irLoaderButtonHeight = irLoader1Button.getHeight();
+    auto unloadIRButtonSize = unloadIR1Button.getWidth();
     
     IRGroup.setBounds(leftMargin, y, groupWidth, height);
     EQGroup.setBounds(IRGroup.getRight() + leftMargin, IRGroup.getY(), groupWidth, height);
@@ -110,8 +148,10 @@ void IRFxAudioProcessorEditor::resized()
 //    IR GROUP
     irBypassButton.setBounds(IRGroup.getWidth() * 0.9, IRGroup.getHeight() * 0.05, bypassButtonSize, bypassButtonSize);
 
-    irLoader1.setBounds(IRGroup.getWidth() * 0.1, IRGroup.getHeight() * 0.16, irLoaderButtonWidth , irLoaderButtonHeight);
-    irLoader2.setBounds(irLoader1.getX(), irLoader1.getBottom() * 1.1, irLoaderButtonWidth, irLoaderButtonHeight);
+    irLoader1Button.setBounds(IRGroup.getWidth() * 0.1, IRGroup.getHeight() * 0.16, irLoaderButtonWidth , irLoaderButtonHeight);
+    unloadIR1Button.setBounds(irLoader1Button.getRight() * 1.05, irLoader1Button.getY() + (irLoaderButtonHeight - unloadIRButtonSize) * 0.5, unloadIRButtonSize, unloadIRButtonSize);
+    irLoader2Button.setBounds(irLoader1Button.getX(), irLoader1Button.getBottom() * 1.1, irLoaderButtonWidth, irLoaderButtonHeight);
+    unloadIR2Button.setBounds(unloadIR1Button.getX(), irLoader2Button.getY() + (irLoaderButtonHeight - unloadIRButtonSize) * 0.5, unloadIRButtonSize, unloadIRButtonSize);
     
     lowCutSlider.setBounds(IRGroup.getWidth() * 0.1, IRGroup.getHeight() * 0.65, dialSize, dialSize);
     lowCutSliderLabel.setBounds(lowCutSlider.getX(), lowCutSlider.getY() * 0.85, labelWidth, labelHeight);
@@ -155,15 +195,15 @@ void IRFxAudioProcessorEditor::loadIRFile(int irIndex)
             {
                 loadedIRFile1 = std::make_unique<juce::File>(selectedFile);
                 audioProcessor.loadIR1(*loadedIRFile1);
-                irLoader1.setButtonText(loadedIRFile1->getFileName());
-                irLoader1.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white);
+                irLoader1Button.setButtonText(loadedIRFile1->getFileName());
+                irLoader1Button.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white);
             }
             else if (irIndex == 2)
             {
                 loadedIRFile2 = std::make_unique<juce::File>(selectedFile);
-                audioProcessor.loadIR1(*loadedIRFile2);
-                irLoader2.setButtonText(loadedIRFile2->getFileName());
-                irLoader2.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white);
+                audioProcessor.loadIR2(*loadedIRFile2);
+                irLoader2Button.setButtonText(loadedIRFile2->getFileName());
+                irLoader2Button.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white);
             }
         }
         else
@@ -182,8 +222,8 @@ void IRFxAudioProcessorEditor::restoreLoadedIRFiles()
         if (file.existsAsFile())
         {
             loadedIRFile1 = std::make_unique<juce::File>(file);
-            irLoader1.setButtonText(file.getFileName());
-            irLoader1.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white);
+            irLoader1Button.setButtonText(file.getFileName());
+            irLoader1Button.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white);
         }
     }
 
@@ -194,8 +234,8 @@ void IRFxAudioProcessorEditor::restoreLoadedIRFiles()
         if (file.existsAsFile())
         {
             loadedIRFile2 = std::make_unique<juce::File>(file);
-            irLoader2.setButtonText(file.getFileName());
-            irLoader2.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white);
+            irLoader2Button.setButtonText(file.getFileName());
+            irLoader2Button.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white);
         }
     }
 }
