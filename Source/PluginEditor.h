@@ -71,18 +71,7 @@ private:
     ImageKnob midEQGainSlider{"Mid", audioProcessor.apvts, juce::ParameterID(ParamNames::getEQMidGainName(), versionHint), knobImage, " dB", 80, true};
     ImageKnob midEQFreqSlider{"Mid Freq", audioProcessor.apvts, juce::ParameterID(ParamNames::getEQMidFreqName(), versionHint), knobImage, " Hz", 80, false};
     ImageKnob highEQGainSlider{"Treble", audioProcessor.apvts, juce::ParameterID(ParamNames::getEQHighGainName(), versionHint), knobImage, " dB", 80, true};
-    
-//    std::vector<ImageKnob*> eqKnobs
-//    {
-//        &lowCutSlider,
-//        &highCutSlider,
-//        &lowEQGainSlider,
-//        &highEQGainSlider,
-//        &midEQGainSlider,
-//        &midEQFreqSlider,
-//        &highEQGainSlider
-//    };
-    
+       
     ImageKnob saturationKnob{"Drive", audioProcessor.apvts, juce::ParameterID(ParamNames::getDistDriveName(), versionHint), knobImage, "", 150};
     
 //    Dials Name Labels
