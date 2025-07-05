@@ -39,7 +39,7 @@ IRFxAudioProcessor::IRFxAudioProcessor()
         &highEQGainParam,
         
 //        SAT
-        
+        &saturationDriveParam,
 //        DELAY
         
     };
@@ -59,6 +59,7 @@ IRFxAudioProcessor::IRFxAudioProcessor()
         &ParamNames::getEQHighGainName,
         
         //        SAT
+        &ParamNames::getDistDriveName,
         
         //        DELAY
     };
@@ -74,6 +75,7 @@ IRFxAudioProcessor::IRFxAudioProcessor()
         //        EQ
         &eqBypassParam,
         //        SAT
+        &saturationBypassParam,
         
         //        DELAY
     };
@@ -86,6 +88,7 @@ IRFxAudioProcessor::IRFxAudioProcessor()
         &ParamNames::getEQBypassName,
         
         //        SAT
+        &ParamNames::getDistBypassName,
         
         //        DELAY
     };
@@ -193,12 +196,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout IRFxAudioProcessor::createPa
 //   DIST
     name = ParamNames::getDistBypassName();
     params.emplace_back(std::make_unique<juce::AudioParameterBool>(juce::ParameterID(name, versionHint), name, false));
+    name = ParamNames::getDistDriveName();
+    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(0.f, 24.f, 0.1f, 1.f), 0.f));
     
 //   DELAY
     name = ParamNames::getDelayBypassName();
     params.emplace_back(std::make_unique<juce::AudioParameterBool>(juce::ParameterID(name, versionHint), name, false));
-    name = ParamNames::getDistDriveName();
-    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(0.f, 24.f, 0.1f, 1.f), 0.f));
+
     
     return {params.begin(), params.end()};
 }
@@ -244,6 +248,8 @@ void IRFxAudioProcessor::updateParams()
     }
     
 //    SATURATION
+//    saturationPreEQ.state = Coefficients::makeLowShelf(sampleRate, 150.f, 0.707f, juce::Decibels::decibelsToGain(2.f));
+//    saturationPostEQ.state = Coefficients::makeLowPass(sampleRate, 15000.f);
     
 //    DELAY
     
@@ -271,7 +277,11 @@ void IRFxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
         toneStackMonoChainAray[i].reset();
         toneStackMonoChainAray[i].prepare(monoSpec);
     }
-   
+    
+    saturationPreEQ.state = Coefficients::makeLowShelf(sampleRate, 150.f, 0.707f, juce::Decibels::decibelsToGain(2.f));
+    saturationPostEQ.state = Coefficients::makeLowPass(sampleRate, 15000.f);
+    saturationPreEQ.prepare(spec);
+    saturationPostEQ.prepare(spec);
     for(auto smoother : getSmoothers())
         smoother->reset(sampleRate, 0.05);
     
@@ -290,6 +300,7 @@ void IRFxAudioProcessor::updateSmootherFromParams(int numSamplesToSkip, Smoother
         midEQGainParam,
         midEQFreqParam,
         highEQGainParam,
+        saturationDriveParam,
     };
     
     auto smoothers = getSmoothers();
@@ -321,6 +332,7 @@ std::vector<juce::SmoothedValue<float>*> IRFxAudioProcessor::getSmoothers()
         &midEQGainParamSmoother,
         &midEQFreqParamSmoother,
         &highEQGainParamSmoother,
+        &saturationDriveParamSmoother,
     };
     
     return smoothers;
@@ -370,6 +382,16 @@ void IRFxAudioProcessor::loadIR2(const juce::File &irFile)
     irLoader2.loadImpulseResponse(irFile, juce::dsp::Convolution::Stereo::yes, juce::dsp::Convolution::Trim::yes, 0, juce::dsp::Convolution::Normalise::yes);
     isIR2Loaded = true;
     apvts.state.setProperty("IR2FilePath", irFile.getFullPathName(), nullptr);
+}
+
+float IRFxAudioProcessor::neveStyleSaturation (float x, float drive)
+{
+    x *= drive;
+    float asym = 0.1f * x * x * x;
+    float saturated = std::tanh(x + asym);
+    saturated *= 0.8f;
+    float gainComp = juce::jlimit (0.2f, 1.0f, 1.0f / (0.5f + 0.5f * drive));
+    return saturated * gainComp;
 }
 
 void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
@@ -451,6 +473,30 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         
         toneStackMonoChainAray[0].process(toneStackContextLeft);
         toneStackMonoChainAray[1].process(toneStackContextRight);
+    }
+    
+    if (saturationBypassParam->get() == false)
+    {
+        juce::dsp::AudioBlock<float> saturationBlock(buffer);
+        juce::dsp::ProcessContextReplacing<float> preSaturationContext(saturationBlock);
+        saturationPreEQ.process(preSaturationContext);
+        auto drive = saturationDriveParamSmoother.getCurrentValue();
+        for (size_t ch {0}; ch < saturationBlock.getNumChannels(); ++ch)
+        {
+            auto* samples = block.getChannelPointer(ch);
+            for (size_t i {0}; i < block.getNumSamples(); ++i)
+            {
+                auto dry = samples[i];
+                float mix = 50.f * 0.01f;
+                auto saturated = neveStyleSaturation(dry * mix, drive);
+                
+                samples [i] = dry * (1.f - mix) + saturated * mix;
+                
+                
+            }
+        }
+        juce::dsp::ProcessContextReplacing<float> postSaturationContext(saturationBlock);
+        saturationPostEQ.process(postSaturationContext);
     }
 
 }

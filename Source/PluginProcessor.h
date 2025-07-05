@@ -110,6 +110,7 @@ private:
     float mixIR1, mixIR2;
     
     using Filter = juce::dsp::IIR::Filter<float>;
+    using Coefficients = juce::dsp::IIR::Coefficients<float>;
     using irEQMonoChain = juce::dsp::ProcessorChain<Filter, Filter>;
     std::array<irEQMonoChain, 2> irEQMonoChainArray;
 //    juce::LinearSmoothedValue<float> smoothedIRBypassValue {1.f},
@@ -119,10 +120,15 @@ private:
     
     using toneStackMonoChain = juce::dsp::ProcessorChain<Filter, Filter, Filter>;
     std::array<toneStackMonoChain, 3> toneStackMonoChainAray;
-    
     float lowShelfGain, midPeakGain, midPeakFreq, highShelfGain;
     
+    float neveStyleSaturation (float x, float drive);
     
+//    using saturationMonoEQChain
+    juce::dsp::ProcessorDuplicator<Filter, Coefficients> saturationPreEQ, saturationPostEQ;
+    
+    
+
     template<typename ParamType, typename Params, typename Funcs>
     void initCachedParams(Params paramsArray, Funcs funcsArray)
     {

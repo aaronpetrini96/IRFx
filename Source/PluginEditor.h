@@ -92,7 +92,6 @@ private:
     juce::Label midEQGainSliderLabel {"Mid"};
     juce::Label midEQFreqSliderLabel {"Mid Freq"};
     juce::Label highEQGainSliderLabel {"Treble"};
-    juce::Label saturationSliderLabel {"Drive"};
     std::vector <juce::Label*> dialLabels
     {
         &lowCutSliderLabel,
@@ -101,7 +100,6 @@ private:
         &midEQGainSliderLabel,
         &midEQFreqSliderLabel,
         &highEQGainSliderLabel,
-        &saturationSliderLabel
     };
     
 //   Bypass Buttons
