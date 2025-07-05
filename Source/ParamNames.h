@@ -9,6 +9,8 @@ namespace ParamNames
     inline juce::String getIRBypassName()     { return "IRBypass"; }
     inline juce::String getIRLowCutName()     { return "IRLowCut"; }
     inline juce::String getIRHighCutName()    { return "IRHighCut"; }
+    inline juce::String getIR1LevelName()    { return "IR1Level"; }
+    inline juce::String getIR2LevelName()    { return "IR2Level"; }
 
     // === EQ ===
     inline juce::String getEQBypassName()     { return "EQBypass"; }
@@ -19,6 +21,7 @@ namespace ParamNames
 
     // === Distortion ===
     inline juce::String getDistBypassName()   { return "DistBypass"; }
+    inline juce::String getDistDriveName() {return "DistDrive";}
 
     // === Delay ===
     inline juce::String getDelayBypassName()  { return "DelayBypass"; }
@@ -31,12 +34,15 @@ namespace ParamNames
             getIRBypassName(),
             getIRLowCutName(),
             getIRHighCutName(),
+            getIR1LevelName(),
+            getIR2LevelName(),
             getEQBypassName(),
             getEQLowGainName(),
             getEQMidGainName(),
             getEQMidFreqName(),
             getEQHighGainName(),
             getDistBypassName(),
+            getDistDriveName(),
             getDelayBypassName()
         };
     }

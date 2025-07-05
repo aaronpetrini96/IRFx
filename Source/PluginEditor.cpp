@@ -13,7 +13,7 @@
 IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
-
+    
 
 //    GROUP GENERAL SETTINGS
     IRGroup.setText("IR Loader");
@@ -27,6 +27,12 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
         addAndMakeVisible(*group);
     }
     
+//    image DIAL GENERAL SETUP
+//    for (auto slider : eqKnobs)
+//    {
+//        slider -> setBounds(0,0, 80, 80);
+//    }
+    
 //    DIAL'S LABELS GENERAL SETUP
     for (auto label : dialLabels)
     {
@@ -39,10 +45,10 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
 //    IR Loaders Buttons General setup
     for (auto button : irLoaderButtons)
     {
-        button->setSize(150, 40);
+        button->setSize(150, 35);
         button->setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white.withAlpha(0.5f));
     }
-    restoreLoadedIRFiles();
+
     irLoader1Button.onClick = [this](){loadIRFile(1);};
     irLoader2Button.onClick = [this](){loadIRFile(2);};
     
@@ -68,6 +74,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
             audioProcessor.apvts.state.removeProperty("IR1FilePath", nullptr);
             irLoader1Button.setButtonText("Load IR1");
             irLoader1Button.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white.withAlpha(0.5f));
+            ir1LevelSlider.setVisible(false);
         }
         
     };
@@ -81,6 +88,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
             audioProcessor.apvts.state.removeProperty("IR2FilePath", nullptr);
             irLoader2Button.setButtonText("Load IR2");
             irLoader2Button.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white.withAlpha(0.5f));
+            ir2LevelSlider.setVisible(false);
         }
     };
     
@@ -105,6 +113,13 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
         audioProcessor.isIR2Muted = !audioProcessor.isIR2Muted;
     };
     
+
+//    DRIVE DIAL
+    saturationKnob.setBounds(0, 0, 600, 600);
+    saturationKnob.setSize(600, 600);
+    
+//    Add And Make Visible
+    
     IRGroup.addAndMakeVisible(irBypassButton);
     IRGroup.addAndMakeVisible(irLoader1Button);
     IRGroup.addAndMakeVisible(irLoader2Button);
@@ -112,6 +127,8 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     IRGroup.addAndMakeVisible(unloadIR2Button);
     IRGroup.addAndMakeVisible(muteIR1Button);
     IRGroup.addAndMakeVisible(muteIR2Button);
+    IRGroup.addAndMakeVisible(ir1LevelSlider);
+    IRGroup.addAndMakeVisible(ir2LevelSlider);
     
     IRGroup.addAndMakeVisible(lowCutSlider);
     IRGroup.addAndMakeVisible(lowCutSliderLabel);
@@ -129,11 +146,17 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     EQGroup.addAndMakeVisible(highEQGainSliderLabel);
     
     distGroup.addAndMakeVisible(distBypassButton);
+    distGroup.addAndMakeVisible(saturationKnob);
+//    distGroup.addAndMakeVisible(saturationSliderLabel);
     
     delayGroup.addAndMakeVisible(delayBypassButton);
    
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
+    ir1LevelSlider.setVisible(false);
+    ir2LevelSlider.setVisible(false);
+    restoreLoadedIRFiles();
+    
     setSize (600, 800);
 }
 
@@ -164,6 +187,10 @@ void IRFxAudioProcessorEditor::resized()
     auto irLoaderButtonHeight = irLoader1Button.getHeight();
     auto unloadIRButtonSize = unloadIR1Button.getWidth();
     auto muteIRButtonSize = muteIR1Button.getWidth();
+    auto irLevelSliderWidth = ir1LevelSlider.getWidth();
+    auto irLevelSliderHeight = ir1LevelSlider.getHeight();
+    auto saturationDialSize = saturationKnob.getWidth();
+    
     
     IRGroup.setBounds(leftMargin, y, groupWidth, height);
     EQGroup.setBounds(IRGroup.getRight() + leftMargin, IRGroup.getY(), groupWidth, height);
@@ -176,9 +203,12 @@ void IRFxAudioProcessorEditor::resized()
     irLoader1Button.setBounds(IRGroup.getWidth() * 0.1, IRGroup.getHeight() * 0.16, irLoaderButtonWidth , irLoaderButtonHeight);
     unloadIR1Button.setBounds(irLoader1Button.getRight() * 1.05, irLoader1Button.getY() + (irLoaderButtonHeight - unloadIRButtonSize) * 0.5, unloadIRButtonSize, unloadIRButtonSize);
     muteIR1Button.setBounds(unloadIR1Button.getRight() * 1.05, irLoader1Button.getY() + (irLoaderButtonHeight - muteIRButtonSize) * 0.5, muteIRButtonSize, muteIRButtonSize);
+    ir1LevelSlider.setBounds(irLoader1Button.getX(), IRGroup.getHeight() * 0.055, irLevelSliderWidth, irLevelSliderHeight);
+    
     irLoader2Button.setBounds(irLoader1Button.getX(), irLoader1Button.getBottom() * 1.1, irLoaderButtonWidth, irLoaderButtonHeight);
     unloadIR2Button.setBounds(unloadIR1Button.getX(), irLoader2Button.getY() + (irLoaderButtonHeight - unloadIRButtonSize) * 0.5, unloadIRButtonSize, unloadIRButtonSize);
     muteIR2Button.setBounds(unloadIR2Button.getRight() * 1.05, irLoader2Button.getY() + (irLoaderButtonHeight - muteIRButtonSize) * 0.5, muteIRButtonSize, muteIRButtonSize);
+    ir2LevelSlider.setBounds(irLoader2Button.getX(), irLoader2Button.getY() * 1.4, irLevelSliderWidth, irLevelSliderHeight);
     
     lowCutSlider.setBounds(IRGroup.getWidth() * 0.1, IRGroup.getHeight() * 0.65, dialSize, dialSize);
     lowCutSliderLabel.setBounds(lowCutSlider.getX(), lowCutSlider.getY() * 0.85, labelWidth, labelHeight);
@@ -198,6 +228,8 @@ void IRFxAudioProcessorEditor::resized()
     
 //    DIST GROUP
     distBypassButton.setBounds(distGroup.getWidth() * 0.9, distGroup.getHeight() * 0.05, bypassButtonSize, bypassButtonSize);
+    saturationKnob.setBounds(distGroup.getWidth() * 0.24, distGroup.getHeight() * 0.225, saturationDialSize, saturationDialSize);
+//    saturationSliderLabel.setBounds(saturationKnob.getX(), saturationKnob.getY() * 0.5, labelWidth, labelHeight);
     
 //    DELAY GROUP
     delayBypassButton.setBounds(delayGroup.getWidth() * 0.9, delayGroup.getHeight() * 0.05, bypassButtonSize, bypassButtonSize);
@@ -224,6 +256,7 @@ void IRFxAudioProcessorEditor::loadIRFile(int irIndex)
                 audioProcessor.loadIR1(*loadedIRFile1);
                 irLoader1Button.setButtonText(loadedIRFile1->getFileName());
                 irLoader1Button.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white);
+                ir1LevelSlider.setVisible(true);
             }
             else if (irIndex == 2)
             {
@@ -231,6 +264,7 @@ void IRFxAudioProcessorEditor::loadIRFile(int irIndex)
                 audioProcessor.loadIR2(*loadedIRFile2);
                 irLoader2Button.setButtonText(loadedIRFile2->getFileName());
                 irLoader2Button.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white);
+                ir2LevelSlider.setVisible(true);
             }
         }
         else
@@ -251,6 +285,7 @@ void IRFxAudioProcessorEditor::restoreLoadedIRFiles()
             loadedIRFile1 = std::make_unique<juce::File>(file);
             irLoader1Button.setButtonText(file.getFileName());
             irLoader1Button.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white);
+            ir1LevelSlider.setVisible(true);
         }
     }
 
@@ -263,6 +298,7 @@ void IRFxAudioProcessorEditor::restoreLoadedIRFiles()
             loadedIRFile2 = std::make_unique<juce::File>(file);
             irLoader2Button.setButtonText(file.getFileName());
             irLoader2Button.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white);
+            ir2LevelSlider.setVisible(true);
         }
     }
 }

@@ -12,6 +12,10 @@
       </GROUP>
       <FILE id="EBhMrY" name="ParamNames.h" compile="0" resource="0" file="Source/ParamNames.h"/>
       <GROUP id="{3C0DDFA1-EB46-77A8-9C4C-9C6E1BAC9197}" name="GUI">
+        <FILE id="fFtcrm" name="HorizontalSlider.cpp" compile="1" resource="0"
+              file="Source/GUI/HorizontalSlider.cpp"/>
+        <FILE id="GbPZxG" name="HorizontalSlider.h" compile="0" resource="0"
+              file="Source/GUI/HorizontalSlider.h"/>
         <FILE id="De5Osc" name="ImageKnob.cpp" compile="1" resource="0" file="Source/GUI/ImageKnob.cpp"/>
         <FILE id="zap4tN" name="ImageKnob.h" compile="0" resource="0" file="Source/GUI/ImageKnob.h"/>
         <FILE id="S60s6Q" name="ImageKnobLookAndFeel.cpp" compile="1" resource="0"

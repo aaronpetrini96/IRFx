@@ -10,6 +10,7 @@ public:
                const juce::ParameterID& parameterID,
                const juce::Image& knobImage,
                const juce::String& suffix,
+               int size,
                bool drawFromMiddle = false);
     
     ~ImageKnob() override;

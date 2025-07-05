@@ -72,6 +72,8 @@ public:
     //IR MODULE
     juce::AudioParameterFloat* lowCutFreqParam {nullptr};
     juce::AudioParameterFloat* highCutFreqParam {nullptr};
+    juce::AudioParameterFloat* ir1LevelParam {nullptr};
+    juce::AudioParameterFloat* ir2LevelParam {nullptr};
     juce::AudioParameterBool* irLoaderBypassParam {nullptr};
     
     //TONE STACK
@@ -82,6 +84,8 @@ public:
     juce::AudioParameterBool* eqBypassParam {nullptr};
     
     //SATURATION
+    juce::AudioParameterFloat* saturationDriveParam {nullptr};
+    juce::AudioParameterBool* saturationBypassParam {nullptr};
     
     //DELAY
     
@@ -89,10 +93,13 @@ public:
     juce::SmoothedValue<float>
     lowCutFreqParamSmoother,
     highCutFreqParamSmoother,
+    ir1LevelParamSmoother,
+    ir2LevelParamSmoother,
     lowEQGainParamSmoother,
     midEQGainParamSmoother,
     midEQFreqParamSmoother,
-    highEQGainParamSmoother;
+    highEQGainParamSmoother,
+    saturationDriveParamSmoother;
     
     juce::dsp::ProcessSpec spec;
     juce::dsp::Convolution irLoader1, irLoader2;

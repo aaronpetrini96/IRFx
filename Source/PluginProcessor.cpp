@@ -29,6 +29,8 @@ IRFxAudioProcessor::IRFxAudioProcessor()
 //        IR LOADER
         &lowCutFreqParam,
         &highCutFreqParam,
+        &ir1LevelParam,
+        &ir2LevelParam,
         
 //        EQ
         &lowEQGainParam,
@@ -47,6 +49,8 @@ IRFxAudioProcessor::IRFxAudioProcessor()
         //        IR LOADER
         &ParamNames::getIRLowCutName,
         &ParamNames::getIRHighCutName,
+        &ParamNames::getIR1LevelName,
+        &ParamNames::getIR2LevelName,
         
         //        EQ
         &ParamNames::getEQLowGainName,
@@ -169,6 +173,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout IRFxAudioProcessor::createPa
     params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(20.f, 1000.f, 1.f, 1.f), 20.f));
     name = ParamNames::getIRHighCutName();
     params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(1000.f, 20000.f, 1.f, 1.f), 20000.f));
+    name = ParamNames::getIR1LevelName();
+    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(-60.f, 0.f, 0.1f, 1.f), 0.f));
+    name = ParamNames::getIR2LevelName();
+    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(-60.f, 0.f, 0.1f, 1.f), 0.f));
     
 //   EQ
     name = ParamNames::getEQBypassName();
@@ -189,6 +197,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout IRFxAudioProcessor::createPa
 //   DELAY
     name = ParamNames::getDelayBypassName();
     params.emplace_back(std::make_unique<juce::AudioParameterBool>(juce::ParameterID(name, versionHint), name, false));
+    name = ParamNames::getDistDriveName();
+    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(0.f, 24.f, 0.1f, 1.f), 0.f));
     
     return {params.begin(), params.end()};
 }
@@ -265,9 +275,6 @@ void IRFxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     for(auto smoother : getSmoothers())
         smoother->reset(sampleRate, 0.05);
     
-//    tempBuffer.setSize(getTotalNumOutputChannels(), samplesPerBlock);
-//        tempBuffer.clear();
-    
     updateSmootherFromParams(1, SmootherUpdateMode::initialize);
 }
 
@@ -277,6 +284,8 @@ void IRFxAudioProcessor::updateSmootherFromParams(int numSamplesToSkip, Smoother
     {
         lowCutFreqParam,
         highCutFreqParam,
+        ir1LevelParam,
+        ir2LevelParam,
         lowEQGainParam,
         midEQGainParam,
         midEQFreqParam,
@@ -306,6 +315,8 @@ std::vector<juce::SmoothedValue<float>*> IRFxAudioProcessor::getSmoothers()
     {
         &lowCutFreqParamSmoother,
         &highCutFreqParamSmoother,
+        &ir1LevelParamSmoother,
+        &ir2LevelParamSmoother,
         &lowEQGainParamSmoother,
         &midEQGainParamSmoother,
         &midEQFreqParamSmoother,
@@ -384,9 +395,13 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         {
             tempBuffer.setSize(buffer.getNumChannels(), buffer.getNumSamples());
             tempBuffer.makeCopyOf(buffer, true);
-
+            
+            buffer.applyGain(juce::Decibels::decibelsToGain(ir1LevelParamSmoother.getCurrentValue()));
+            tempBuffer.applyGain(juce::Decibels::decibelsToGain(ir2LevelParamSmoother.getCurrentValue()));
+            
             juce::dsp::AudioBlock<float> block1(buffer);
             juce::dsp::AudioBlock<float> block2(tempBuffer);
+            
 
             irLoader1.process(juce::dsp::ProcessContextReplacing<float>(block1));
             irLoader2.process(juce::dsp::ProcessContextReplacing<float>(block2));
@@ -398,6 +413,7 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         }
         else if (useIR1)
         {
+            buffer.applyGain(juce::Decibels::decibelsToGain(ir1LevelParamSmoother.getCurrentValue()));
             juce::dsp::AudioBlock<float> block(buffer);
             irLoader1.process(juce::dsp::ProcessContextReplacing<float>(block));
 
@@ -405,6 +421,7 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         }
         else if (useIR2)
         {
+            buffer.applyGain(juce::Decibels::decibelsToGain(ir2LevelParamSmoother.getCurrentValue()));
             juce::dsp::AudioBlock<float> block(buffer);
             irLoader2.process(juce::dsp::ProcessContextReplacing<float>(block));
 
@@ -435,14 +452,7 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         toneStackMonoChainAray[0].process(toneStackContextLeft);
         toneStackMonoChainAray[1].process(toneStackContextRight);
     }
-    
-    
-    
-    
-    
 
-    
-    
 }
 
 //==============================================================================

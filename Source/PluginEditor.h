@@ -12,6 +12,7 @@
 #include "PluginProcessor.h"
 #include "GUI/ImageKnob.h"
 #include "GUI/BypassButton.h"
+#include "GUI/HorizontalSlider.h"
 #include "ParamNames.h"
 
 
@@ -36,6 +37,7 @@ private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     IRFxAudioProcessor& audioProcessor;
+    const int versionHint = 1;
     
     juce::GroupComponent IRGroup, EQGroup, distGroup, delayGroup;
     std::vector<juce::GroupComponent*> groupComponents
@@ -54,19 +56,34 @@ private:
     std::unique_ptr<juce::File> loadedIRFile1 {nullptr}, loadedIRFile2 {nullptr};
     std::unique_ptr<juce::FileChooser> fileChooser;
     
+    HorizontalSlider ir1LevelSlider {"IR1 Level", audioProcessor.apvts, juce::ParameterID(ParamNames::getIR1LevelName(), versionHint), " dB"};
+    HorizontalSlider ir2LevelSlider {"IR2 Level", audioProcessor.apvts, juce::ParameterID(ParamNames::getIR2LevelName(), versionHint), " dB"};
+    
     void restoreLoadedIRFiles();
     
 //    knobImage Dials
     const juce::Image knobImage {juce::ImageCache::getFromMemory(BinaryData::Knob_10brighter_png, BinaryData::Knob_10brighter_pngSize)};
-    const int versionHint = 1;
     
-    ImageKnob lowCutSlider{"LowCut", audioProcessor.apvts, juce::ParameterID(ParamNames::getIRLowCutName(), versionHint), knobImage, " Hz"};
-    ImageKnob highCutSlider{"HighCut", audioProcessor.apvts, juce::ParameterID(ParamNames::getIRHighCutName(), versionHint), knobImage, " Hz"};
+    ImageKnob lowCutSlider{"LowCut", audioProcessor.apvts, juce::ParameterID(ParamNames::getIRLowCutName(), versionHint), knobImage, " Hz", 80};
+    ImageKnob highCutSlider{"HighCut", audioProcessor.apvts, juce::ParameterID(ParamNames::getIRHighCutName(), versionHint), knobImage, " Hz", 80};
     
-    ImageKnob lowEQGainSlider{"Bass", audioProcessor.apvts, juce::ParameterID(ParamNames::getEQLowGainName(), versionHint), knobImage, " dB", true};
-    ImageKnob midEQGainSlider{"Mid", audioProcessor.apvts, juce::ParameterID(ParamNames::getEQMidGainName(), versionHint), knobImage, " dB", true};
-    ImageKnob midEQFreqSlider{"Mid Freq", audioProcessor.apvts, juce::ParameterID(ParamNames::getEQMidFreqName(), versionHint), knobImage, " Hz", false};
-    ImageKnob highEQGainSlider{"Treble", audioProcessor.apvts, juce::ParameterID(ParamNames::getEQHighGainName(), versionHint), knobImage, " dB", true};
+    ImageKnob lowEQGainSlider{"Bass", audioProcessor.apvts, juce::ParameterID(ParamNames::getEQLowGainName(), versionHint), knobImage, " dB", 80, true};
+    ImageKnob midEQGainSlider{"Mid", audioProcessor.apvts, juce::ParameterID(ParamNames::getEQMidGainName(), versionHint), knobImage, " dB", 80, true};
+    ImageKnob midEQFreqSlider{"Mid Freq", audioProcessor.apvts, juce::ParameterID(ParamNames::getEQMidFreqName(), versionHint), knobImage, " Hz", 80, false};
+    ImageKnob highEQGainSlider{"Treble", audioProcessor.apvts, juce::ParameterID(ParamNames::getEQHighGainName(), versionHint), knobImage, " dB", 80, true};
+    
+//    std::vector<ImageKnob*> eqKnobs
+//    {
+//        &lowCutSlider,
+//        &highCutSlider,
+//        &lowEQGainSlider,
+//        &highEQGainSlider,
+//        &midEQGainSlider,
+//        &midEQFreqSlider,
+//        &highEQGainSlider
+//    };
+    
+    ImageKnob saturationKnob{"Drive", audioProcessor.apvts, juce::ParameterID(ParamNames::getDistDriveName(), versionHint), knobImage, "", 150};
     
 //    Dials Name Labels
     juce::Label lowCutSliderLabel {"Low Cut"};
@@ -75,6 +92,7 @@ private:
     juce::Label midEQGainSliderLabel {"Mid"};
     juce::Label midEQFreqSliderLabel {"Mid Freq"};
     juce::Label highEQGainSliderLabel {"Treble"};
+    juce::Label saturationSliderLabel {"Drive"};
     std::vector <juce::Label*> dialLabels
     {
         &lowCutSliderLabel,
@@ -82,7 +100,8 @@ private:
         &lowEQGainSliderLabel,
         &midEQGainSliderLabel,
         &midEQFreqSliderLabel,
-        &highEQGainSliderLabel
+        &highEQGainSliderLabel,
+        &saturationSliderLabel
     };
     
 //   Bypass Buttons
