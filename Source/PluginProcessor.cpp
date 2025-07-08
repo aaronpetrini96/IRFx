@@ -40,6 +40,7 @@ IRFxAudioProcessor::IRFxAudioProcessor()
         
 //        SAT
         &saturationDriveParam,
+        &saturationMixParam,
 //        DELAY
         
     };
@@ -60,6 +61,7 @@ IRFxAudioProcessor::IRFxAudioProcessor()
         
         //        SAT
         &ParamNames::getDistDriveName,
+        &ParamNames::getDistMixName,
         
         //        DELAY
     };
@@ -197,7 +199,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout IRFxAudioProcessor::createPa
     name = ParamNames::getDistBypassName();
     params.emplace_back(std::make_unique<juce::AudioParameterBool>(juce::ParameterID(name, versionHint), name, false));
     name = ParamNames::getDistDriveName();
-    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(0.f, 24.f, 0.1f, 1.f), 0.f));
+    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(0.f, 12.f, 0.1f, 1.f), 0.f));
+    name = ParamNames::getDistMixName();
+    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(0.f, 100.f, 1.f, 1.f), 100.f));
     
 //   DELAY
     name = ParamNames::getDelayBypassName();
@@ -248,8 +252,7 @@ void IRFxAudioProcessor::updateParams()
     }
     
 //    SATURATION
-//    saturationPreEQ.state = Coefficients::makeLowShelf(sampleRate, 150.f, 0.707f, juce::Decibels::decibelsToGain(2.f));
-//    saturationPostEQ.state = Coefficients::makeLowPass(sampleRate, 15000.f);
+
     
 //    DELAY
     
@@ -301,6 +304,7 @@ void IRFxAudioProcessor::updateSmootherFromParams(int numSamplesToSkip, Smoother
         midEQFreqParam,
         highEQGainParam,
         saturationDriveParam,
+        saturationMixParam,
     };
     
     auto smoothers = getSmoothers();
@@ -333,6 +337,7 @@ std::vector<juce::SmoothedValue<float>*> IRFxAudioProcessor::getSmoothers()
         &midEQFreqParamSmoother,
         &highEQGainParamSmoother,
         &saturationDriveParamSmoother,
+        &saturationMixParamSmoother,
     };
     
     return smoothers;
@@ -481,24 +486,26 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         juce::dsp::ProcessContextReplacing<float> preSaturationContext(saturationBlock);
         saturationPreEQ.process(preSaturationContext);
         auto drive = saturationDriveParamSmoother.getCurrentValue();
+        float mix = (saturationMixParamSmoother.getCurrentValue()) * 0.01f;
         for (size_t ch {0}; ch < saturationBlock.getNumChannels(); ++ch)
         {
             auto* samples = block.getChannelPointer(ch);
             for (size_t i {0}; i < block.getNumSamples(); ++i)
             {
                 auto dry = samples[i];
-                float mix = 50.f * 0.01f;
-                auto saturated = neveStyleSaturation(dry * mix, drive);
-                
-                samples [i] = dry * (1.f - mix) + saturated * mix;
-                
+                if (drive > 0.f)
+                {
+                    auto saturated = neveStyleSaturation(dry, drive);
+                    samples [i] = dry * (1.f - mix) + saturated * mix;
+                }
+                else
+                    samples [i] = dry;
                 
             }
         }
         juce::dsp::ProcessContextReplacing<float> postSaturationContext(saturationBlock);
         saturationPostEQ.process(postSaturationContext);
     }
-
 }
 
 //==============================================================================

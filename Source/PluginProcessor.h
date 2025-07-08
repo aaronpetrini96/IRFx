@@ -85,7 +85,9 @@ public:
     
     //SATURATION
     juce::AudioParameterFloat* saturationDriveParam {nullptr};
+    juce::AudioParameterFloat* saturationMixParam {nullptr};
     juce::AudioParameterBool* saturationBypassParam {nullptr};
+    
     
     //DELAY
     
@@ -99,7 +101,8 @@ public:
     midEQGainParamSmoother,
     midEQFreqParamSmoother,
     highEQGainParamSmoother,
-    saturationDriveParamSmoother;
+    saturationDriveParamSmoother,
+    saturationMixParamSmoother;
     
     juce::dsp::ProcessSpec spec;
     juce::dsp::Convolution irLoader1, irLoader2;
@@ -123,8 +126,6 @@ private:
     float lowShelfGain, midPeakGain, midPeakFreq, highShelfGain;
     
     float neveStyleSaturation (float x, float drive);
-    
-//    using saturationMonoEQChain
     juce::dsp::ProcessorDuplicator<Filter, Coefficients> saturationPreEQ, saturationPostEQ;
     
     

@@ -27,11 +27,6 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
         addAndMakeVisible(*group);
     }
     
-//    image DIAL GENERAL SETUP
-//    for (auto slider : eqKnobs)
-//    {
-//        slider -> setBounds(0,0, 80, 80);
-//    }
     
 //    DIAL'S LABELS GENERAL SETUP
     for (auto label : dialLabels)
@@ -41,6 +36,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
         label->setSize(80, 30);
         label->setColour(juce::Label::ColourIds::textColourId, juce::Colours::white.darker(0.2f));
     }
+
     
 //    IR Loaders Buttons General setup
     for (auto button : irLoaderButtons)
@@ -114,9 +110,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     };
     
 
-//    DRIVE DIAL
-    saturationKnob.setBounds(0, 0, 600, 600);
-    saturationKnob.setSize(600, 600);
+
     
 //    Add And Make Visible
     
@@ -147,7 +141,9 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     
     distGroup.addAndMakeVisible(distBypassButton);
     distGroup.addAndMakeVisible(saturationKnob);
-//    distGroup.addAndMakeVisible(saturationSliderLabel);
+    distGroup.addAndMakeVisible(saturationLabel);
+    distGroup.addAndMakeVisible(saturationMixKnob);
+    distGroup.addAndMakeVisible(saturationMixLabel);
     
     delayGroup.addAndMakeVisible(delayBypassButton);
    
@@ -175,21 +171,24 @@ void IRFxAudioProcessorEditor::paint (juce::Graphics& g)
 void IRFxAudioProcessorEditor::resized()
 {
     auto bounds = getLocalBounds().withSizeKeepingCentre(600, 600);
-    auto y = bounds.getHeight() * 0.015;
-    auto height = bounds.getHeight() * 0.5 - y * 2;
-    auto leftMargin = bounds.getWidth() * 0.02;
-    auto groupWidth = bounds.getWidth() * 0.5 - leftMargin * 1.5;
-    auto dialSize = bounds.getWidth() * 0.25;
+    auto boundsHeight = bounds.getHeight();
+    auto boundsWidth = bounds.getWidth();
+    auto y = boundsHeight * 0.015;
+    auto height = boundsHeight * 0.5 - y * 2;
+    auto leftMargin = boundsWidth * 0.02;
+    auto groupWidth = boundsWidth * 0.5 - leftMargin * 1.5;
+    auto dialSize = boundsWidth * 0.25;
     auto labelWidth = lowCutSliderLabel.getWidth();
     auto labelHeight = lowCutSliderLabel.getHeight();
-    auto bypassButtonSize = bounds.getWidth() * 0.10;
+    auto bypassButtonSize = boundsWidth * 0.10;
     auto irLoaderButtonWidth = irLoader1Button.getWidth();
     auto irLoaderButtonHeight = irLoader1Button.getHeight();
     auto unloadIRButtonSize = unloadIR1Button.getWidth();
     auto muteIRButtonSize = muteIR1Button.getWidth();
     auto irLevelSliderWidth = ir1LevelSlider.getWidth();
     auto irLevelSliderHeight = ir1LevelSlider.getHeight();
-    auto saturationDialSize = saturationKnob.getWidth();
+    auto saturationDialSize = boundsWidth * 0.25;
+
     
     
     IRGroup.setBounds(leftMargin, y, groupWidth, height);
@@ -210,9 +209,9 @@ void IRFxAudioProcessorEditor::resized()
     muteIR2Button.setBounds(unloadIR2Button.getRight() * 1.05, irLoader2Button.getY() + (irLoaderButtonHeight - muteIRButtonSize) * 0.5, muteIRButtonSize, muteIRButtonSize);
     ir2LevelSlider.setBounds(irLoader2Button.getX(), irLoader2Button.getY() * 1.4, irLevelSliderWidth, irLevelSliderHeight);
     
-    lowCutSlider.setBounds(IRGroup.getWidth() * 0.1, IRGroup.getHeight() * 0.65, dialSize, dialSize);
+    lowCutSlider.setBounds(IRGroup.getWidth() * 0.115, IRGroup.getHeight() * 0.65, dialSize, dialSize);
     lowCutSliderLabel.setBounds(lowCutSlider.getX(), lowCutSlider.getY() * 0.85, labelWidth, labelHeight);
-    highCutSlider.setBounds(IRGroup.getRight() - dialSize * 0.8, lowCutSlider.getY(), dialSize, dialSize);
+    highCutSlider.setBounds(IRGroup.getRight() - dialSize * 0.83, lowCutSlider.getY(), dialSize, dialSize);
     highCutSliderLabel.setBounds(highCutSlider.getX(), highCutSlider.getY() * 0.85, labelWidth, labelHeight);
     
 //    EQ GROUP
@@ -228,8 +227,10 @@ void IRFxAudioProcessorEditor::resized()
     
 //    DIST GROUP
     distBypassButton.setBounds(distGroup.getWidth() * 0.9, distGroup.getHeight() * 0.05, bypassButtonSize, bypassButtonSize);
-    saturationKnob.setBounds(distGroup.getWidth() * 0.24, distGroup.getHeight() * 0.225, saturationDialSize, saturationDialSize);
-//    saturationSliderLabel.setBounds(saturationKnob.getX(), saturationKnob.getY() * 0.5, labelWidth, labelHeight);
+    saturationKnob.setBounds(distGroup.getWidth() * 0.55, distGroup.getHeight() * 0.3, saturationDialSize, saturationDialSize);
+    saturationLabel.setBounds(saturationKnob.getX() * 1.09, saturationKnob.getY() * 0.7, labelWidth, labelHeight);
+    saturationMixKnob.setBounds(distGroup.getWidth() * 0.07, saturationKnob.getY(), saturationDialSize, saturationDialSize);
+    saturationMixLabel.setBounds(saturationMixKnob.getX() * 1.7, saturationLabel.getY(), labelWidth, labelHeight);
     
 //    DELAY GROUP
     delayBypassButton.setBounds(delayGroup.getWidth() * 0.9, delayGroup.getHeight() * 0.05, bypassButtonSize, bypassButtonSize);

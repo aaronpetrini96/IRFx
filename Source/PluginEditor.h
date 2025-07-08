@@ -72,7 +72,8 @@ private:
     ImageKnob midEQFreqSlider{"Mid Freq", audioProcessor.apvts, juce::ParameterID(ParamNames::getEQMidFreqName(), versionHint), knobImage, " Hz", 80, false};
     ImageKnob highEQGainSlider{"Treble", audioProcessor.apvts, juce::ParameterID(ParamNames::getEQHighGainName(), versionHint), knobImage, " dB", 80, true};
        
-    ImageKnob saturationKnob{"Drive", audioProcessor.apvts, juce::ParameterID(ParamNames::getDistDriveName(), versionHint), knobImage, "", 150};
+    ImageKnob saturationKnob{"Drive", audioProcessor.apvts, juce::ParameterID(ParamNames::getDistDriveName(), versionHint), knobImage, "", 110};
+    ImageKnob saturationMixKnob{"Mix", audioProcessor.apvts, juce::ParameterID(ParamNames::getDistMixName(), versionHint), knobImage, " %", 110};
     
 //    Dials Name Labels
     juce::Label lowCutSliderLabel {"Low Cut"};
@@ -81,6 +82,8 @@ private:
     juce::Label midEQGainSliderLabel {"Mid"};
     juce::Label midEQFreqSliderLabel {"Mid Freq"};
     juce::Label highEQGainSliderLabel {"Treble"};
+    juce::Label saturationLabel {"Drive"};
+    juce::Label saturationMixLabel {"Mix"};
     std::vector <juce::Label*> dialLabels
     {
         &lowCutSliderLabel,
@@ -89,6 +92,8 @@ private:
         &midEQGainSliderLabel,
         &midEQFreqSliderLabel,
         &highEQGainSliderLabel,
+        &saturationLabel,
+        &saturationMixLabel,
     };
     
 //   Bypass Buttons

@@ -22,6 +22,7 @@ namespace ParamNames
     // === Distortion ===
     inline juce::String getDistBypassName()   { return "DistBypass"; }
     inline juce::String getDistDriveName() {return "DistDrive";}
+    inline juce::String getDistMixName() {return "DistMix";}
 
     // === Delay ===
     inline juce::String getDelayBypassName()  { return "DelayBypass"; }
@@ -43,6 +44,7 @@ namespace ParamNames
             getEQHighGainName(),
             getDistBypassName(),
             getDistDriveName(),
+            getDistMixName(),
             getDelayBypassName()
         };
     }
