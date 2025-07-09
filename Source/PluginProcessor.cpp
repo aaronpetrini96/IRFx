@@ -43,6 +43,10 @@ IRFxAudioProcessor::IRFxAudioProcessor()
         &saturationMixParam,
 //        DELAY
         
+//        IN-OUT GAIN
+        &inputGainParam,
+        &outputGainParam,
+        
     };
     
     auto floatNameFuncs = std::array
@@ -64,6 +68,10 @@ IRFxAudioProcessor::IRFxAudioProcessor()
         &ParamNames::getDistMixName,
         
         //        DELAY
+        
+        //        IN-OUT GAIN
+        &ParamNames::getInGainName,
+        &ParamNames::getOutGainName,
     };
     
     initCachedParams<juce::AudioParameterFloat*>(floatParams, floatNameFuncs);
@@ -206,6 +214,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout IRFxAudioProcessor::createPa
 //   DELAY
     name = ParamNames::getDelayBypassName();
     params.emplace_back(std::make_unique<juce::AudioParameterBool>(juce::ParameterID(name, versionHint), name, false));
+    
+    
+//   IN-OUT GAIN
+    name = ParamNames::getInGainName();
+    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(-60.f, 12.f, 0.1f, 1.f), 0.f));
+    name = ParamNames::getOutGainName();
+    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(-60.f, 12.f, 0.1f, 1.f), 0.f));
 
     
     return {params.begin(), params.end()};
@@ -270,6 +285,14 @@ void IRFxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     irLoader1.prepare(spec);
     irLoader2.prepare(spec);
     
+    inputGain.prepare(spec);
+    inputGain.setRampDurationSeconds(0.05);
+    outputGain.prepare(spec);
+    outputGain.setRampDurationSeconds(0.05);
+    
+    gain.prepare(spec);
+    gain.setGainDecibels(-12.f);
+    
     juce::dsp::ProcessSpec monoSpec = spec;
     monoSpec.numChannels = 1;  // IMPORTANT: mono
     
@@ -305,6 +328,8 @@ void IRFxAudioProcessor::updateSmootherFromParams(int numSamplesToSkip, Smoother
         highEQGainParam,
         saturationDriveParam,
         saturationMixParam,
+        inputGainParam,
+        outputGainParam,
     };
     
     auto smoothers = getSmoothers();
@@ -338,6 +363,8 @@ std::vector<juce::SmoothedValue<float>*> IRFxAudioProcessor::getSmoothers()
         &highEQGainParamSmoother,
         &saturationDriveParamSmoother,
         &saturationMixParamSmoother,
+        &inputGainParamSmoother,
+        &outputGainParamSmoother,
     };
     
     return smoothers;
@@ -399,6 +426,27 @@ float IRFxAudioProcessor::neveStyleSaturation (float x, float drive)
     return saturated * gainComp;
 }
 
+bool clipDetection(juce::AudioBuffer<float>& buffer)
+{
+// CLIP DETECTION
+    bool isClipping = false;
+    for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
+    {
+        auto* samples = buffer.getReadPointer(channel);
+        for (int i = 0; i < buffer.getNumSamples(); ++i)
+        {
+            auto sampleAbs = std::abs(samples[i]);
+            if (sampleAbs > 1.0f)
+            {
+                isClipping = true;
+                break; // you can also break out of both loops early if you want
+            }
+        }
+    }
+    
+    return isClipping;
+}
+
 void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
@@ -409,8 +457,19 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     juce::AudioBuffer<float> tempBuffer;
     
     
+    //========================    IN GAIN part    ========================
+    juce::AudioBuffer<float> dryBuffer;
+    dryBuffer.makeCopyOf(buffer);
+    inputGain.setGainDecibels(inputGainParamSmoother.getCurrentValue());
+    
+    inputLevelL = buffer.getRMSLevel(0, 0, buffer.getNumSamples());
+    inputLevelR = buffer.getNumChannels() > 1 ? buffer.getRMSLevel(1, 0, buffer.getNumSamples()) : inputLevelL;
+    //========================                    ========================
+    
     updateSmootherFromParams(buffer.getNumSamples(), SmootherUpdateMode::liveInRealTime);
     updateParams();
+    
+    applyGain(buffer, inputGain);
     
     if (irLoaderBypassParam->get() == false)
     {
@@ -506,6 +565,15 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         juce::dsp::ProcessContextReplacing<float> postSaturationContext(saturationBlock);
         saturationPostEQ.process(postSaturationContext);
     }
+    
+    outputGain.setGainDecibels(outputGainParamSmoother.getCurrentValue());
+    applyGain(buffer, outputGain);
+    //    OUTPUT CLIP DETECTION
+    if (clipDetection(buffer))
+        clipFlagOut.store(true); // atomic flag to be safe for GUI thread
+    
+    outputLevelL = buffer.getRMSLevel(0, 0, buffer.getNumSamples());
+    outputLevelR = buffer.getNumChannels() > 1 ? buffer.getRMSLevel(1, 0, buffer.getNumSamples()) : outputLevelL;
 }
 
 //==============================================================================

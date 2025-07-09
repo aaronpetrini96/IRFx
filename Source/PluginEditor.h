@@ -13,6 +13,7 @@
 #include "GUI/ImageKnob.h"
 #include "GUI/BypassButton.h"
 #include "GUI/HorizontalSlider.h"
+#include "GUI/GainSlider.h"
 #include "ParamNames.h"
 
 
@@ -20,7 +21,7 @@
 /**
 */
 
-class IRFxAudioProcessorEditor  : public juce::AudioProcessorEditor
+class IRFxAudioProcessorEditor  : public juce::AudioProcessorEditor, private juce::Timer
 {
 public:
     IRFxAudioProcessorEditor (IRFxAudioProcessor&);
@@ -31,6 +32,7 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
     void loadIRFile(int);
+    void clipLight(juce::Graphics& g);
     
 
 private:
@@ -38,6 +40,7 @@ private:
     // access the processor object that created it.
     IRFxAudioProcessor& audioProcessor;
     const int versionHint = 1;
+    void timerCallback() override;
     
     juce::GroupComponent IRGroup, EQGroup, distGroup, delayGroup;
     std::vector<juce::GroupComponent*> groupComponents
@@ -116,6 +119,16 @@ private:
         &muteIR1Button, &muteIR2Button
     };
     juce::Image muteIRImage = juce::ImageCache::getFromMemory(BinaryData::Mute_png, BinaryData::Mute_pngSize);
+    
+    
+    
+    
+//    INPUT & OUTPUT GAIN SLIDERS
+    GainSlider inputGainSlider {"Input Gain", audioProcessor.apvts, juce::ParameterID(ParamNames::getInGainName(), versionHint), " dB [IN]", juce::Slider::TextEntryBoxPosition::TextBoxRight};
+    GainSlider outputGainSlider {"Output Gain", audioProcessor.apvts, juce::ParameterID(ParamNames::getOutGainName(), versionHint), " dB [OUT]", juce::Slider::TextEntryBoxPosition::TextBoxLeft};
+    bool isClippingLightOn = false;
+    int clipLightHoldCounter = 0; // counts down in timer ticks
+    float clipPopScale = 1.0f;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (IRFxAudioProcessorEditor)
 };

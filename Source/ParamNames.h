@@ -27,6 +27,10 @@ namespace ParamNames
     // === Delay ===
     inline juce::String getDelayBypassName()  { return "DelayBypass"; }
 
+    // === In & Out Gain ===
+    inline juce::String getInGainName() {return "InGain";}
+    inline juce::String getOutGainName() {return "OutGain";}
+
     // === If you need to loop over all IDs ===
     // Example: an array of all IDs for simpler iteration
     inline const juce::StringArray getAllIDs()

@@ -13,7 +13,10 @@
 IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
-    
+    startTimerHz(30);
+//    IN-OUT GAIN
+    addAndMakeVisible(inputGainSlider);
+    addAndMakeVisible(outputGainSlider);
 
 //    GROUP GENERAL SETTINGS
     IRGroup.setText("IR Loader");
@@ -165,7 +168,8 @@ void IRFxAudioProcessorEditor::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (juce::Colours::black.withAlpha(0.8f));
-
+    
+    clipLight(g);
 }
 
 void IRFxAudioProcessorEditor::resized()
@@ -234,6 +238,12 @@ void IRFxAudioProcessorEditor::resized()
     
 //    DELAY GROUP
     delayBypassButton.setBounds(delayGroup.getWidth() * 0.9, delayGroup.getHeight() * 0.05, bypassButtonSize, bypassButtonSize);
+    
+    
+    
+//    IN OUT GAIN
+    inputGainSlider.setBounds(IRGroup.getX(), distGroup.getBottom() * 0.99, inputGainSlider.getWidth(), inputGainSlider.getHeight());
+    outputGainSlider.setBounds(delayGroup.getX() * 1.09, inputGainSlider.getY(), outputGainSlider.getWidth(), outputGainSlider.getHeight());
 
 }
 
@@ -302,4 +312,58 @@ void IRFxAudioProcessorEditor::restoreLoadedIRFiles()
             ir2LevelSlider.setVisible(true);
         }
     }
+}
+
+
+
+void IRFxAudioProcessorEditor::timerCallback()
+{
+   
+// === Clipping light logic ===
+    
+    bool inClipping = audioProcessor.clipFlagIn.exchange(false);
+    bool outClipping = audioProcessor.clipFlagOut.exchange(false);
+    if (inClipping)
+        inputGainSlider.setClippingStatus(true);
+    if (outClipping)
+        outputGainSlider.setClippingStatus(true);
+    
+    if (inClipping == true || outClipping == true)
+    {
+        isClippingLightOn = true;
+        clipLightHoldCounter = 15; // light stays on for 15 ticks
+        clipPopScale = 1.3f;       // pop to 1.3x size when clipping
+    }
+    
+    if (clipLightHoldCounter > 0)
+    {
+        --clipLightHoldCounter;
+        
+        // Gradually shrink pop effect back to normal
+        clipPopScale -= 0.02f;
+        if (clipPopScale < 1.0f)
+            clipPopScale = 1.0f;
+    }
+    else
+    {
+        inputGainSlider.setClippingStatus(false);
+        outputGainSlider.setClippingStatus(false);
+        isClippingLightOn = false;
+        clipPopScale = 1.0f;
+    }
+    
+    repaint(); // triggers paint() to draw updated light
+    
+}
+
+void IRFxAudioProcessorEditor::clipLight(juce::Graphics& g)
+{
+    juce::Colour activeColor = juce::Colours::red.withAlpha(0.9f);
+    juce::Colour offColor = juce::Colours::green.withAlpha(0.75f);
+    juce::Colour currentColor = isClippingLightOn ? activeColor : offColor;
+   
+    g.setColour(currentColor);
+    auto fontOptions = juce::FontOptions(20.0f * clipPopScale, juce::Font::bold);
+    g.setFont(juce::Font(fontOptions));
+    g.drawFittedText("CLIP", getWidth() * 0.334, getHeight() * 0.745, 200, 20, juce::Justification::centred, 1);
 }

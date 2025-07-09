@@ -12,6 +12,8 @@
       </GROUP>
       <FILE id="EBhMrY" name="ParamNames.h" compile="0" resource="0" file="Source/ParamNames.h"/>
       <GROUP id="{3C0DDFA1-EB46-77A8-9C4C-9C6E1BAC9197}" name="GUI">
+        <FILE id="YVEZfv" name="GainSlider.cpp" compile="1" resource="0" file="Source/GUI/GainSlider.cpp"/>
+        <FILE id="qu8Zz9" name="GainSlider.h" compile="0" resource="0" file="Source/GUI/GainSlider.h"/>
         <FILE id="fFtcrm" name="HorizontalSlider.cpp" compile="1" resource="0"
               file="Source/GUI/HorizontalSlider.cpp"/>
         <FILE id="GbPZxG" name="HorizontalSlider.h" compile="0" resource="0"

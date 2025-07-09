@@ -63,6 +63,11 @@ public:
     
     void updateParams();
     
+    float getInputLevelL() const { return inputLevelL; }
+    float getInputLevelR() const { return inputLevelR; }
+    float getOutputLevelL() const { return outputLevelL; }
+    float getOutputLevelR() const { return outputLevelR; }
+    
     //==============================================================================
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     juce::AudioProcessorValueTreeState apvts {*this, nullptr, "Parameters", createParameterLayout()};
@@ -91,6 +96,10 @@ public:
     
     //DELAY
     
+    //IN-OUT GAIN
+    juce::AudioParameterFloat* inputGainParam {nullptr};
+    juce::AudioParameterFloat* outputGainParam {nullptr};
+    
     //======================= SMOOTHED PARAMS ================================================
     juce::SmoothedValue<float>
     lowCutFreqParamSmoother,
@@ -102,15 +111,31 @@ public:
     midEQFreqParamSmoother,
     highEQGainParamSmoother,
     saturationDriveParamSmoother,
-    saturationMixParamSmoother;
+    saturationMixParamSmoother,
+    inputGainParamSmoother,
+    outputGainParamSmoother;
     
     juce::dsp::ProcessSpec spec;
     juce::dsp::Convolution irLoader1, irLoader2;
+    
+    std::atomic<bool> clipFlagIn { false };
+    std::atomic<bool> clipFlagOut { false };
 
 private:
     
-    
+    float inputLevelL{0.f}, inputLevelR {0.f}, outputLevelL{0.f}, outputLevelR{0.f};
+    juce::dsp::Gain<float> inputGain, outputGain;
+    juce::dsp::Gain<float> gain;
     float mixIR1, mixIR2;
+    template<typename T, typename U>
+    void applyGain(T& buffer, U& gain)
+    {
+        auto block = juce::dsp::AudioBlock<float>(buffer);
+        auto ctx = juce::dsp::ProcessContextReplacing<float>(block);
+        gain.process(ctx);
+    }
+    
+    
     
     using Filter = juce::dsp::IIR::Filter<float>;
     using Coefficients = juce::dsp::IIR::Coefficients<float>;
@@ -124,6 +149,8 @@ private:
     using toneStackMonoChain = juce::dsp::ProcessorChain<Filter, Filter, Filter>;
     std::array<toneStackMonoChain, 3> toneStackMonoChainAray;
     float lowShelfGain, midPeakGain, midPeakFreq, highShelfGain;
+    
+    
     
     float neveStyleSaturation (float x, float drive);
     juce::dsp::ProcessorDuplicator<Filter, Coefficients> saturationPreEQ, saturationPostEQ;
