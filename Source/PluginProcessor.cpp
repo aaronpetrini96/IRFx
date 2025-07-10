@@ -416,14 +416,26 @@ void IRFxAudioProcessor::loadIR2(const juce::File &irFile)
     apvts.state.setProperty("IR2FilePath", irFile.getFullPathName(), nullptr);
 }
 
+float computeRMS(const float* data, size_t numSamples)
+{
+    float sumSquares = 0.0f;
+    for (size_t i = 0; i < numSamples; ++i)
+        sumSquares += data[i] * data[i];
+
+    return std::sqrt(sumSquares / (float)numSamples);
+}
+
 float IRFxAudioProcessor::neveStyleSaturation (float x, float drive)
 {
+//    Apply Drive
     x *= drive;
+    
+//    Asymmetric Dist
     float asym = 0.1f * x * x * x;
     float saturated = std::tanh(x + asym);
-    saturated *= 0.8f;
-    float gainComp = juce::jlimit (0.2f, 1.0f, 1.0f / (0.5f + 0.5f * drive));
-    return saturated * gainComp;
+    saturated *= 0.8f; // attenuation to avoid over-brightening
+
+    return saturated;
 }
 
 bool clipDetection(juce::AudioBuffer<float>& buffer)
@@ -539,27 +551,60 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         toneStackMonoChainAray[1].process(toneStackContextRight);
     }
     
-    if (saturationBypassParam->get() == false)
+    auto drive = saturationDriveParamSmoother.getCurrentValue();
+    if (!saturationBypassParam->get() && drive > 0.f )
     {
         juce::dsp::AudioBlock<float> saturationBlock(buffer);
         juce::dsp::ProcessContextReplacing<float> preSaturationContext(saturationBlock);
         saturationPreEQ.process(preSaturationContext);
-        auto drive = saturationDriveParamSmoother.getCurrentValue();
+        
         float mix = (saturationMixParamSmoother.getCurrentValue()) * 0.01f;
+        
+        std::vector<float> dryBuffer(block.getNumSamples()), wetBuffer(block.getNumSamples());
+        
+        
         for (size_t ch {0}; ch < saturationBlock.getNumChannels(); ++ch)
         {
             auto* samples = block.getChannelPointer(ch);
-            for (size_t i {0}; i < block.getNumSamples(); ++i)
+            
+            for (size_t i{0}; i < block.getNumSamples(); ++i)
             {
-                auto dry = samples[i];
-                if (drive > 0.f)
-                {
-                    auto saturated = neveStyleSaturation(dry, drive);
-                    samples [i] = dry * (1.f - mix) + saturated * mix;
-                }
-                else
-                    samples [i] = dry;
+                float dry = samples [i];
+                dryBuffer[i] = dry;
+                wetBuffer[i] = neveStyleSaturation(dry, drive);
+            }
+            
+            float dryRMS = computeRMS(dryBuffer.data(), block.getNumSamples());
+            float wetRMS = computeRMS(wetBuffer.data(), block.getNumSamples());
+            float targetRMS = 0.1f;
+            static float smoothedGain = 1.f;
+            static bool gainInitialized = false;
+            
+            float makeUpGain = (wetRMS > 0.0001f) ? targetRMS/wetRMS : 1.f;
+            
+            if (!gainInitialized)
+            {
+                smoothedGain = makeUpGain * 0.3f;
+                gainInitialized = true;
+            }
+            else
+            {
+                float smoothingCoeff = 0.99f;
+                smoothedGain = smoothedGain * smoothingCoeff + makeUpGain * (1.f - smoothingCoeff);
+            }
+            if (dryRMS < 0.0001f)
+            {
+                gainInitialized = false;
+                smoothedGain = 1.0f;
+            }
                 
+            
+            
+            
+            for (size_t i{0}; i < block.getNumSamples(); ++i)
+            {
+                wetBuffer[i] *= smoothedGain;
+                samples[i] = dryBuffer[i] * (1.0f - mix) + wetBuffer[i] * mix;
             }
         }
         juce::dsp::ProcessContextReplacing<float> postSaturationContext(saturationBlock);
