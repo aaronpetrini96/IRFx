@@ -152,12 +152,7 @@ private:
     
     
     Saturation saturationInstance;
-//    enum class satType
-//    {
-//        Neve,
-//        SSL,
-//        API
-//    };
+
 //    float neveStyleSaturation (float x, float drive);
 //    float sslStyleSaturation (float x, float drive);
 //    float apiStyleSaturation (float x, float drive);
