@@ -113,7 +113,14 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     };
     
 
-
+//   SAT MODE BUTTONS
+    for (auto button : satModeButtons)
+    {
+        button -> setClickingTogglesState(false);
+        button -> setRadioGroupId(123);
+        button -> setSize(60, 30);
+        distGroup.addAndMakeVisible(*button);
+    }
     
 //    Add And Make Visible
     
@@ -192,6 +199,7 @@ void IRFxAudioProcessorEditor::resized()
     auto irLevelSliderWidth = ir1LevelSlider.getWidth();
     auto irLevelSliderHeight = ir1LevelSlider.getHeight();
     auto saturationDialSize = boundsWidth * 0.25;
+    auto satModeButtonWidth = boundsWidth * 0.1;
 
     
     
@@ -235,6 +243,10 @@ void IRFxAudioProcessorEditor::resized()
     saturationLabel.setBounds(saturationKnob.getX() * 1.09, saturationKnob.getY() * 0.7, labelWidth, labelHeight);
     saturationMixKnob.setBounds(distGroup.getWidth() * 0.07, saturationKnob.getY(), saturationDialSize, saturationDialSize);
     saturationMixLabel.setBounds(saturationMixKnob.getX() * 1.7, saturationLabel.getY(), labelWidth, labelHeight);
+    
+    sat1Button.setBounds(distGroup.getWidth() * 0.18, distGroup.getHeight() * 0.8, satModeButtonWidth, satModeButtonWidth * 0.4);
+    sat2Button.setBounds(sat1Button.getRight(), sat1Button.getY(), satModeButtonWidth, satModeButtonWidth * 0.4);
+    sat3Button.setBounds(sat2Button.getRight(), sat2Button.getY(), satModeButtonWidth, satModeButtonWidth * 0.4);
     
 //    DELAY GROUP
     delayBypassButton.setBounds(delayGroup.getWidth() * 0.9, delayGroup.getHeight() * 0.05, bypassButtonSize, bypassButtonSize);

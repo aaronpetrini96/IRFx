@@ -121,6 +121,12 @@ private:
     juce::Image muteIRImage = juce::ImageCache::getFromMemory(BinaryData::Mute_png, BinaryData::Mute_pngSize);
     
     
+//   SATURATION TYPE BUTTONS
+    juce::TextButton sat1Button {"1"}, sat2Button {"2"}, sat3Button{"3"};
+    std::vector<juce::TextButton*> satModeButtons
+    {
+        &sat1Button, &sat2Button, &sat3Button
+    };
     
     
 //    INPUT & OUTPUT GAIN SLIDERS
