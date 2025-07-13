@@ -114,13 +114,18 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     
 
 //   SAT MODE BUTTONS
+    sat1Button.onClick = [this] () {setSaturationType(0);};
+    sat2Button.onClick = [this] () {setSaturationType(1);};
+    sat3Button.onClick = [this] () {setSaturationType(2);};
     for (auto button : satModeButtons)
     {
-        button -> setClickingTogglesState(false);
+        button -> setClickingTogglesState(true);
         button -> setRadioGroupId(123);
         button -> setSize(60, 30);
+        setSatButtonColour(*button, button->getToggleState());
         distGroup.addAndMakeVisible(*button);
     }
+
     
 //    Add And Make Visible
     
@@ -154,6 +159,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     distGroup.addAndMakeVisible(saturationLabel);
     distGroup.addAndMakeVisible(saturationMixKnob);
     distGroup.addAndMakeVisible(saturationMixLabel);
+    distGroup.addAndMakeVisible(satModeLabel);
     
     delayGroup.addAndMakeVisible(delayBypassButton);
    
@@ -247,6 +253,7 @@ void IRFxAudioProcessorEditor::resized()
     sat1Button.setBounds(distGroup.getWidth() * 0.18, distGroup.getHeight() * 0.8, satModeButtonWidth, satModeButtonWidth * 0.4);
     sat2Button.setBounds(sat1Button.getRight(), sat1Button.getY(), satModeButtonWidth, satModeButtonWidth * 0.4);
     sat3Button.setBounds(sat2Button.getRight(), sat2Button.getY(), satModeButtonWidth, satModeButtonWidth * 0.4);
+    satModeLabel.setBounds(sat2Button.getX() * 0.92, sat2Button.getY() * 1.11, labelWidth, labelHeight);
     
 //    DELAY GROUP
     delayBypassButton.setBounds(delayGroup.getWidth() * 0.9, delayGroup.getHeight() * 0.05, bypassButtonSize, bypassButtonSize);
@@ -330,7 +337,24 @@ void IRFxAudioProcessorEditor::restoreLoadedIRFiles()
 
 void IRFxAudioProcessorEditor::timerCallback()
 {
-   
+//    SAT TYPE
+    auto currentSatMode = audioProcessor.saturationModeParam->getIndex();
+    switch (currentSatMode)
+    {
+        case 0:
+            setSatButtonColour(sat1Button, true);
+            break;
+        case 1:
+            setSatButtonColour(sat2Button, true);
+            break;
+        case 2:
+            setSatButtonColour(sat3Button, true);
+            break;
+    }
+    sat1Button.setToggleState(currentSatMode == 0, juce::dontSendNotification);
+    sat2Button.setToggleState(currentSatMode == 1, juce::dontSendNotification);
+    sat3Button.setToggleState(currentSatMode == 2, juce::dontSendNotification);
+
 // === Clipping light logic ===
     
     bool inClipping = audioProcessor.clipFlagIn.exchange(false);
@@ -378,4 +402,31 @@ void IRFxAudioProcessorEditor::clipLight(juce::Graphics& g)
     auto fontOptions = juce::FontOptions(20.0f * clipPopScale, juce::Font::bold);
     g.setFont(juce::Font(fontOptions));
     g.drawFittedText("CLIP", getWidth() * 0.334, getHeight() * 0.745, 200, 20, juce::Justification::centred, 1);
+}
+
+
+void IRFxAudioProcessorEditor::setSaturationType(int type)
+{
+    audioProcessor.saturationModeParam->beginChangeGesture();
+    audioProcessor.saturationModeParam->setValueNotifyingHost(audioProcessor.saturationModeParam->convertTo0to1(type));
+    audioProcessor.saturationModeParam->endChangeGesture();
+    
+    setSatButtonColour(sat1Button, sat1Button.getToggleState());
+    setSatButtonColour(sat2Button, sat2Button.getToggleState());
+    setSatButtonColour(sat3Button, sat3Button.getToggleState());
+}
+
+void IRFxAudioProcessorEditor::setSatButtonColour (juce::TextButton& b, bool isOn)
+{
+//    juce::Colour vintageYellow = juce::Colour::fromRGB(255, 221, 102);
+    juce::Colour darkPink = juce::Colour::fromRGB(200, 30, 100).withAlpha(0.8f); // Dark Trash pink
+
+    if (isOn)
+    {
+        b.setColour(juce::TextButton::ColourIds::buttonOnColourId, darkPink.brighter());
+    }
+    else
+    {
+        b.setColour(juce::TextButton::ColourIds::buttonColourId, darkPink.withAlpha(0.5f));
+    }
 }

@@ -10,7 +10,7 @@
 
 #include <JuceHeader.h>
 #include "ParamNames.h"
-#include "DSP/SingleChannelSampleFifo.h"
+#include "DSP/Saturation.h"
 
 //==============================================================================
 /**
@@ -92,7 +92,7 @@ public:
     juce::AudioParameterFloat* saturationDriveParam {nullptr};
     juce::AudioParameterFloat* saturationMixParam {nullptr};
     juce::AudioParameterBool* saturationBypassParam {nullptr};
-    
+    juce::AudioParameterChoice* saturationModeParam {nullptr};
     
     //DELAY
     
@@ -151,12 +151,20 @@ private:
     float lowShelfGain, midPeakGain, midPeakFreq, highShelfGain;
     
     
-    
-    float neveStyleSaturation (float x, float drive);
-    juce::dsp::ProcessorDuplicator<Filter, Coefficients> saturationPreEQ, saturationPostEQ;
-    
-    
+    Saturation saturationInstance;
+//    enum class satType
+//    {
+//        Neve,
+//        SSL,
+//        API
+//    };
+//    float neveStyleSaturation (float x, float drive);
+//    float sslStyleSaturation (float x, float drive);
+//    float apiStyleSaturation (float x, float drive);
+//    juce::dsp::ProcessorDuplicator<Filter, Coefficients> saturationPreEQ, saturationPostEQ;
 
+    
+    
     template<typename ParamType, typename Params, typename Funcs>
     void initCachedParams(Params paramsArray, Funcs funcsArray)
     {

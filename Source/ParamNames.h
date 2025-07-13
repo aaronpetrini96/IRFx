@@ -23,6 +23,7 @@ namespace ParamNames
     inline juce::String getDistBypassName()   { return "DistBypass"; }
     inline juce::String getDistDriveName() {return "DistDrive";}
     inline juce::String getDistMixName() {return "DistMix";}
+    inline juce::String getDistModeName() {return "DistMode";}
 
     // === Delay ===
     inline juce::String getDelayBypassName()  { return "DelayBypass"; }
@@ -49,7 +50,10 @@ namespace ParamNames
             getDistBypassName(),
             getDistDriveName(),
             getDistMixName(),
-            getDelayBypassName()
+            getDistModeName(),
+            getDelayBypassName(),
+            getInGainName(),
+            getOutGainName(),
         };
     }
 }

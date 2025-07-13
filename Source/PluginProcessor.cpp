@@ -105,6 +105,26 @@ IRFxAudioProcessor::IRFxAudioProcessor()
     
     initCachedParams<juce::AudioParameterBool*>(boolParams, boolNameFuncs);
     
+    //============ CHOICE PARAMS ============
+    auto choiceParams = std::array
+    {
+//        DIST
+        &saturationModeParam,
+    };
+    
+    auto choiceNameFuncs = std::array
+    {
+        &ParamNames::getDistModeName,
+    };
+    
+//    initCachedParams<juce::AudioParameterChoice*>(choiceParams, choiceNameFuncs);
+    for (size_t i = 0 ; i < choiceParams.size(); ++i)
+    {
+        auto ptrToParamPtr = choiceParams [i];
+        *ptrToParamPtr = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter(choiceNameFuncs[i]()));
+        jassert(*ptrToParamPtr != nullptr);
+    }
+    
 }
 
 IRFxAudioProcessor::~IRFxAudioProcessor()
@@ -207,9 +227,15 @@ juce::AudioProcessorValueTreeState::ParameterLayout IRFxAudioProcessor::createPa
     name = ParamNames::getDistBypassName();
     params.emplace_back(std::make_unique<juce::AudioParameterBool>(juce::ParameterID(name, versionHint), name, false));
     name = ParamNames::getDistDriveName();
-    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(0.f, 12.f, 0.1f, 1.f), 0.f));
+    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(0.f, 12.f, 0.1f, 1.f), 6.f));
     name = ParamNames::getDistMixName();
-    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(0.f, 100.f, 1.f, 1.f), 100.f));
+    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(0.f, 100.f, 1.f, 1.f), 0.f));
+    name = ParamNames::getDistModeName();
+    juce::StringArray choices;
+    choices.add("Neve");
+    choices.add("SSL");
+    choices.add("API");
+    params.emplace_back(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID(name, versionHint), name, choices, 0));
     
 //   DELAY
     name = ParamNames::getDelayBypassName();
@@ -304,10 +330,13 @@ void IRFxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
         toneStackMonoChainAray[i].prepare(monoSpec);
     }
     
-    saturationPreEQ.state = Coefficients::makeLowShelf(sampleRate, 150.f, 0.707f, juce::Decibels::decibelsToGain(2.f));
-    saturationPostEQ.state = Coefficients::makeLowPass(sampleRate, 15000.f);
-    saturationPreEQ.prepare(spec);
-    saturationPostEQ.prepare(spec);
+//    saturationPreEQ.state = Coefficients::makeLowShelf(sampleRate, 150.f, 0.707f, juce::Decibels::decibelsToGain(2.f));
+//    saturationPostEQ.state = Coefficients::makeLowPass(sampleRate, 15000.f);
+//    saturationPreEQ.prepare(spec);
+//    saturationPostEQ.prepare(spec);
+    saturationInstance.prepare(spec);
+    
+    
     for(auto smoother : getSmoothers())
         smoother->reset(sampleRate, 0.05);
     
@@ -425,18 +454,47 @@ float computeRMS(const float* data, size_t numSamples)
     return std::sqrt(sumSquares / (float)numSamples);
 }
 
-float IRFxAudioProcessor::neveStyleSaturation (float x, float drive)
-{
-//    Apply Drive
-    x *= drive;
-    
-//    Asymmetric Dist
-    float asym = 0.1f * x * x * x;
-    float saturated = std::tanh(x + asym);
-    saturated *= 0.8f; // attenuation to avoid over-brightening
-
-    return saturated;
-}
+//float IRFxAudioProcessor::neveStyleSaturation (float x, float drive)
+//{
+////    Apply Drive
+////    x *= drive;
+//    float mappedDrive = juce::jmap(drive, 0.0f, 12.0f, 1.0f, 10.0f);
+//    x *= mappedDrive;
+//    
+//    
+//
+//    float asym = 0.1f * x * x * x;
+//    float saturated = std::tanh(x + asym);
+//    saturated *= 0.8f;
+//
+//    return saturated;
+//}
+//float IRFxAudioProcessor::sslStyleSaturation (float x, float drive)
+//{
+//    //    Apply Drive
+//    //    x *= drive;
+//    float mappedDrive = juce::jmap(drive, 0.0f, 12.0f, 1.0f, 10.0f);
+//    x *= mappedDrive;
+//    
+//    float saturated = std::tanh(x);
+//    saturated *= 0.7f; // attenuation, adjust to taste
+//    return saturated;
+//}
+//
+//float IRFxAudioProcessor::apiStyleSaturation (float x, float drive)
+//{
+//    //    Apply Drive
+//    //    x *= drive;
+//    float mappedDrive = juce::jmap(drive, 0.0f, 12.0f, 1.0f, 10.0f);
+//    x *= mappedDrive;
+//
+//    // Stronger asymmetry, more "bite"
+//    float asym = 0.3f * x * x * x;
+//    float saturated = std::tanh(x + asym);
+//    
+//    saturated *= 0.7f; // adjust to keep level in check
+//    return saturated;
+//}
 
 bool clipDetection(juce::AudioBuffer<float>& buffer)
 {
@@ -552,6 +610,13 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     }
     
     auto drive = saturationDriveParamSmoother.getCurrentValue();
+
+    if (!saturationBypassParam->get() && drive > 0.f)
+    {
+        float mix = (saturationMixParamSmoother.getCurrentValue()) * 0.01f;
+        saturationInstance.processBlock(buffer, drive, saturationModeParam->getIndex(), mix);
+    }
+    /*
     if (!saturationBypassParam->get() && drive > 0.f )
     {
         juce::dsp::AudioBlock<float> saturationBlock(buffer);
@@ -562,7 +627,6 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         
         std::vector<float> dryBuffer(block.getNumSamples()), wetBuffer(block.getNumSamples());
         
-        
         for (size_t ch {0}; ch < saturationBlock.getNumChannels(); ++ch)
         {
             auto* samples = block.getChannelPointer(ch);
@@ -571,7 +635,18 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
             {
                 float dry = samples [i];
                 dryBuffer[i] = dry;
-                wetBuffer[i] = neveStyleSaturation(dry, drive);
+                switch (saturationModeParam->getIndex())
+                {
+                    case 0:
+                        wetBuffer[i] = neveStyleSaturation(dry, drive);
+                        break;
+                    case 1:
+                        wetBuffer[i] = sslStyleSaturation(dry, drive);
+                        break;
+                    case 2:
+                        wetBuffer[i] = apiStyleSaturation(dry, drive);
+                        break;
+                }
             }
             
             float dryRMS = computeRMS(dryBuffer.data(), block.getNumSamples());
@@ -597,10 +672,7 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
                 gainInitialized = false;
                 smoothedGain = 1.0f;
             }
-                
-            
-            
-            
+
             for (size_t i{0}; i < block.getNumSamples(); ++i)
             {
                 wetBuffer[i] *= smoothedGain;
@@ -610,6 +682,7 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         juce::dsp::ProcessContextReplacing<float> postSaturationContext(saturationBlock);
         saturationPostEQ.process(postSaturationContext);
     }
+     */
     
     outputGain.setGainDecibels(outputGainParamSmoother.getCurrentValue());
     applyGain(buffer, outputGain);

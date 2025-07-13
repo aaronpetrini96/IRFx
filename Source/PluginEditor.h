@@ -33,6 +33,7 @@ public:
     void resized() override;
     void loadIRFile(int);
     void clipLight(juce::Graphics& g);
+    void setSaturationType (int);
     
 
 private:
@@ -87,6 +88,7 @@ private:
     juce::Label highEQGainSliderLabel {"Treble"};
     juce::Label saturationLabel {"Drive"};
     juce::Label saturationMixLabel {"Mix"};
+    juce::Label satModeLabel {"Mode"};
     std::vector <juce::Label*> dialLabels
     {
         &lowCutSliderLabel,
@@ -97,6 +99,7 @@ private:
         &highEQGainSliderLabel,
         &saturationLabel,
         &saturationMixLabel,
+        &satModeLabel,
     };
     
 //   Bypass Buttons
@@ -127,6 +130,8 @@ private:
     {
         &sat1Button, &sat2Button, &sat3Button
     };
+    
+    void setSatButtonColour (juce::TextButton& b, bool isOn);
     
     
 //    INPUT & OUTPUT GAIN SLIDERS
