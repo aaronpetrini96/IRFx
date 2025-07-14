@@ -11,7 +11,7 @@
 
 //==============================================================================
 IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p)
+    : AudioProcessorEditor (&p), audioProcessor (p), presetManager(p, presetBox)
 {
     startTimerHz(30);
 //    IN-OUT GAIN
@@ -29,6 +29,21 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
         group->setColour(juce::GroupComponent::ColourIds::outlineColourId, juce::Colours::white);
         addAndMakeVisible(*group);
     }
+    
+    
+//  PRESET BUTTONS
+    setPresetButtonStyle(savePresetButton);
+    addAndMakeVisible(savePresetButton);
+    savePresetButton.onClick = [this] {presetManager.savePreset();};
+    
+//  PRESET DROPDOWN MENU
+    presetBox.setTextWhenNothingSelected("Select Preset");
+    presetBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colour(100, 100, 110).darker(0.5f));
+    presetBox.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
+    presetBox.setLookAndFeel(ComboBoxLookAndFeel::get());
+    presetBox.onChange = [this]() {presetManager.presetSelected();};
+    presetManager.refreshPresetList();
+    addAndMakeVisible(presetBox);
     
     
 //    DIAL'S LABELS GENERAL SETUP
@@ -169,7 +184,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     ir2LevelSlider.setVisible(false);
     restoreLoadedIRFiles();
     
-    setSize (600, 700);
+    setSize (600, 650);
 }
 
 IRFxAudioProcessorEditor::~IRFxAudioProcessorEditor()
@@ -187,6 +202,7 @@ void IRFxAudioProcessorEditor::paint (juce::Graphics& g)
 
 void IRFxAudioProcessorEditor::resized()
 {
+    auto totalBounds = getLocalBounds();
     auto bounds = getLocalBounds().withSizeKeepingCentre(600, 600);
     auto boundsHeight = bounds.getHeight();
     auto boundsWidth = bounds.getWidth();
@@ -261,8 +277,13 @@ void IRFxAudioProcessorEditor::resized()
     
     
 //    IN OUT GAIN
-    inputGainSlider.setBounds(IRGroup.getX(), distGroup.getBottom() * 0.99, inputGainSlider.getWidth(), inputGainSlider.getHeight());
+    inputGainSlider.setBounds(IRGroup.getX(), distGroup.getBottom() * 0.98, inputGainSlider.getWidth(), inputGainSlider.getHeight());
     outputGainSlider.setBounds(delayGroup.getX() * 1.09, inputGainSlider.getY(), outputGainSlider.getWidth(), outputGainSlider.getHeight());
+    
+    
+//   PRESET BOX
+    presetBox.setBounds(totalBounds.getWidth() * 0.31, totalBounds.getHeight() * 0.955, boundsWidth * 0.25 , boundsWidth * 0.04);
+    savePresetButton.setBounds(presetBox.getRight() * 1.05, presetBox.getY(), presetBox.getWidth() * 0.5, presetBox.getHeight());
 
 }
 
@@ -401,7 +422,7 @@ void IRFxAudioProcessorEditor::clipLight(juce::Graphics& g)
     g.setColour(currentColor);
     auto fontOptions = juce::FontOptions(20.0f * clipPopScale, juce::Font::bold);
     g.setFont(juce::Font(fontOptions));
-    g.drawFittedText("CLIP", getWidth() * 0.334, getHeight() * 0.852, 200, 20, juce::Justification::centred, 1);
+    g.drawFittedText("CLIP", getWidth() * 0.334, getHeight() * 0.909, 200, 20, juce::Justification::centred, 1);
 }
 
 
@@ -429,4 +450,15 @@ void IRFxAudioProcessorEditor::setSatButtonColour (juce::TextButton& b, bool isO
     {
         b.setColour(juce::TextButton::ColourIds::buttonColourId, darkPink.withAlpha(0.5f));
     }
+}
+
+void IRFxAudioProcessorEditor::setPresetButtonStyle(juce::TextButton& button)
+{
+    button.setClickingTogglesState(true);
+    button.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(100, 100, 110).darker(0.5f));
+    button.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colour(100, 100, 110).darker(0.5f));
+    button.setColour(juce::ComboBox::outlineColourId, juce::Colours::transparentBlack);
+    button.setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colours::white);
+    button.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white);
+    button.setSize(25, 25);
 }

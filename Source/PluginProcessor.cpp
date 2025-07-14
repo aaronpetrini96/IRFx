@@ -736,6 +736,30 @@ void IRFxAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
     }
 }
 
+void IRFxAudioProcessor::savePreset(const juce::File& file)
+{
+    auto state = apvts.copyState();
+    std::unique_ptr<juce::XmlElement> xml (state.createXml());
+    if (xml) { xml->writeTo(file);}
+}
+
+void IRFxAudioProcessor::loadPreset(const juce::File& file)
+{
+    std::unique_ptr<juce::XmlElement> xml (juce::XmlDocument::parse(file));
+    if (xml && xml->hasTagName(apvts.state.getType()))
+    {
+        juce::ValueTree state = juce::ValueTree::fromXml(*xml);
+        apvts.replaceState(state);
+        updateParams();
+    }
+}
+
+void IRFxAudioProcessor::loadDefaultPreset()
+{
+    loadPreset(juce::File::getSpecialLocation(juce::File::userDocumentsDirectory).getChildFile("DefaultPreset.xml"));
+               
+}
+
 //==============================================================================
 // This creates new instances of the plugin..
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()

@@ -14,6 +14,7 @@
 #include "GUI/BypassButton.h"
 #include "GUI/HorizontalSlider.h"
 #include "GUI/GainSlider.h"
+#include "Utilities/PresetManager.h"
 #include "ParamNames.h"
 
 
@@ -140,6 +141,13 @@ private:
     bool isClippingLightOn = false;
     int clipLightHoldCounter = 0; // counts down in timer ticks
     float clipPopScale = 1.0f;
+    
+    
+//    PRESET MANAGER
+    PresetManager presetManager;
+    juce::ComboBox presetBox;
+    juce::TextButton savePresetButton {"Save"};
+    void setPresetButtonStyle(juce::TextButton&);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (IRFxAudioProcessorEditor)
 };

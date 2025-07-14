@@ -68,6 +68,11 @@ public:
     float getOutputLevelL() const { return outputLevelL; }
     float getOutputLevelR() const { return outputLevelR; }
     
+    
+    void savePreset(const juce::File& file);
+    void loadPreset(const juce::File& file);
+    void loadDefaultPreset();
+    
     //==============================================================================
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     juce::AudioProcessorValueTreeState apvts {*this, nullptr, "Parameters", createParameterLayout()};
