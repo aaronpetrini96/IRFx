@@ -108,6 +108,7 @@ private:
     BypassButton eqBypassButton{"EQ Bypass Button", audioProcessor.apvts, juce::ParameterID(ParamNames::getEQBypassName(),versionHint)};
     BypassButton distBypassButton{"Dist Bypass Button", audioProcessor.apvts, juce::ParameterID(ParamNames::getDistBypassName(),versionHint)};
     BypassButton delayBypassButton{"Delay Bypass Button", audioProcessor.apvts, juce::ParameterID(ParamNames::getDelayBypassName(),versionHint)};
+    BypassButton generalBypassButton{"General Bypass Button", audioProcessor.apvts, juce::ParameterID(ParamNames::getGeneralBypassName(), versionHint)};
     
 //  Unload IR Buttons
     juce::ImageButton unloadIR1Button, unloadIR2Button;
@@ -148,6 +149,9 @@ private:
     juce::ComboBox presetBox;
     juce::TextButton savePresetButton {"Save"};
     void setPresetButtonStyle(juce::TextButton&);
+    
+//    SCREW IMAGE
+    juce::Image screwImage = juce::ImageCache::getFromMemory(BinaryData::screw_png, BinaryData::screw_pngSize);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (IRFxAudioProcessorEditor)
 };

@@ -105,6 +105,8 @@ public:
     juce::AudioParameterFloat* inputGainParam {nullptr};
     juce::AudioParameterFloat* outputGainParam {nullptr};
     
+    juce::AudioParameterBool* pluginBypassParam {nullptr};
+    
     //======================= SMOOTHED PARAMS ================================================
     juce::SmoothedValue<float>
     lowCutFreqParamSmoother,

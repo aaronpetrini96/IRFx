@@ -161,6 +161,7 @@
 		C9653C9FF70A0EA75D6A90BB /* VST3 Manifest Helper */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = juce_vst3_helper; sourceTree = BUILT_PRODUCTS_DIR; };
 		D2D5E39CF57A639073BA302E /* include_juce_events.mm */ /* include_juce_events.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_events.mm; path = ../../JuceLibraryCode/include_juce_events.mm; sourceTree = SOURCE_ROOT; };
 		D3B4DD98F110A8421F5534B3 /* include_juce_audio_plugin_client_VST3.mm */ /* include_juce_audio_plugin_client_VST3.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_audio_plugin_client_VST3.mm; path = ../../JuceLibraryCode/include_juce_audio_plugin_client_VST3.mm; sourceTree = SOURCE_ROOT; };
+		D5CF92C47120DB2B4AA63ABD /* screw.png */ /* screw.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = screw.png; path = ../../Source/Assets/screw.png; sourceTree = SOURCE_ROOT; };
 		D5F86EABFF9D4C4BFEFC8228 /* include_juce_core.mm */ /* include_juce_core.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_core.mm; path = ../../JuceLibraryCode/include_juce_core.mm; sourceTree = SOURCE_ROOT; };
 		D7834D32668D4816503A730B /* Info-Standalone_Plugin.plist */ /* Info-Standalone_Plugin.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Info-Standalone_Plugin.plist"; path = "Info-Standalone_Plugin.plist"; sourceTree = SOURCE_ROOT; };
 		DD1389FFF18ABB369A416C62 /* WebKit.framework */ /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
@@ -390,6 +391,7 @@
 				893DB364A2A248AB06FE77E5,
 				85E29FFBBACF2CCF54D85B1C,
 				781E44880D713B3E10626340,
+				D5CF92C47120DB2B4AA63ABD,
 				C339C51757F596096FC6D0F7,
 				58756169392109D3D2DBE50A,
 			);

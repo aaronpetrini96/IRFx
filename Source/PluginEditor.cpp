@@ -17,6 +17,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
 //    IN-OUT GAIN
     addAndMakeVisible(inputGainSlider);
     addAndMakeVisible(outputGainSlider);
+    addAndMakeVisible(generalBypassButton);
 
 //    GROUP GENERAL SETTINGS
     IRGroup.setText("IR Loader");
@@ -196,8 +197,19 @@ void IRFxAudioProcessorEditor::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (juce::Colours::black.withAlpha(0.8f));
-    
     clipLight(g);
+    
+    g.setColour(juce::Colours::white.withAlpha(0.9f));
+    auto fontOptions = juce::FontOptions("Helvetica", getHeight() * 0.025, juce::Font::FontStyleFlags::bold);
+    g.setFont(juce::Font(fontOptions));
+    g.drawFittedText("IRFx v1.0", getWidth() * 0.1, getHeight() * 0.957, 200, 20, juce::Justification::centredLeft, 1);
+    
+    auto size = getWidth() * 0.05;
+    if (screwImage.isValid())
+    {
+        g.drawImage(screwImage, IRGroup.getX() - size * 0.25, getHeight() * 0.955, size, size, 0, 0, getWidth() * 0.1, getWidth() * 0.1);
+        g.drawImage(screwImage, delayGroup.getRight() - size * 0.5, getHeight() * 0.955, size, size, 0, 0, getWidth() * 0.1, getWidth() * 0.1);
+    }
 }
 
 void IRFxAudioProcessorEditor::resized()
@@ -223,12 +235,12 @@ void IRFxAudioProcessorEditor::resized()
     auto saturationDialSize = boundsWidth * 0.25;
     auto satModeButtonWidth = boundsWidth * 0.1;
 
-    
-    
     IRGroup.setBounds(leftMargin, y, groupWidth, height);
     EQGroup.setBounds(IRGroup.getRight() + leftMargin, IRGroup.getY(), groupWidth, height);
     distGroup.setBounds(leftMargin, IRGroup.getBottom() + y, groupWidth, height);
     delayGroup.setBounds(EQGroup.getX(), distGroup.getY(), groupWidth, height);
+    
+    
     
 //    IR GROUP
     irBypassButton.setBounds(IRGroup.getWidth() * 0.9, IRGroup.getHeight() * 0.05, bypassButtonSize, bypassButtonSize);
@@ -284,6 +296,8 @@ void IRFxAudioProcessorEditor::resized()
 //   PRESET BOX
     presetBox.setBounds(totalBounds.getWidth() * 0.31, totalBounds.getHeight() * 0.955, boundsWidth * 0.25 , boundsWidth * 0.04);
     savePresetButton.setBounds(presetBox.getRight() * 1.05, presetBox.getY(), presetBox.getWidth() * 0.5, presetBox.getHeight());
+    
+    generalBypassButton.setBounds(savePresetButton.getRight() * JUCE_LIVE_CONSTANT(1.10), savePresetButton.getY(), bypassButtonSize, bypassButtonSize);
 
 }
 
@@ -410,7 +424,6 @@ void IRFxAudioProcessorEditor::timerCallback()
     }
     
     repaint(); // triggers paint() to draw updated light
-    
 }
 
 void IRFxAudioProcessorEditor::clipLight(juce::Graphics& g)

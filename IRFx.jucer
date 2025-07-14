@@ -46,6 +46,7 @@
         <FILE id="XHI532" name="Lato-Regular.ttf" compile="0" resource="1"
               file="Source/Assets/Lato-Regular.ttf"/>
         <FILE id="iqoDHU" name="Mute.png" compile="0" resource="1" file="Source/Assets/Mute.png"/>
+        <FILE id="x1iI73" name="screw.png" compile="0" resource="1" file="Source/Assets/screw.png"/>
         <FILE id="tPWTTQ" name="Ver_flat_slider.png" compile="0" resource="1"
               file="Source/Assets/Ver_flat_slider.png"/>
         <FILE id="GavFrW" name="Ver_slider.png" compile="0" resource="1" file="Source/Assets/Ver_slider.png"/>

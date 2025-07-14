@@ -29,6 +29,9 @@ namespace BinaryData
     extern const char*   Mute_png;
     const int            Mute_pngSize = 95071;
 
+    extern const char*   screw_png;
+    const int            screw_pngSize = 12789;
+
     extern const char*   Ver_flat_slider_png;
     const int            Ver_flat_slider_pngSize = 294674;
 
@@ -36,7 +39,7 @@ namespace BinaryData
     const int            Ver_slider_pngSize = 6785719;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
-    const int namedResourceListSize = 9;
+    const int namedResourceListSize = 10;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];

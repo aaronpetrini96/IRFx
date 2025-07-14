@@ -47,6 +47,7 @@ IRFxAudioProcessor::IRFxAudioProcessor()
         &inputGainParam,
         &outputGainParam,
         
+        
     };
     
     auto floatNameFuncs = std::array
@@ -88,6 +89,8 @@ IRFxAudioProcessor::IRFxAudioProcessor()
         &saturationBypassParam,
         
         //        DELAY
+        
+        &pluginBypassParam,
     };
     
     auto boolNameFuncs = std::array
@@ -101,6 +104,9 @@ IRFxAudioProcessor::IRFxAudioProcessor()
         &ParamNames::getDistBypassName,
         
         //        DELAY
+        
+        
+        &ParamNames::getGeneralBypassName,
     };
     
     initCachedParams<juce::AudioParameterBool*>(boolParams, boolNameFuncs);
@@ -203,7 +209,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout IRFxAudioProcessor::createPa
     auto name = ParamNames::getIRBypassName();
     params.emplace_back(std::make_unique<juce::AudioParameterBool>(juce::ParameterID(name, versionHint), name, false));
     name = ParamNames::getIRLowCutName();
-    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(20.f, 1000.f, 1.f, 1.f), 20.f));
+    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(20.f, 1000.f, 1.f, 0.8f), 20.f));
     name = ParamNames::getIRHighCutName();
     params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(1000.f, 20000.f, 1.f, 1.f), 20000.f));
     name = ParamNames::getIR1LevelName();
@@ -247,8 +253,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout IRFxAudioProcessor::createPa
     params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(-60.f, 12.f, 0.1f, 1.f), 0.f));
     name = ParamNames::getOutGainName();
     params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(-60.f, 12.f, 0.1f, 1.f), 0.f));
-
     
+    
+//   PLUGIN BYPASS
+    name = ParamNames::getGeneralBypassName();
+    params.emplace_back(std::make_unique<juce::AudioParameterBool>(juce::ParameterID(name, versionHint), name, false));
+
     return {params.begin(), params.end()};
 }
 
@@ -539,157 +549,160 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     updateSmootherFromParams(buffer.getNumSamples(), SmootherUpdateMode::liveInRealTime);
     updateParams();
     
-    applyGain(buffer, inputGain);
-    
-    if (irLoaderBypassParam->get() == false)
+    if (pluginBypassParam->get() == false)
     {
-        // Evaluate effective loading states after mute
-        const bool useIR1 = isIR1Loaded && !isIR1Muted;
-        const bool useIR2 = isIR2Loaded && !isIR2Muted;
-
-        if (useIR1 && useIR2)
+        applyGain(buffer, inputGain);
+        
+        if (irLoaderBypassParam->get() == false)
         {
-            tempBuffer.setSize(buffer.getNumChannels(), buffer.getNumSamples());
-            tempBuffer.makeCopyOf(buffer, true);
-            
-            buffer.applyGain(juce::Decibels::decibelsToGain(ir1LevelParamSmoother.getCurrentValue()));
-            tempBuffer.applyGain(juce::Decibels::decibelsToGain(ir2LevelParamSmoother.getCurrentValue()));
-            
-            juce::dsp::AudioBlock<float> block1(buffer);
-            juce::dsp::AudioBlock<float> block2(tempBuffer);
-            
+            // Evaluate effective loading states after mute
+            const bool useIR1 = isIR1Loaded && !isIR1Muted;
+            const bool useIR2 = isIR2Loaded && !isIR2Muted;
 
-            irLoader1.process(juce::dsp::ProcessContextReplacing<float>(block1));
-            irLoader2.process(juce::dsp::ProcessContextReplacing<float>(block2));
-
-            for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
-                buffer.addFrom(ch, 0, tempBuffer, ch, 0, buffer.getNumSamples());
-
-            buffer.applyGain(juce::Decibels::decibelsToGain(3.f));
-        }
-        else if (useIR1)
-        {
-            buffer.applyGain(juce::Decibels::decibelsToGain(ir1LevelParamSmoother.getCurrentValue()));
-            juce::dsp::AudioBlock<float> block(buffer);
-            irLoader1.process(juce::dsp::ProcessContextReplacing<float>(block));
-
-            buffer.applyGain(juce::Decibels::decibelsToGain(9.f));
-        }
-        else if (useIR2)
-        {
-            buffer.applyGain(juce::Decibels::decibelsToGain(ir2LevelParamSmoother.getCurrentValue()));
-            juce::dsp::AudioBlock<float> block(buffer);
-            irLoader2.process(juce::dsp::ProcessContextReplacing<float>(block));
-
-            buffer.applyGain(juce::Decibels::decibelsToGain(9.f));
-        }
-
-        // Apply EQ to final buffer
-        juce::dsp::AudioBlock<float> eqBlock(buffer);
-        auto eqBlockLeft = eqBlock.getSingleChannelBlock(0);
-        auto eqBlockRight = eqBlock.getSingleChannelBlock(1);
-
-        juce::dsp::ProcessContextReplacing<float> eqContextLeft(eqBlockLeft);
-        juce::dsp::ProcessContextReplacing<float> eqContextRight(eqBlockRight);
-
-        irEQMonoChainArray[0].process(eqContextLeft);
-        irEQMonoChainArray[1].process(eqContextRight);
-    }
-    
-    
-    if (eqBypassParam->get() == false)
-    {
-        juce::dsp::AudioBlock<float> toneStackBlock(buffer);
-        auto toneStackBlockLeft = toneStackBlock.getSingleChannelBlock(0);
-        auto toneStackBlockRight = toneStackBlock.getSingleChannelBlock(1);
-        
-        juce::dsp::ProcessContextReplacing<float> toneStackContextLeft (toneStackBlockLeft), toneStackContextRight (toneStackBlockRight);
-        
-        toneStackMonoChainAray[0].process(toneStackContextLeft);
-        toneStackMonoChainAray[1].process(toneStackContextRight);
-    }
-    
-    auto drive = saturationDriveParamSmoother.getCurrentValue();
-
-    if (!saturationBypassParam->get() && drive > 0.f)
-    {
-        float mix = (saturationMixParamSmoother.getCurrentValue()) * 0.01f;
-        saturationInstance.processBlock(buffer, drive, saturationModeParam->getIndex(), mix);
-    }
-    /*
-    if (!saturationBypassParam->get() && drive > 0.f )
-    {
-        juce::dsp::AudioBlock<float> saturationBlock(buffer);
-        juce::dsp::ProcessContextReplacing<float> preSaturationContext(saturationBlock);
-        saturationPreEQ.process(preSaturationContext);
-        
-        float mix = (saturationMixParamSmoother.getCurrentValue()) * 0.01f;
-        
-        std::vector<float> dryBuffer(block.getNumSamples()), wetBuffer(block.getNumSamples());
-        
-        for (size_t ch {0}; ch < saturationBlock.getNumChannels(); ++ch)
-        {
-            auto* samples = block.getChannelPointer(ch);
-            
-            for (size_t i{0}; i < block.getNumSamples(); ++i)
+            if (useIR1 && useIR2)
             {
-                float dry = samples [i];
-                dryBuffer[i] = dry;
-                switch (saturationModeParam->getIndex())
+                tempBuffer.setSize(buffer.getNumChannels(), buffer.getNumSamples());
+                tempBuffer.makeCopyOf(buffer, true);
+                
+                buffer.applyGain(juce::Decibels::decibelsToGain(ir1LevelParamSmoother.getCurrentValue()));
+                tempBuffer.applyGain(juce::Decibels::decibelsToGain(ir2LevelParamSmoother.getCurrentValue()));
+                
+                juce::dsp::AudioBlock<float> block1(buffer);
+                juce::dsp::AudioBlock<float> block2(tempBuffer);
+                
+
+                irLoader1.process(juce::dsp::ProcessContextReplacing<float>(block1));
+                irLoader2.process(juce::dsp::ProcessContextReplacing<float>(block2));
+
+                for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
+                    buffer.addFrom(ch, 0, tempBuffer, ch, 0, buffer.getNumSamples());
+
+                buffer.applyGain(juce::Decibels::decibelsToGain(3.f));
+            }
+            else if (useIR1)
+            {
+                buffer.applyGain(juce::Decibels::decibelsToGain(ir1LevelParamSmoother.getCurrentValue()));
+                juce::dsp::AudioBlock<float> block(buffer);
+                irLoader1.process(juce::dsp::ProcessContextReplacing<float>(block));
+
+                buffer.applyGain(juce::Decibels::decibelsToGain(9.f));
+            }
+            else if (useIR2)
+            {
+                buffer.applyGain(juce::Decibels::decibelsToGain(ir2LevelParamSmoother.getCurrentValue()));
+                juce::dsp::AudioBlock<float> block(buffer);
+                irLoader2.process(juce::dsp::ProcessContextReplacing<float>(block));
+
+                buffer.applyGain(juce::Decibels::decibelsToGain(9.f));
+            }
+
+            // Apply EQ to final buffer
+            juce::dsp::AudioBlock<float> eqBlock(buffer);
+            auto eqBlockLeft = eqBlock.getSingleChannelBlock(0);
+            auto eqBlockRight = eqBlock.getSingleChannelBlock(1);
+
+            juce::dsp::ProcessContextReplacing<float> eqContextLeft(eqBlockLeft);
+            juce::dsp::ProcessContextReplacing<float> eqContextRight(eqBlockRight);
+
+            irEQMonoChainArray[0].process(eqContextLeft);
+            irEQMonoChainArray[1].process(eqContextRight);
+        }
+        
+        
+        if (eqBypassParam->get() == false)
+        {
+            juce::dsp::AudioBlock<float> toneStackBlock(buffer);
+            auto toneStackBlockLeft = toneStackBlock.getSingleChannelBlock(0);
+            auto toneStackBlockRight = toneStackBlock.getSingleChannelBlock(1);
+            
+            juce::dsp::ProcessContextReplacing<float> toneStackContextLeft (toneStackBlockLeft), toneStackContextRight (toneStackBlockRight);
+            
+            toneStackMonoChainAray[0].process(toneStackContextLeft);
+            toneStackMonoChainAray[1].process(toneStackContextRight);
+        }
+        
+        auto drive = saturationDriveParamSmoother.getCurrentValue();
+
+        if (!saturationBypassParam->get() && drive > 0.f)
+        {
+            float mix = (saturationMixParamSmoother.getCurrentValue()) * 0.01f;
+            saturationInstance.processBlock(buffer, drive, saturationModeParam->getIndex(), mix);
+        }
+        /*
+        if (!saturationBypassParam->get() && drive > 0.f )
+        {
+            juce::dsp::AudioBlock<float> saturationBlock(buffer);
+            juce::dsp::ProcessContextReplacing<float> preSaturationContext(saturationBlock);
+            saturationPreEQ.process(preSaturationContext);
+            
+            float mix = (saturationMixParamSmoother.getCurrentValue()) * 0.01f;
+            
+            std::vector<float> dryBuffer(block.getNumSamples()), wetBuffer(block.getNumSamples());
+            
+            for (size_t ch {0}; ch < saturationBlock.getNumChannels(); ++ch)
+            {
+                auto* samples = block.getChannelPointer(ch);
+                
+                for (size_t i{0}; i < block.getNumSamples(); ++i)
                 {
-                    case 0:
-                        wetBuffer[i] = neveStyleSaturation(dry, drive);
-                        break;
-                    case 1:
-                        wetBuffer[i] = sslStyleSaturation(dry, drive);
-                        break;
-                    case 2:
-                        wetBuffer[i] = apiStyleSaturation(dry, drive);
-                        break;
+                    float dry = samples [i];
+                    dryBuffer[i] = dry;
+                    switch (saturationModeParam->getIndex())
+                    {
+                        case 0:
+                            wetBuffer[i] = neveStyleSaturation(dry, drive);
+                            break;
+                        case 1:
+                            wetBuffer[i] = sslStyleSaturation(dry, drive);
+                            break;
+                        case 2:
+                            wetBuffer[i] = apiStyleSaturation(dry, drive);
+                            break;
+                    }
+                }
+                
+                float dryRMS = computeRMS(dryBuffer.data(), block.getNumSamples());
+                float wetRMS = computeRMS(wetBuffer.data(), block.getNumSamples());
+                float targetRMS = 0.1f;
+                static float smoothedGain = 1.f;
+                static bool gainInitialized = false;
+                
+                float makeUpGain = (wetRMS > 0.0001f) ? targetRMS/wetRMS : 1.f;
+                
+                if (!gainInitialized)
+                {
+                    smoothedGain = makeUpGain * 0.3f;
+                    gainInitialized = true;
+                }
+                else
+                {
+                    float smoothingCoeff = 0.99f;
+                    smoothedGain = smoothedGain * smoothingCoeff + makeUpGain * (1.f - smoothingCoeff);
+                }
+                if (dryRMS < 0.0001f)
+                {
+                    gainInitialized = false;
+                    smoothedGain = 1.0f;
+                }
+
+                for (size_t i{0}; i < block.getNumSamples(); ++i)
+                {
+                    wetBuffer[i] *= smoothedGain;
+                    samples[i] = dryBuffer[i] * (1.0f - mix) + wetBuffer[i] * mix;
                 }
             }
-            
-            float dryRMS = computeRMS(dryBuffer.data(), block.getNumSamples());
-            float wetRMS = computeRMS(wetBuffer.data(), block.getNumSamples());
-            float targetRMS = 0.1f;
-            static float smoothedGain = 1.f;
-            static bool gainInitialized = false;
-            
-            float makeUpGain = (wetRMS > 0.0001f) ? targetRMS/wetRMS : 1.f;
-            
-            if (!gainInitialized)
-            {
-                smoothedGain = makeUpGain * 0.3f;
-                gainInitialized = true;
-            }
-            else
-            {
-                float smoothingCoeff = 0.99f;
-                smoothedGain = smoothedGain * smoothingCoeff + makeUpGain * (1.f - smoothingCoeff);
-            }
-            if (dryRMS < 0.0001f)
-            {
-                gainInitialized = false;
-                smoothedGain = 1.0f;
-            }
-
-            for (size_t i{0}; i < block.getNumSamples(); ++i)
-            {
-                wetBuffer[i] *= smoothedGain;
-                samples[i] = dryBuffer[i] * (1.0f - mix) + wetBuffer[i] * mix;
-            }
+            juce::dsp::ProcessContextReplacing<float> postSaturationContext(saturationBlock);
+            saturationPostEQ.process(postSaturationContext);
         }
-        juce::dsp::ProcessContextReplacing<float> postSaturationContext(saturationBlock);
-        saturationPostEQ.process(postSaturationContext);
+         */
+        
+        outputGain.setGainDecibels(outputGainParamSmoother.getCurrentValue());
+        applyGain(buffer, outputGain);
+        //    OUTPUT CLIP DETECTION
+        if (clipDetection(buffer))
+            clipFlagOut.store(true); // atomic flag to be safe for GUI thread
     }
-     */
-    
-    outputGain.setGainDecibels(outputGainParamSmoother.getCurrentValue());
-    applyGain(buffer, outputGain);
-    //    OUTPUT CLIP DETECTION
-    if (clipDetection(buffer))
-        clipFlagOut.store(true); // atomic flag to be safe for GUI thread
-    
+
     outputLevelL = buffer.getRMSLevel(0, 0, buffer.getNumSamples());
     outputLevelR = buffer.getNumChannels() > 1 ? buffer.getRMSLevel(1, 0, buffer.getNumSamples()) : outputLevelL;
 }
@@ -757,7 +770,6 @@ void IRFxAudioProcessor::loadPreset(const juce::File& file)
 void IRFxAudioProcessor::loadDefaultPreset()
 {
     loadPreset(juce::File::getSpecialLocation(juce::File::userDocumentsDirectory).getChildFile("DefaultPreset.xml"));
-               
 }
 
 //==============================================================================
