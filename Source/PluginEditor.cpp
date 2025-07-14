@@ -169,7 +169,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     ir2LevelSlider.setVisible(false);
     restoreLoadedIRFiles();
     
-    setSize (600, 800);
+    setSize (600, 700);
 }
 
 IRFxAudioProcessorEditor::~IRFxAudioProcessorEditor()
@@ -395,13 +395,13 @@ void IRFxAudioProcessorEditor::timerCallback()
 void IRFxAudioProcessorEditor::clipLight(juce::Graphics& g)
 {
     juce::Colour activeColor = juce::Colours::red.withAlpha(0.9f);
-    juce::Colour offColor = juce::Colours::green.withAlpha(0.75f);
+    juce::Colour offColor = juce::Colours::green.withAlpha(0.9f);
     juce::Colour currentColor = isClippingLightOn ? activeColor : offColor;
    
     g.setColour(currentColor);
     auto fontOptions = juce::FontOptions(20.0f * clipPopScale, juce::Font::bold);
     g.setFont(juce::Font(fontOptions));
-    g.drawFittedText("CLIP", getWidth() * 0.334, getHeight() * 0.745, 200, 20, juce::Justification::centred, 1);
+    g.drawFittedText("CLIP", getWidth() * 0.334, getHeight() * 0.852, 200, 20, juce::Justification::centred, 1);
 }
 
 
