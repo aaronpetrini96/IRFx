@@ -41,13 +41,16 @@ IRFxAudioProcessor::IRFxAudioProcessor()
 //        SAT
         &saturationDriveParam,
         &saturationMixParam,
+        
 //        DELAY
+        &delayMixParam,
+        &delayFeedbackParam,
+        &delayTimeParam,
+
         
 //        IN-OUT GAIN
         &inputGainParam,
         &outputGainParam,
-        
-        
     };
     
     auto floatNameFuncs = std::array
@@ -69,6 +72,9 @@ IRFxAudioProcessor::IRFxAudioProcessor()
         &ParamNames::getDistMixName,
         
         //        DELAY
+        &ParamNames::getDelayMixName,
+        &ParamNames::getDelayFeedbackName,
+        &ParamNames::getDelayTimeName,
         
         //        IN-OUT GAIN
         &ParamNames::getInGainName,
@@ -87,8 +93,9 @@ IRFxAudioProcessor::IRFxAudioProcessor()
         &eqBypassParam,
         //        SAT
         &saturationBypassParam,
-        
         //        DELAY
+        &delayBypassParam,
+        &delaySyncParam,
         
         &pluginBypassParam,
     };
@@ -102,9 +109,9 @@ IRFxAudioProcessor::IRFxAudioProcessor()
         
         //        SAT
         &ParamNames::getDistBypassName,
-        
         //        DELAY
-        
+        &ParamNames::getDelayBypassName,
+        &ParamNames::getDelaySyncName,
         
         &ParamNames::getGeneralBypassName,
     };
@@ -116,20 +123,25 @@ IRFxAudioProcessor::IRFxAudioProcessor()
     {
 //        DIST
         &saturationModeParam,
+//        DELAY
+        &delayModeParam,
+        &delayMonoStereoParam,
     };
     
     auto choiceNameFuncs = std::array
     {
         &ParamNames::getDistModeName,
+        &ParamNames::getDelayModeName,
+        &ParamNames::getDelayMonoStereoName,
     };
     
-//    initCachedParams<juce::AudioParameterChoice*>(choiceParams, choiceNameFuncs);
-    for (size_t i = 0 ; i < choiceParams.size(); ++i)
-    {
-        auto ptrToParamPtr = choiceParams [i];
-        *ptrToParamPtr = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter(choiceNameFuncs[i]()));
-        jassert(*ptrToParamPtr != nullptr);
-    }
+    initCachedParams<juce::AudioParameterChoice*>(choiceParams, choiceNameFuncs);
+//    for (size_t i = 0 ; i < choiceParams.size(); ++i)
+//    {
+//        auto ptrToParamPtr = choiceParams [i];
+//        *ptrToParamPtr = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter(choiceNameFuncs[i]()));
+//        jassert(*ptrToParamPtr != nullptr);
+//    }
     
 }
 
@@ -246,7 +258,22 @@ juce::AudioProcessorValueTreeState::ParameterLayout IRFxAudioProcessor::createPa
 //   DELAY
     name = ParamNames::getDelayBypassName();
     params.emplace_back(std::make_unique<juce::AudioParameterBool>(juce::ParameterID(name, versionHint), name, false));
-    
+    name = ParamNames::getDelayMixName();
+    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(0.f, 100.f, 1.f, 1.f), 0.f));
+    name = ParamNames::getDelayFeedbackName();
+    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(0.f, 100.f, 1.f, 1.f), 30.f));
+    name = ParamNames::getDelayTimeName();
+    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(1.f, 2000.f, 1.f, 0.5f), 375.f));
+    name = ParamNames::getDelayModeName();
+    juce::StringArray delayModes;
+    delayModes.add("Digital");
+    delayModes.add("Tape");
+    params.emplace_back(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID(name, versionHint), name, delayModes, 0));
+    name = ParamNames::getDelaySyncName();
+    params.emplace_back(std::make_unique<juce::AudioParameterBool>(juce::ParameterID(name, versionHint), name, false));
+    name = ParamNames::getDelayMonoStereoName();
+    juce::StringArray delayMonoStereoArray {"Mono", "Stereo"};
+    params.emplace_back(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID(name, versionHint), name, delayMonoStereoArray, 0));
     
 //   IN-OUT GAIN
     name = ParamNames::getInGainName();
@@ -346,6 +373,8 @@ void IRFxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 //    saturationPostEQ.prepare(spec);
     saturationInstance.prepare(spec);
     
+    delayInstance.prepare(sampleRate, samplesPerBlock, getTotalNumOutputChannels());
+    
     
     for(auto smoother : getSmoothers())
         smoother->reset(sampleRate, 0.05);
@@ -367,6 +396,9 @@ void IRFxAudioProcessor::updateSmootherFromParams(int numSamplesToSkip, Smoother
         highEQGainParam,
         saturationDriveParam,
         saturationMixParam,
+        delayMixParam,
+        delayFeedbackParam,
+        delayTimeParam,
         inputGainParam,
         outputGainParam,
     };
@@ -402,6 +434,9 @@ std::vector<juce::SmoothedValue<float>*> IRFxAudioProcessor::getSmoothers()
         &highEQGainParamSmoother,
         &saturationDriveParamSmoother,
         &saturationMixParamSmoother,
+        &delayMixParamSmoother,
+        &delayFeedbackParamSmoother,
+        &delayTimeParamSmoother,
         &inputGainParamSmoother,
         &outputGainParamSmoother,
     };
@@ -553,6 +588,7 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     {
         applyGain(buffer, inputGain);
         
+        //========================    IR LOADER part    ========================
         if (irLoaderBypassParam->get() == false)
         {
             // Evaluate effective loading states after mute
@@ -609,6 +645,7 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         }
         
         
+        //========================    TONE STACK part    ========================
         if (eqBypassParam->get() == false)
         {
             juce::dsp::AudioBlock<float> toneStackBlock(buffer);
@@ -620,6 +657,8 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
             toneStackMonoChainAray[0].process(toneStackContextLeft);
             toneStackMonoChainAray[1].process(toneStackContextRight);
         }
+        
+        //========================    SATURATION part    ========================
         
         auto drive = saturationDriveParamSmoother.getCurrentValue();
 
@@ -695,6 +734,21 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
             saturationPostEQ.process(postSaturationContext);
         }
          */
+        
+        
+        //========================    DELAY part    ========================
+        if (!delayBypassParam->get())
+        {
+            delayInstance.setDelayTime(delayTimeParamSmoother.getCurrentValue());
+            delayInstance.setFeedback(delayFeedbackParamSmoother.getCurrentValue());
+            delayInstance.setMix(delayMixParamSmoother.getCurrentValue());
+            delayInstance.setMode(delayModeParam->getIndex() == 0 ? DelayProcessor::Mode::Digital : DelayProcessor::Mode::Tape);
+            delayInstance.setSyncEnabled(delaySyncParam->get());
+            delayInstance.setHostBpm(getPlayHead()->getPosition()->getBpm().orFallback(120.0));
+            
+            bool isMono = delayMonoStereoParam->getIndex() == 0 ? true : false;
+            delayInstance.process(buffer, buffer.getNumSamples(), isMono);
+        }
         
         outputGain.setGainDecibels(outputGainParamSmoother.getCurrentValue());
         applyGain(buffer, outputGain);

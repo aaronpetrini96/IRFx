@@ -27,6 +27,12 @@ namespace ParamNames
 
     // === Delay ===
     inline juce::String getDelayBypassName()  { return "DelayBypass"; }
+    inline juce::String getDelayMixName() {return "DelayMix";}
+    inline juce::String getDelayFeedbackName() {return "DelayFeedback";}
+    inline juce::String getDelayTimeName() {return "DelayTime";}
+    inline juce::String getDelayModeName() {return "DelayMode";}
+    inline juce::String getDelaySyncName() {return "DelaySync";}
+    inline juce::String getDelayMonoStereoName() {return "DelayMonoStereo";}
 
     // === In & Out Gain ===
     inline juce::String getInGainName() {return "InGain";}
@@ -57,6 +63,12 @@ namespace ParamNames
             getDistMixName(),
             getDistModeName(),
             getDelayBypassName(),
+            getDelayMixName(),
+            getDelayFeedbackName(),
+            getDelayTimeName(),
+            getDelayModeName(),
+            getDelaySyncName(),
+            getDelayMonoStereoName(),
             getInGainName(),
             getOutGainName(),
             getGeneralBypassName(),

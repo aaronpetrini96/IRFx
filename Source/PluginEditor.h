@@ -80,6 +80,10 @@ private:
     ImageKnob saturationKnob{"Drive", audioProcessor.apvts, juce::ParameterID(ParamNames::getDistDriveName(), versionHint), knobImage, "", 110};
     ImageKnob saturationMixKnob{"Mix", audioProcessor.apvts, juce::ParameterID(ParamNames::getDistMixName(), versionHint), knobImage, " %", 110};
     
+    ImageKnob delayMixKnob{"Mix", audioProcessor.apvts, juce::ParameterID(ParamNames::getDelayMixName(), versionHint), knobImage, " %", 80};
+    ImageKnob delayFeedbackKnob{"Feedback", audioProcessor.apvts, juce::ParameterID(ParamNames::getDelayFeedbackName(), versionHint), knobImage, " %", 80};
+    ImageKnob delayTimeKnob{"Time", audioProcessor.apvts, juce::ParameterID(ParamNames::getDelayTimeName(), versionHint), knobImage, " ms", 80};
+    
 //    Dials Name Labels
     juce::Label lowCutSliderLabel {"Low Cut"};
     juce::Label highCutSliderLabel {"High Cut"};
@@ -90,6 +94,9 @@ private:
     juce::Label saturationLabel {"Drive"};
     juce::Label saturationMixLabel {"Mix"};
     juce::Label satModeLabel {"Mode"};
+    juce::Label delayMixLabel {"Mix"};
+    juce::Label delayFeedbackLabel {"Feedback"};
+    juce::Label delayTimeLabel {"Time"};
     std::vector <juce::Label*> dialLabels
     {
         &lowCutSliderLabel,
@@ -101,6 +108,9 @@ private:
         &saturationLabel,
         &saturationMixLabel,
         &satModeLabel,
+        &delayMixLabel,
+        &delayFeedbackLabel,
+        &delayTimeLabel,
     };
     
 //   Bypass Buttons

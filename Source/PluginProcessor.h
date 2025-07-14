@@ -11,6 +11,7 @@
 #include <JuceHeader.h>
 #include "ParamNames.h"
 #include "DSP/Saturation.h"
+#include "DSP/DelayProcessor.h"
 
 //==============================================================================
 /**
@@ -100,6 +101,14 @@ public:
     juce::AudioParameterChoice* saturationModeParam {nullptr};
     
     //DELAY
+    juce::AudioParameterFloat* delayMixParam {nullptr};
+    juce::AudioParameterFloat* delayFeedbackParam {nullptr};
+    juce::AudioParameterFloat* delayTimeParam {nullptr};
+    juce::AudioParameterChoice* delayModeParam {nullptr};
+    juce::AudioParameterChoice* delayMonoStereoParam {nullptr};
+    juce::AudioParameterBool* delaySyncParam {nullptr};
+    juce::AudioParameterBool* delayBypassParam{nullptr};
+
     
     //IN-OUT GAIN
     juce::AudioParameterFloat* inputGainParam {nullptr};
@@ -119,6 +128,9 @@ public:
     highEQGainParamSmoother,
     saturationDriveParamSmoother,
     saturationMixParamSmoother,
+    delayMixParamSmoother,
+    delayFeedbackParamSmoother,
+    delayTimeParamSmoother,
     inputGainParamSmoother,
     outputGainParamSmoother;
     
@@ -165,7 +177,7 @@ private:
 //    float apiStyleSaturation (float x, float drive);
 //    juce::dsp::ProcessorDuplicator<Filter, Coefficients> saturationPreEQ, saturationPostEQ;
 
-    
+    DelayProcessor delayInstance;
     
     template<typename ParamType, typename Params, typename Funcs>
     void initCachedParams(Params paramsArray, Funcs funcsArray)

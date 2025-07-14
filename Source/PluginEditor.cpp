@@ -178,6 +178,12 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     distGroup.addAndMakeVisible(satModeLabel);
     
     delayGroup.addAndMakeVisible(delayBypassButton);
+    delayGroup.addAndMakeVisible(delayMixKnob);
+    delayGroup.addAndMakeVisible(delayMixLabel);
+    delayGroup.addAndMakeVisible(delayFeedbackKnob);
+    delayGroup.addAndMakeVisible(delayFeedbackLabel);
+    delayGroup.addAndMakeVisible(delayTimeKnob);
+    delayGroup.addAndMakeVisible(delayTimeLabel);
    
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -285,6 +291,12 @@ void IRFxAudioProcessorEditor::resized()
     
 //    DELAY GROUP
     delayBypassButton.setBounds(delayGroup.getWidth() * 0.9, delayGroup.getHeight() * 0.05, bypassButtonSize, bypassButtonSize);
+    delayTimeKnob.setBounds(delayGroup.getWidth() * 0.1, delayGroup.getHeight() * 0.2, dialSize, dialSize);
+    delayTimeLabel.setBounds(delayTimeKnob.getX(), delayTimeKnob.getY() * 0.5, labelWidth, labelHeight);
+    delayFeedbackKnob.setBounds(delayGroup.getWidth() * 0.6, delayTimeKnob.getY(), dialSize, dialSize);
+    delayFeedbackLabel.setBounds(delayFeedbackKnob.getX(), delayTimeLabel.getY(), labelWidth, labelHeight);
+    delayMixKnob.setBounds(delayTimeKnob.getX(), delayGroup.getHeight() * 0.65, dialSize, dialSize);
+    delayMixLabel.setBounds(delayMixKnob.getX(), delayMixKnob.getY() * 0.85, labelWidth, labelHeight);
     
     
     
@@ -297,7 +309,7 @@ void IRFxAudioProcessorEditor::resized()
     presetBox.setBounds(totalBounds.getWidth() * 0.31, totalBounds.getHeight() * 0.955, boundsWidth * 0.25 , boundsWidth * 0.04);
     savePresetButton.setBounds(presetBox.getRight() * 1.05, presetBox.getY(), presetBox.getWidth() * 0.5, presetBox.getHeight());
     
-    generalBypassButton.setBounds(savePresetButton.getRight() * JUCE_LIVE_CONSTANT(1.10), savePresetButton.getY(), bypassButtonSize, bypassButtonSize);
+    generalBypassButton.setBounds(savePresetButton.getRight() * 1.16, savePresetButton.getY(), bypassButtonSize, bypassButtonSize);
 
 }
 

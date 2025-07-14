@@ -11,6 +11,10 @@
         <FILE id="Lj8s1q" name="PresetManager.h" compile="0" resource="0" file="Source/Utilities/PresetManager.h"/>
       </GROUP>
       <GROUP id="{D65F6F65-620F-1C0C-07AD-46F626E13518}" name="DSP">
+        <FILE id="xJyVjZ" name="DelayProcessor.cpp" compile="1" resource="0"
+              file="Source/DSP/DelayProcessor.cpp"/>
+        <FILE id="emD7HM" name="DelayProcessor.h" compile="0" resource="0"
+              file="Source/DSP/DelayProcessor.h"/>
         <FILE id="HrDYS7" name="Saturation.cpp" compile="1" resource="0" file="Source/DSP/Saturation.cpp"/>
         <FILE id="sQlX02" name="Saturation.h" compile="0" resource="0" file="Source/DSP/Saturation.h"/>
       </GROUP>
