@@ -47,6 +47,39 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     addAndMakeVisible(presetBox);
     
     
+//  delay BUTTONS
+    delaySyncButton.setClickingTogglesState(true);
+    setSatButtonColour(delaySyncButton, delaySyncButton.getToggleState());
+    delaySyncButton.setColour(juce::ComboBox::outlineColourId, juce::Colours::transparentBlack);
+    delaySyncButton.setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colours::white);
+    delaySyncButton.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white.withAlpha(0.3f));
+    
+    delaySyncButton.onClick = [this]()
+    {
+         isSyncOn = delaySyncButton.getToggleState();
+         setSatButtonColour(delaySyncButton, isSyncOn);
+    };
+    
+//  DELAY BOXES
+    delayMonoStereoBox.addItem("Mono", 1);
+    delayMonoStereoBox.addItem("Ping-Pong", 2);
+    delayMonoStereoBox.setSelectedId(1);
+    delayMonoStereoBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, darkPink);
+    delayMonoStereoBox.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
+    delayMonoStereoBox.setLookAndFeel(ComboBoxLookAndFeel::get());
+    delayMonoStereoAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, ParamNames::getDelayMonoStereoName(), delayMonoStereoBox);
+    
+    
+    delayModeBox.addItem("Digital", 1);
+    delayModeBox.addItem("Tape", 2);
+    delayModeBox.setSelectedId(1);
+    delayModeBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, darkPink);
+    delayModeBox.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
+    delayModeBox.setLookAndFeel(ComboBoxLookAndFeel::get());
+    delayModeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, ParamNames::getDelayModeName(), delayModeBox);
+    
+    
+    
 //    DIAL'S LABELS GENERAL SETUP
     for (auto label : dialLabels)
     {
@@ -138,6 +171,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
         button -> setClickingTogglesState(true);
         button -> setRadioGroupId(123);
         button -> setSize(60, 30);
+        button -> setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
         setSatButtonColour(*button, button->getToggleState());
         distGroup.addAndMakeVisible(*button);
     }
@@ -184,6 +218,10 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     delayGroup.addAndMakeVisible(delayFeedbackLabel);
     delayGroup.addAndMakeVisible(delayTimeKnob);
     delayGroup.addAndMakeVisible(delayTimeLabel);
+    
+    delayGroup.addAndMakeVisible(delaySyncButton);
+    delayGroup.addAndMakeVisible(delayModeBox);
+    delayGroup.addAndMakeVisible(delayMonoStereoBox);
    
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -247,6 +285,9 @@ void IRFxAudioProcessorEditor::resized()
     delayGroup.setBounds(EQGroup.getX(), distGroup.getY(), groupWidth, height);
     
     
+//   PRESET BOX
+    presetBox.setBounds(totalBounds.getWidth() * 0.31, totalBounds.getHeight() * 0.955, boundsWidth * 0.25 , boundsWidth * 0.04);
+    savePresetButton.setBounds(presetBox.getRight() * 1.05, presetBox.getY(), presetBox.getWidth() * 0.5, presetBox.getHeight());
     
 //    IR GROUP
     irBypassButton.setBounds(IRGroup.getWidth() * 0.9, IRGroup.getHeight() * 0.05, bypassButtonSize, bypassButtonSize);
@@ -298,16 +339,16 @@ void IRFxAudioProcessorEditor::resized()
     delayMixKnob.setBounds(delayTimeKnob.getX(), delayGroup.getHeight() * 0.65, dialSize, dialSize);
     delayMixLabel.setBounds(delayMixKnob.getX(), delayMixKnob.getY() * 0.85, labelWidth, labelHeight);
     
-    
-    
+    delaySyncButton.setBounds(delayFeedbackKnob.getX(), delayFeedbackKnob.getBottom() * 0.85, savePresetButton.getWidth(), savePresetButton.getHeight());
+    delayMonoStereoBox.setBounds(delayFeedbackKnob.getX(), delayFeedbackKnob.getBottom() * 1.01, savePresetButton.getWidth(), savePresetButton.getHeight());
+    delayModeBox.setBounds(delayMonoStereoBox.getX(), delayMonoStereoBox.getBottom() * 1.05, savePresetButton.getWidth(), savePresetButton.getHeight());
+ 
 //    IN OUT GAIN
     inputGainSlider.setBounds(IRGroup.getX(), distGroup.getBottom() * 0.98, inputGainSlider.getWidth(), inputGainSlider.getHeight());
     outputGainSlider.setBounds(delayGroup.getX() * 1.09, inputGainSlider.getY(), outputGainSlider.getWidth(), outputGainSlider.getHeight());
     
     
-//   PRESET BOX
-    presetBox.setBounds(totalBounds.getWidth() * 0.31, totalBounds.getHeight() * 0.955, boundsWidth * 0.25 , boundsWidth * 0.04);
-    savePresetButton.setBounds(presetBox.getRight() * 1.05, presetBox.getY(), presetBox.getWidth() * 0.5, presetBox.getHeight());
+
     
     generalBypassButton.setBounds(savePresetButton.getRight() * 1.16, savePresetButton.getY(), bypassButtonSize, bypassButtonSize);
 

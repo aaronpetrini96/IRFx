@@ -136,15 +136,21 @@ private:
     juce::Image muteIRImage = juce::ImageCache::getFromMemory(BinaryData::Mute_png, BinaryData::Mute_pngSize);
     
     
-//   SATURATION TYPE BUTTONS
+//   SATURATION TYPE
     juce::TextButton sat1Button {"1"}, sat2Button {"2"}, sat3Button{"3"};
     std::vector<juce::TextButton*> satModeButtons
     {
-        &sat1Button, &sat2Button, &sat3Button
+        &sat1Button, &sat2Button, &sat3Button,
     };
     
     void setSatButtonColour (juce::TextButton& b, bool isOn);
     
+//    DELAY Options
+    juce::TextButton delaySyncButton {"Sync"};
+    juce::ComboBox delayMonoStereoBox, delayModeBox;
+    bool isSyncOn {false};
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> delayMonoStereoAttachment, delayModeAttachment;
+    juce::Colour darkPink = juce::Colour::fromRGB(200, 30, 100).withAlpha(0.8f);
     
 //    INPUT & OUTPUT GAIN SLIDERS
     GainSlider inputGainSlider {"Input Gain", audioProcessor.apvts, juce::ParameterID(ParamNames::getInGainName(), versionHint), " dB [IN]", juce::Slider::TextEntryBoxPosition::TextBoxRight};

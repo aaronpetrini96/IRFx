@@ -107,6 +107,7 @@ public:
     juce::AudioParameterChoice* delayModeParam {nullptr};
     juce::AudioParameterChoice* delayMonoStereoParam {nullptr};
     juce::AudioParameterBool* delaySyncParam {nullptr};
+    juce::AudioParameterChoice* delayNoteParam {nullptr};
     juce::AudioParameterBool* delayBypassParam{nullptr};
 
     
@@ -178,6 +179,7 @@ private:
 //    juce::dsp::ProcessorDuplicator<Filter, Coefficients> saturationPreEQ, saturationPostEQ;
 
     DelayProcessor delayInstance;
+    
     
     template<typename ParamType, typename Params, typename Funcs>
     void initCachedParams(Params paramsArray, Funcs funcsArray)
