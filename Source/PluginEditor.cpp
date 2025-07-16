@@ -56,9 +56,16 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     
     delaySyncButton.onClick = [this]()
     {
-         isSyncOn = delaySyncButton.getToggleState();
-         setSatButtonColour(delaySyncButton, isSyncOn);
+        isSyncOn = delaySyncButton.getToggleState();
+        audioProcessor.delaySyncParam->beginChangeGesture();
+        audioProcessor.delaySyncParam->setValueNotifyingHost(isSyncOn);
+        audioProcessor.delaySyncParam->endChangeGesture();
+        setSatButtonColour(delaySyncButton, isSyncOn);
+        delayTimeKnob.setVisible(!isSyncOn);
+        delayNoteKnob.setVisible(isSyncOn);
     };
+    
+    
     
 //  DELAY BOXES
     delayMonoStereoBox.addItem("Mono", 1);
@@ -218,6 +225,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     delayGroup.addAndMakeVisible(delayFeedbackLabel);
     delayGroup.addAndMakeVisible(delayTimeKnob);
     delayGroup.addAndMakeVisible(delayTimeLabel);
+    delayGroup.addAndMakeVisible(delayNoteKnob);
     
     delayGroup.addAndMakeVisible(delaySyncButton);
     delayGroup.addAndMakeVisible(delayModeBox);
@@ -227,6 +235,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     // editor's size to whatever you need it to be.
     ir1LevelSlider.setVisible(false);
     ir2LevelSlider.setVisible(false);
+    delayNoteKnob.setVisible(false);
     restoreLoadedIRFiles();
     
     setSize (600, 650);
@@ -333,22 +342,20 @@ void IRFxAudioProcessorEditor::resized()
 //    DELAY GROUP
     delayBypassButton.setBounds(delayGroup.getWidth() * 0.9, delayGroup.getHeight() * 0.05, bypassButtonSize, bypassButtonSize);
     delayTimeKnob.setBounds(delayGroup.getWidth() * 0.1, delayGroup.getHeight() * 0.2, dialSize, dialSize);
+    delayNoteKnob.setBounds(delayGroup.getWidth() * 0.1, delayGroup.getHeight() * 0.2, dialSize, dialSize);
     delayTimeLabel.setBounds(delayTimeKnob.getX(), delayTimeKnob.getY() * 0.5, labelWidth, labelHeight);
     delayFeedbackKnob.setBounds(delayGroup.getWidth() * 0.6, delayTimeKnob.getY(), dialSize, dialSize);
     delayFeedbackLabel.setBounds(delayFeedbackKnob.getX(), delayTimeLabel.getY(), labelWidth, labelHeight);
     delayMixKnob.setBounds(delayTimeKnob.getX(), delayGroup.getHeight() * 0.65, dialSize, dialSize);
     delayMixLabel.setBounds(delayMixKnob.getX(), delayMixKnob.getY() * 0.85, labelWidth, labelHeight);
     
-    delaySyncButton.setBounds(delayFeedbackKnob.getX(), delayFeedbackKnob.getBottom() * 0.85, savePresetButton.getWidth(), savePresetButton.getHeight());
-    delayMonoStereoBox.setBounds(delayFeedbackKnob.getX(), delayFeedbackKnob.getBottom() * 1.01, savePresetButton.getWidth(), savePresetButton.getHeight());
+    delaySyncButton.setBounds(delayFeedbackKnob.getX(), delayFeedbackKnob.getBottom() * 0.83, savePresetButton.getWidth(), savePresetButton.getHeight());
+    delayMonoStereoBox.setBounds(delayFeedbackKnob.getX(), delaySyncButton.getBottom() * 1.05, savePresetButton.getWidth(), savePresetButton.getHeight());
     delayModeBox.setBounds(delayMonoStereoBox.getX(), delayMonoStereoBox.getBottom() * 1.05, savePresetButton.getWidth(), savePresetButton.getHeight());
  
 //    IN OUT GAIN
     inputGainSlider.setBounds(IRGroup.getX(), distGroup.getBottom() * 0.98, inputGainSlider.getWidth(), inputGainSlider.getHeight());
     outputGainSlider.setBounds(delayGroup.getX() * 1.09, inputGainSlider.getY(), outputGainSlider.getWidth(), outputGainSlider.getHeight());
-    
-    
-
     
     generalBypassButton.setBounds(savePresetButton.getRight() * 1.16, savePresetButton.getY(), bypassButtonSize, bypassButtonSize);
 

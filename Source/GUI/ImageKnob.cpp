@@ -4,7 +4,7 @@ ImageKnob::ImageKnob (const juce::String& sliderName, juce::AudioProcessorValueT
 : attachment(apvts, parameterID.getParamID(), slider)
 {
     imageKnobLookAndFeel = std::make_unique<ImageKnobLookAndFeel>(knobImage);
-
+    parameter = apvts.getParameter(parameterID.getParamID());
     // Slider
     slider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     slider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
@@ -14,8 +14,17 @@ ImageKnob::ImageKnob (const juce::String& sliderName, juce::AudioProcessorValueT
     // Update value label when the slider changes
     slider.onValueChange = [this, suffix]()
     {
-        auto value = std::abs(slider.getValue()) < 0.01 ? 0.0 : std::round(slider.getValue() * 100.0) / 100.0;
-        valueLabel.setText(juce::String(value, 0) + suffix, juce::dontSendNotification);
+        if (auto* choiceParam = dynamic_cast<juce::AudioParameterChoice*>(parameter))
+        {
+            auto index = static_cast<int>(slider.getValue());
+            if (index >= 0 && index < choiceParam->choices.size())
+                valueLabel.setText(choiceParam->choices[index], juce::dontSendNotification);
+        }
+        else
+        {
+            auto value = std::abs(slider.getValue()) < 0.01 ? 0.0 : std::round(slider.getValue() * 100.0) / 100.0;
+            valueLabel.setText(juce::String(value, 0) + suffix, juce::dontSendNotification);
+        }
     };
     
 //    Draw from middle?

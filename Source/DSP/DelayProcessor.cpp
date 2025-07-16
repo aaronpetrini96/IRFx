@@ -41,6 +41,7 @@ float DelayProcessor::getDelayInSamples() const
             case 4: delayTimeSec = beatTimeSec * 0.25; break;         // 1/16
             case 5: delayTimeSec = beatTimeSec * 1.5; break;          // dotted 1/4
             case 6: delayTimeSec = beatTimeSec * (1.0 / 3.0); break;  // triplet 1/4
+            case 7: delayTimeSec = beatTimeSec * 0.125; break;           // 1/32
             default: delayTimeSec = beatTimeSec * 1.0; break;         // default to 1/4
         }
 

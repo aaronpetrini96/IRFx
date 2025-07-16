@@ -24,6 +24,7 @@ private:
     juce::Slider slider;
     juce::AudioProcessorValueTreeState::SliderAttachment attachment;
     juce::Label valueLabel;
+    juce::RangedAudioParameter* parameter = nullptr;
     
     std::unique_ptr<ImageKnobLookAndFeel> imageKnobLookAndFeel;
     

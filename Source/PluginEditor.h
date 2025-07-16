@@ -83,6 +83,7 @@ private:
     ImageKnob delayMixKnob{"Mix", audioProcessor.apvts, juce::ParameterID(ParamNames::getDelayMixName(), versionHint), knobImage, " %", 80};
     ImageKnob delayFeedbackKnob{"Feedback", audioProcessor.apvts, juce::ParameterID(ParamNames::getDelayFeedbackName(), versionHint), knobImage, " %", 80};
     ImageKnob delayTimeKnob{"Time", audioProcessor.apvts, juce::ParameterID(ParamNames::getDelayTimeName(), versionHint), knobImage, " ms", 80};
+    ImageKnob delayNoteKnob{"Notes", audioProcessor.apvts, juce::ParameterID(ParamNames::getDelayNoteName(), versionHint), knobImage, "", 80};
     
 //    Dials Name Labels
     juce::Label lowCutSliderLabel {"Low Cut"};

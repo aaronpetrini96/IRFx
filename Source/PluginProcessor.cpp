@@ -274,7 +274,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout IRFxAudioProcessor::createPa
     name = ParamNames::getDelaySyncName();
     params.emplace_back(std::make_unique<juce::AudioParameterBool>(juce::ParameterID(name, versionHint), name, false));
     name = ParamNames::getDelayNoteName();
-    juce::StringArray subdivisionArray { "1/1", "1/2", "1/4", "1/8", "1/16", "1/4 Dotted", "1/4 Triplet" };
+    juce::StringArray subdivisionArray { "1/1", "1/2", "1/4", "1/8", "1/16", "1/4 Dotted", "1/4 Triplet", "1/32"};
     params.emplace_back(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID(name, versionHint), name, subdivisionArray, 2));
     name = ParamNames::getDelayMonoStereoName();
     juce::StringArray delayMonoStereoArray {"Mono", "Ping-Pong"};
@@ -762,7 +762,7 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
                     buffer.setSize(2, buffer.getNumSamples(), true, true, true);
                     buffer.copyFrom(1, 0, buffer, 0, 0, buffer.getNumSamples());
                 }
-            delayInstance.setDelayTime(delayTimeParamSmoother.getCurrentValue());
+            
             delayInstance.setFeedback(delayFeedbackParamSmoother.getCurrentValue());
             delayInstance.setMix(delayMixParamSmoother.getCurrentValue());
             delayInstance.setMode(delayModeParam->getIndex() == 0 ? DelayProcessor::Mode::Digital : DelayProcessor::Mode::Tape);
@@ -770,6 +770,8 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
             delayInstance.setSyncEnabled(isSync);
             if (isSync)
                 delayInstance.setSubdivision(delayNoteParam->getIndex());
+            else
+                delayInstance.setDelayTime(delayTimeParamSmoother.getCurrentValue());
             
             delayInstance.setHostBpm(getPlayHead()->getPosition()->getBpm().orFallback(120.0));
             
