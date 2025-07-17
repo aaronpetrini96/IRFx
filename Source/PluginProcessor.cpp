@@ -138,12 +138,6 @@ IRFxAudioProcessor::IRFxAudioProcessor()
     };
     
     initCachedParams<juce::AudioParameterChoice*>(choiceParams, choiceNameFuncs);
-//    for (size_t i = 0 ; i < choiceParams.size(); ++i)
-//    {
-//        auto ptrToParamPtr = choiceParams [i];
-//        *ptrToParamPtr = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter(choiceNameFuncs[i]()));
-//        jassert(*ptrToParamPtr != nullptr);
-//    }
     
 }
 
@@ -348,11 +342,14 @@ void IRFxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     spec.sampleRate = sampleRate;
     spec.numChannels = getTotalNumOutputChannels();
     
-    irLoader1.reset();
-    irLoader2.reset();
-    irLoader1.prepare(spec);
-    irLoader2.prepare(spec);
+    irLoader1 = std::make_unique<juce::dsp::Convolution>();
+    irLoader2 = std::make_unique<juce::dsp::Convolution>();
+    irLoader1->reset();
+    irLoader2->reset();
+    irLoader1->prepare(spec);
+    irLoader2->prepare(spec);
     
+    spec.numChannels = getTotalNumOutputChannels();
     inputGain.prepare(spec);
     inputGain.setRampDurationSeconds(0.05);
     outputGain.prepare(spec);
@@ -371,11 +368,7 @@ void IRFxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
         toneStackMonoChainAray[i].reset();
         toneStackMonoChainAray[i].prepare(monoSpec);
     }
-    
-//    saturationPreEQ.state = Coefficients::makeLowShelf(sampleRate, 150.f, 0.707f, juce::Decibels::decibelsToGain(2.f));
-//    saturationPostEQ.state = Coefficients::makeLowPass(sampleRate, 15000.f);
-//    saturationPreEQ.prepare(spec);
-//    saturationPostEQ.prepare(spec);
+ 
     saturationInstance.prepare(spec);
     
     delayInstance.prepare(sampleRate, samplesPerBlock, getTotalNumOutputChannels());
@@ -455,58 +448,72 @@ void IRFxAudioProcessor::releaseResources()
     // spare memory, etc.
 }
 
-//#ifndef JucePlugin_PreferredChannelConfigurations
-//bool IRFxAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
-//{
-//  #if JucePlugin_IsMidiEffect
-//    juce::ignoreUnused (layouts);
-//    return true;
-//  #else
-//    // This is the place where you check if the layout is supported.
-//    // In this template code we only support mono or stereo.
-//    // Some plugin hosts, such as certain GarageBand versions, will only
-//    // load plugins that support stereo bus layouts.
-//    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
-//     && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
-//        return false;
-//
-//    // This checks if the input layout matches the output layout
-//   #if ! JucePlugin_IsSynth
-//    if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
-//        return false;
-//   #endif
-//
-//    return true;
-//  #endif
-//}
-//#endif
-bool IRFxAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) const
+#ifndef JucePlugin_PreferredChannelConfigurations
+bool IRFxAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
-    const auto mono = juce::AudioChannelSet::mono();
-    const auto stereo = juce::AudioChannelSet::stereo();
-    const auto mainIn = layouts.getMainInputChannelSet();
-    const auto mainOut = layouts.getMainOutputChannelSet();
-    
-    if (mainIn == mono && mainOut == mono) {return true;}
-    if (mainIn == mono && mainOut == stereo) {return true;}
-    if (mainIn == stereo && mainOut == stereo) {return true;}
-    
-    return false;
+  #if JucePlugin_IsMidiEffect
+    juce::ignoreUnused (layouts);
+    return true;
+  #else
+    // This is the place where you check if the layout is supported.
+    // In this template code we only support mono or stereo.
+    // Some plugin hosts, such as certain GarageBand versions, will only
+    // load plugins that support stereo bus layouts.
+    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
+     && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
+        return false;
+
+    // This checks if the input layout matches the output layout
+   #if ! JucePlugin_IsSynth
+    if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
+        return false;
+   #endif
+
+    return true;
+  #endif
 }
+#endif
+
 
 void IRFxAudioProcessor::loadIR1(const juce::File &irFile)
 {
-    irLoader1.loadImpulseResponse(irFile, juce::dsp::Convolution::Stereo::yes, juce::dsp::Convolution::Trim::yes, 0, juce::dsp::Convolution::Normalise::yes);
+    auto newIR = std::make_unique<juce::dsp::Convolution>();
+    newIR->loadImpulseResponse(irFile,
+                               juce::dsp::Convolution::Stereo::yes,
+                               juce::dsp::Convolution::Trim::yes,
+                               0,
+                               juce::dsp::Convolution::Normalise::yes);
+    
+    // Prepare it here with the cached spec
+    newIR->prepare(spec);
+    
+    pendingIR1 = std::move(newIR);
+    ir1PendingUpdate.store(true);
     isIR1Loaded = true;
+    
     apvts.state.setProperty("IR1FilePath", irFile.getFullPathName(), nullptr);
 }
 
-void IRFxAudioProcessor::loadIR2(const juce::File &irFile)
+
+void IRFxAudioProcessor::loadIR2(const juce::File& irFile)
 {
-    irLoader2.loadImpulseResponse(irFile, juce::dsp::Convolution::Stereo::yes, juce::dsp::Convolution::Trim::yes, 0, juce::dsp::Convolution::Normalise::yes);
+    auto newIR = std::make_unique<juce::dsp::Convolution>();
+    newIR->loadImpulseResponse(irFile,
+                               juce::dsp::Convolution::Stereo::yes,
+                               juce::dsp::Convolution::Trim::yes,
+                               0,
+                               juce::dsp::Convolution::Normalise::yes);
+
+    newIR->prepare(spec);
+
+    pendingIR2 = std::move(newIR);
+    ir2PendingUpdate.store(true);
     isIR2Loaded = true;
+
     apvts.state.setProperty("IR2FilePath", irFile.getFullPathName(), nullptr);
 }
+
+
 
 float computeRMS(const float* data, size_t numSamples)
 {
@@ -517,47 +524,6 @@ float computeRMS(const float* data, size_t numSamples)
     return std::sqrt(sumSquares / (float)numSamples);
 }
 
-//float IRFxAudioProcessor::neveStyleSaturation (float x, float drive)
-//{
-////    Apply Drive
-////    x *= drive;
-//    float mappedDrive = juce::jmap(drive, 0.0f, 12.0f, 1.0f, 10.0f);
-//    x *= mappedDrive;
-//    
-//    
-//
-//    float asym = 0.1f * x * x * x;
-//    float saturated = std::tanh(x + asym);
-//    saturated *= 0.8f;
-//
-//    return saturated;
-//}
-//float IRFxAudioProcessor::sslStyleSaturation (float x, float drive)
-//{
-//    //    Apply Drive
-//    //    x *= drive;
-//    float mappedDrive = juce::jmap(drive, 0.0f, 12.0f, 1.0f, 10.0f);
-//    x *= mappedDrive;
-//    
-//    float saturated = std::tanh(x);
-//    saturated *= 0.7f; // attenuation, adjust to taste
-//    return saturated;
-//}
-//
-//float IRFxAudioProcessor::apiStyleSaturation (float x, float drive)
-//{
-//    //    Apply Drive
-//    //    x *= drive;
-//    float mappedDrive = juce::jmap(drive, 0.0f, 12.0f, 1.0f, 10.0f);
-//    x *= mappedDrive;
-//
-//    // Stronger asymmetry, more "bite"
-//    float asym = 0.3f * x * x * x;
-//    float saturated = std::tanh(x + asym);
-//    
-//    saturated *= 0.7f; // adjust to keep level in check
-//    return saturated;
-//}
 
 bool clipDetection(juce::AudioBuffer<float>& buffer)
 {
@@ -586,10 +552,8 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     [[maybe_unused]] auto totalNumInputChannels  = getTotalNumInputChannels();
     [[maybe_unused]] auto totalNumOutputChannels = getTotalNumOutputChannels();
     
-    juce::dsp::AudioBlock<float> block(buffer);
-    juce::AudioBuffer<float> tempBuffer;
-    
-    
+
+
     //========================    IN GAIN part    ========================
     juce::AudioBuffer<float> dryBuffer;
     dryBuffer.makeCopyOf(buffer);
@@ -602,6 +566,7 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     updateSmootherFromParams(buffer.getNumSamples(), SmootherUpdateMode::liveInRealTime);
     updateParams();
     
+
     if (pluginBypassParam->get() == false)
     {
         applyGain(buffer, inputGain);
@@ -615,18 +580,22 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
 
             if (useIR1 && useIR2)
             {
+                if (ir1PendingUpdate.exchange(false))
+                    irLoader1 = std::move(pendingIR1);
+                if (ir2PendingUpdate.exchange(false))
+                    irLoader2 = std::move(pendingIR2);
+                
+                juce::AudioBuffer<float> tempBuffer;
                 tempBuffer.setSize(buffer.getNumChannels(), buffer.getNumSamples());
                 tempBuffer.makeCopyOf(buffer, true);
                 
                 buffer.applyGain(juce::Decibels::decibelsToGain(ir1LevelParamSmoother.getCurrentValue()));
                 tempBuffer.applyGain(juce::Decibels::decibelsToGain(ir2LevelParamSmoother.getCurrentValue()));
-                
                 juce::dsp::AudioBlock<float> block1(buffer);
                 juce::dsp::AudioBlock<float> block2(tempBuffer);
-                
+                irLoader1->process(juce::dsp::ProcessContextReplacing<float>(block1));
+                irLoader2->process(juce::dsp::ProcessContextReplacing<float>(block2));
 
-                irLoader1.process(juce::dsp::ProcessContextReplacing<float>(block1));
-                irLoader2.process(juce::dsp::ProcessContextReplacing<float>(block2));
 
                 for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
                     buffer.addFrom(ch, 0, tempBuffer, ch, 0, buffer.getNumSamples());
@@ -635,31 +604,33 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
             }
             else if (useIR1)
             {
+                if (ir1PendingUpdate.exchange(false))
+                    irLoader1 = std::move(pendingIR1);
                 buffer.applyGain(juce::Decibels::decibelsToGain(ir1LevelParamSmoother.getCurrentValue()));
                 juce::dsp::AudioBlock<float> block(buffer);
-                irLoader1.process(juce::dsp::ProcessContextReplacing<float>(block));
-
+                irLoader1->process(juce::dsp::ProcessContextReplacing<float>(block));
                 buffer.applyGain(juce::Decibels::decibelsToGain(9.f));
             }
             else if (useIR2)
             {
+                if (ir2PendingUpdate.exchange(false))
+                    irLoader2 = std::move(pendingIR2);
                 buffer.applyGain(juce::Decibels::decibelsToGain(ir2LevelParamSmoother.getCurrentValue()));
                 juce::dsp::AudioBlock<float> block(buffer);
-                irLoader2.process(juce::dsp::ProcessContextReplacing<float>(block));
-
+                irLoader2->process(juce::dsp::ProcessContextReplacing<float>(block));
                 buffer.applyGain(juce::Decibels::decibelsToGain(9.f));
             }
 
+
             // Apply EQ to final buffer
             juce::dsp::AudioBlock<float> eqBlock(buffer);
-            auto eqBlockLeft = eqBlock.getSingleChannelBlock(0);
-            auto eqBlockRight = eqBlock.getSingleChannelBlock(1);
-
-            juce::dsp::ProcessContextReplacing<float> eqContextLeft(eqBlockLeft);
-            juce::dsp::ProcessContextReplacing<float> eqContextRight(eqBlockRight);
-
-            irEQMonoChainArray[0].process(eqContextLeft);
-            irEQMonoChainArray[1].process(eqContextRight);
+            
+            for (int ch {0}; ch < buffer.getNumChannels(); ++ch)
+            {
+                auto eqBlockCh = eqBlock.getSingleChannelBlock(ch);
+                juce::dsp::ProcessContextReplacing<float> eqContextCh(eqBlockCh);
+                irEQMonoChainArray[ch].process(eqContextCh);
+            }
         }
         
         
@@ -667,13 +638,13 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         if (eqBypassParam->get() == false)
         {
             juce::dsp::AudioBlock<float> toneStackBlock(buffer);
-            auto toneStackBlockLeft = toneStackBlock.getSingleChannelBlock(0);
-            auto toneStackBlockRight = toneStackBlock.getSingleChannelBlock(1);
-            
-            juce::dsp::ProcessContextReplacing<float> toneStackContextLeft (toneStackBlockLeft), toneStackContextRight (toneStackBlockRight);
-            
-            toneStackMonoChainAray[0].process(toneStackContextLeft);
-            toneStackMonoChainAray[1].process(toneStackContextRight);
+
+            for (int ch {0}; ch < buffer.getNumChannels(); ++ch)
+            {
+                auto toneBlock = toneStackBlock.getSingleChannelBlock(ch);
+                juce::dsp::ProcessContextReplacing<float> context(toneBlock);
+                toneStackMonoChainAray[ch].process(context);
+            }
         }
         
         //========================    SATURATION part    ========================
@@ -756,12 +727,12 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         //========================    DELAY part    ========================
         if (!delayBypassParam->get())
         {
-            // Make sure buffer is stereo for ping-pong
-                if (buffer.getNumChannels() < 2)
-                {
-                    buffer.setSize(2, buffer.getNumSamples(), true, true, true);
-                    buffer.copyFrom(1, 0, buffer, 0, 0, buffer.getNumSamples());
-                }
+//            // Make sure buffer is stereo for ping-pong
+//            if (buffer.getNumChannels() < 2)
+//            {
+//                buffer.setSize(2, buffer.getNumSamples(), true, true, true);
+//                buffer.copyFrom(1, 0, buffer, 0, 0, buffer.getNumSamples());
+//            }
             
             delayInstance.setFeedback(delayFeedbackParamSmoother.getCurrentValue());
             delayInstance.setMix(delayMixParamSmoother.getCurrentValue());

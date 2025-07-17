@@ -124,7 +124,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
         if(audioProcessor.isIR1Loaded)
         {
             loadedIRFile1 = nullptr;
-            audioProcessor.irLoader1.loadImpulseResponse(juce::AudioBuffer<float>(), audioProcessor.getSampleRate(), juce::dsp::Convolution::Stereo::yes, juce::dsp::Convolution::Trim::no, juce::dsp::Convolution::Normalise::no);
+            audioProcessor.irLoader1->loadImpulseResponse(juce::AudioBuffer<float>(), audioProcessor.getSampleRate(), juce::dsp::Convolution::Stereo::yes, juce::dsp::Convolution::Trim::no, juce::dsp::Convolution::Normalise::no);
             audioProcessor.isIR1Loaded = false;
             audioProcessor.apvts.state.removeProperty("IR1FilePath", nullptr);
             irLoader1Button.setButtonText("Load IR1");
@@ -138,7 +138,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
         if (audioProcessor.isIR2Loaded)
         {
             loadedIRFile2 = nullptr;
-            audioProcessor.irLoader2.loadImpulseResponse(juce::AudioBuffer<float>(), audioProcessor.getSampleRate(), juce::dsp::Convolution::Stereo::yes, juce::dsp::Convolution::Trim::no, juce::dsp::Convolution::Normalise::no);
+            audioProcessor.irLoader2->loadImpulseResponse(juce::AudioBuffer<float>(), audioProcessor.getSampleRate(), juce::dsp::Convolution::Stereo::yes, juce::dsp::Convolution::Trim::no, juce::dsp::Convolution::Normalise::no);
             audioProcessor.isIR2Loaded = false;
             audioProcessor.apvts.state.removeProperty("IR2FilePath", nullptr);
             irLoader2Button.setButtonText("Load IR2");
@@ -249,7 +249,22 @@ IRFxAudioProcessorEditor::~IRFxAudioProcessorEditor()
 void IRFxAudioProcessorEditor::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (juce::Colours::black.withAlpha(0.8f));
+    g.fillAll (juce::Colours::black);
+    g.setColour(juce::Colours::grey.withAlpha(0.1f));
+    g.fillRect(0, 615, 600, 35);
+    
+//    g.fillAll(juce::Colours::grey);
+//    if (backgroundImg.isValid())
+//    {
+//        g.drawImage(backgroundImg, 0, 0, backgroundImg.getBounds().getWidth(), backgroundImg.getBounds().getHeight(), getLocalBounds().getX(), getLocalBounds().getY(), getLocalBounds().getWidth(), getLocalBounds().getHeight());
+//        g.setColour (juce::Colours::black.withAlpha (0.45f)); // 0.0 = transparent, 1.0 = opaque
+//            g.fillRect (getLocalBounds());
+//    }
+//    else
+//    {
+//        g.fillAll(juce::Colours::black);
+//    }
+    
     clipLight(g);
     
     g.setColour(juce::Colours::white.withAlpha(0.9f));

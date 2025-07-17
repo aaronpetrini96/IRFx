@@ -59,6 +59,7 @@ public:
     
     void loadIR1(const juce::File&);
     void loadIR2(const juce::File&);
+//    void checkAndLoadPendingIRs();
     bool isIR1Loaded {false}, isIR2Loaded {false};
     bool isIR1Muted {false}, isIR2Muted {false};
     
@@ -136,10 +137,21 @@ public:
     outputGainParamSmoother;
     
     juce::dsp::ProcessSpec spec;
-    juce::dsp::Convolution irLoader1, irLoader2;
+    std::unique_ptr<juce::dsp::Convolution> irLoader1, irLoader2;
     
     std::atomic<bool> clipFlagIn { false };
     std::atomic<bool> clipFlagOut { false };
+    
+
+    
+    std::atomic<bool> ir1PendingUpdate { false };
+    juce::File irFile1ToLoad;
+    std::unique_ptr<juce::dsp::Convolution> pendingIR1;
+    std::atomic<bool> ir2PendingUpdate { false };
+    juce::File irFile2ToLoad;
+    std::unique_ptr<juce::dsp::Convolution> pendingIR2;
+
+
 
 private:
     

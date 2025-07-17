@@ -8,6 +8,9 @@
 
 namespace BinaryData
 {
+    extern const char*   BlackSnakeskin_png;
+    const int            BlackSnakeskin_pngSize = 301643;
+
     extern const char*   Bypass_png;
     const int            Bypass_pngSize = 3321;
 
@@ -39,7 +42,7 @@ namespace BinaryData
     const int            Ver_slider_pngSize = 6785719;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
-    const int namedResourceListSize = 10;
+    const int namedResourceListSize = 11;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];
