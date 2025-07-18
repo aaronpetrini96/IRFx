@@ -60,9 +60,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
         audioProcessor.delaySyncParam->beginChangeGesture();
         audioProcessor.delaySyncParam->setValueNotifyingHost(isSyncOn);
         audioProcessor.delaySyncParam->endChangeGesture();
-        setSatButtonColour(delaySyncButton, isSyncOn);
-        delayTimeKnob.setVisible(!isSyncOn);
-        delayNoteKnob.setVisible(isSyncOn);
+        updateDelaySyncState();
     };
     
     
@@ -237,6 +235,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     ir2LevelSlider.setVisible(false);
     delayNoteKnob.setVisible(false);
     restoreLoadedIRFiles();
+    updateDelaySyncState();
     
     setSize (600, 650);
 }
@@ -465,6 +464,7 @@ void IRFxAudioProcessorEditor::timerCallback()
     sat2Button.setToggleState(currentSatMode == 1, juce::dontSendNotification);
     sat3Button.setToggleState(currentSatMode == 2, juce::dontSendNotification);
 
+
 // === Clipping light logic ===
     
     bool inClipping = audioProcessor.clipFlagIn.exchange(false);
@@ -501,6 +501,15 @@ void IRFxAudioProcessorEditor::timerCallback()
     repaint(); // triggers paint() to draw updated light
 }
 
+void IRFxAudioProcessorEditor::updateDelaySyncState()
+{
+    isSyncOn = audioProcessor.delaySyncParam->get();
+    delaySyncButton.setToggleState(isSyncOn, juce::dontSendNotification);
+    setSatButtonColour(delaySyncButton, isSyncOn);
+    delayTimeKnob.setVisible(!isSyncOn);
+    delayNoteKnob.setVisible(isSyncOn);
+}
+
 void IRFxAudioProcessorEditor::clipLight(juce::Graphics& g)
 {
     juce::Colour activeColor = juce::Colours::red.withAlpha(0.9f);
@@ -527,7 +536,6 @@ void IRFxAudioProcessorEditor::setSaturationType(int type)
 
 void IRFxAudioProcessorEditor::setSatButtonColour (juce::TextButton& b, bool isOn)
 {
-//    juce::Colour vintageYellow = juce::Colour::fromRGB(255, 221, 102);
     juce::Colour darkPink = juce::Colour::fromRGB(200, 30, 100).withAlpha(0.8f); // Dark Trash pink
 
     if (isOn)

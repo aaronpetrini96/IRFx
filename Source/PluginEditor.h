@@ -156,6 +156,9 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> delayMonoStereoAttachment, delayModeAttachment;
     juce::Colour darkPink = juce::Colour::fromRGB(200, 30, 100).withAlpha(0.8f);
     
+    void updateDelaySyncState();
+    
+    
 //    INPUT & OUTPUT GAIN SLIDERS
     GainSlider inputGainSlider {"Input Gain", audioProcessor.apvts, juce::ParameterID(ParamNames::getInGainName(), versionHint), " dB [IN]", juce::Slider::TextEntryBoxPosition::TextBoxRight};
     GainSlider outputGainSlider {"Output Gain", audioProcessor.apvts, juce::ParameterID(ParamNames::getOutGainName(), versionHint), " dB [OUT]", juce::Slider::TextEntryBoxPosition::TextBoxLeft};

@@ -41,6 +41,8 @@ private:
     bool syncEnabled = false;
     float hostBpm = 120.0f;
     int subdivisionIndex = 2; // Default to 1/4 note
+    
+    bool outputToLeft = true;
 
     float getDelayInSamples() const;
 };

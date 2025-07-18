@@ -18,8 +18,8 @@ void DelayProcessor::prepare(double newSampleRate, int samplesPerBlock, int numC
 {
     sampleRate = newSampleRate;
     const int maxDelaySamples = static_cast<int>(sampleRate * 2.0); // up to 2 sec delay
-    delayBuffer.setSize(numChannels, maxDelaySamples);
-//    delayBuffer.setSize(2, maxDelaySamples); // Stereo buffer for ping-pong
+//    delayBuffer.setSize(numChannels, maxDelaySamples);
+    delayBuffer.setSize(2, maxDelaySamples); // Stereo buffer for ping-pong
     delayBuffer.clear();
     writePosition = 0;
 }
@@ -62,13 +62,16 @@ void DelayProcessor::process(juce::AudioBuffer<float>& buffer, int numSamples, b
     int numInputChannels = buffer.getNumChannels();
 
     // Ensure buffer has 2 channels for ping-pong output
-    buffer.setSize(2, numSamples, true, true, true);
-
-    auto* leftChannelData = buffer.getWritePointer(0);
-    auto* rightChannelData = buffer.getWritePointer(1);
+//    buffer.setSize(2, numSamples, true, true, true);
+    jassert(delayBuffer.getNumChannels() >= 2); //check stereo
 
     auto* leftDelayData = delayBuffer.getWritePointer(0);
     auto* rightDelayData = delayBuffer.getWritePointer(1);
+    
+    auto* leftChannelData = buffer.getWritePointer(0);
+    auto* rightChannelData = buffer.getNumChannels() > 1 ? buffer.getWritePointer(1) : nullptr;
+
+
 
     // Static filter states for tape low-pass (consider member variables for thread safety)
     static float prevFilteredL = 0.0f;
@@ -90,16 +93,14 @@ void DelayProcessor::process(juce::AudioBuffer<float>& buffer, int numSamples, b
             prevFilteredL = (1.0f - filterCoeff) * prevFilteredL + filterCoeff * delayedL;
             prevFilteredR = (1.0f - filterCoeff) * prevFilteredR + filterCoeff * delayedR;
 
-            delayedL = prevFilteredL;
-            delayedR = prevFilteredR;
-
             // Saturate delayed signals for analog tape warmth
-            delayedL = std::tanh(delayedL * 1.5f);
-            delayedR = std::tanh(delayedR * 1.5f);
+            delayedL = std::tanh(prevFilteredL * 1.5f);
+            delayedR = std::tanh(prevFilteredR * 1.5f);
         }
 
-        float inputSampleL = numInputChannels > 0 ? buffer.getReadPointer(0)[i] : 0.0f;
-        float inputSampleR = numInputChannels > 1 ? buffer.getReadPointer(1)[i] : inputSampleL;
+//        float inputSampleL = numInputChannels > 0 ? buffer.getReadPointer(0)[i] : 0.0f;
+        float inputSampleL = buffer.getReadPointer(0)[i];
+        float inputSampleR = (numInputChannels > 1) ? buffer.getReadPointer(1)[i] : inputSampleL;
 
         float dryL = inputSampleL * (1.0f - mix);
         float dryR = inputSampleR * (1.0f - mix);
@@ -126,13 +127,29 @@ void DelayProcessor::process(juce::AudioBuffer<float>& buffer, int numSamples, b
         }
         else
         {
-            // Ping-pong delay: cross feedback
-            wetL = delayedL * mix;
-            wetR = delayedR * mix;
+            //PingPong
+            // Wet output alternates left/right on each repeat
+//            wetL = delayedR * mix;  // Use delayed RIGHT for LEFT output
+//            wetR = delayedL * mix;  // Use delayed LEFT for RIGHT output
+//            wetL = -delayedR * mix;
+//            wetR = delayedL * mix;
+            
+            if (outputToLeft)
+            {
+                wetL = delayedR * mix;   // output delayed right signal on left channel
+                wetR = 0.0f;
+            }
+            else
+            {
+                wetL = 0.0f;
+                wetR = delayedL * mix;   // output delayed left signal on right channel
+            }
 
-            // Saturate feedback if tape mode
+
+            // Cross-feedback: left gets right's delayed + input, right gets left's
             float feedbackSampleL = 0.5f * (inputSampleL + inputSampleR) + delayedR * feedback;
             float feedbackSampleR = 0.5f * (inputSampleL + inputSampleR) + delayedL * feedback;
+
 
             if (this->mode == Mode::Tape)
             {
@@ -145,16 +162,23 @@ void DelayProcessor::process(juce::AudioBuffer<float>& buffer, int numSamples, b
         }
 
         leftChannelData[i] = dryL + wetL;
-        rightChannelData[i] = dryR + wetR;
-
+        if (rightChannelData)
+            rightChannelData[i] = dryR + wetR;
+        
         localWritePos = (localWritePos + 1) % bufferSize;
+        // Toggle output channel every time we cross the delay boundary
+        // This means each delay repeat alternates channel output
+        
+        static int lastDelayReadPos = -1;
+        if (delayReadPos != lastDelayReadPos)
+        {
+            outputToLeft = !outputToLeft;
+            lastDelayReadPos = delayReadPos;
+        }
     }
 
     writePosition = (writePosition + numSamples) % bufferSize;
 }
-
-
-
 
 void DelayProcessor::setDelayTime(float timeMs)
 {

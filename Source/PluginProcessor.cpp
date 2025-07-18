@@ -448,32 +448,46 @@ void IRFxAudioProcessor::releaseResources()
     // spare memory, etc.
 }
 
-#ifndef JucePlugin_PreferredChannelConfigurations
+//#ifndef JucePlugin_PreferredChannelConfigurations
+//bool IRFxAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+//{
+//  #if JucePlugin_IsMidiEffect
+//    juce::ignoreUnused (layouts);
+//    return true;
+//  #else
+//    // This is the place where you check if the layout is supported.
+//    // In this template code we only support mono or stereo.
+//    // Some plugin hosts, such as certain GarageBand versions, will only
+//    // load plugins that support stereo bus layouts.
+//    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
+//     && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
+//        return false;
+//
+//    // This checks if the input layout matches the output layout
+//   #if ! JucePlugin_IsSynth
+//    if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
+//        return false;
+//   #endif
+//
+//    return true;
+//  #endif
+//}
+//#endif
+
 bool IRFxAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
-  #if JucePlugin_IsMidiEffect
-    juce::ignoreUnused (layouts);
-    return true;
-  #else
-    // This is the place where you check if the layout is supported.
-    // In this template code we only support mono or stereo.
-    // Some plugin hosts, such as certain GarageBand versions, will only
-    // load plugins that support stereo bus layouts.
-    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
-     && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
-        return false;
-
-    // This checks if the input layout matches the output layout
-   #if ! JucePlugin_IsSynth
-    if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
-        return false;
-   #endif
-
-    return true;
-  #endif
+    if (isMono)
+        {
+            // Mono output supported
+            return layouts.getMainOutputChannelSet() == juce::AudioChannelSet::mono()
+                || layouts.getMainOutputChannelSet() == juce::AudioChannelSet::stereo(); // you can allow stereo output too
+        }
+        else
+        {
+            // Stereo output required for ping-pong
+            return layouts.getMainOutputChannelSet() == juce::AudioChannelSet::stereo();
+        }
 }
-#endif
-
 
 void IRFxAudioProcessor::loadIR1(const juce::File &irFile)
 {
@@ -727,12 +741,6 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         //========================    DELAY part    ========================
         if (!delayBypassParam->get())
         {
-//            // Make sure buffer is stereo for ping-pong
-//            if (buffer.getNumChannels() < 2)
-//            {
-//                buffer.setSize(2, buffer.getNumSamples(), true, true, true);
-//                buffer.copyFrom(1, 0, buffer, 0, 0, buffer.getNumSamples());
-//            }
             
             delayInstance.setFeedback(delayFeedbackParamSmoother.getCurrentValue());
             delayInstance.setMix(delayMixParamSmoother.getCurrentValue());
@@ -746,7 +754,13 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
             
             delayInstance.setHostBpm(getPlayHead()->getPosition()->getBpm().orFallback(120.0));
             
-            bool isMono = delayMonoStereoParam->getIndex() == 0 ? true : false;
+            isMono = delayMonoStereoParam->getIndex() == 0 ? true : false;
+            if (!isMono)
+            {
+                jassert(buffer.getNumChannels() >= 2);
+//                setBusesLayout(juce::AudioChannelSet::stereo());
+            }
+            
             delayInstance.process(buffer, buffer.getNumSamples(), isMono);
         }
         

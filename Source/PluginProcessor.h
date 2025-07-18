@@ -185,12 +185,9 @@ private:
     
     Saturation saturationInstance;
 
-//    float neveStyleSaturation (float x, float drive);
-//    float sslStyleSaturation (float x, float drive);
-//    float apiStyleSaturation (float x, float drive);
-//    juce::dsp::ProcessorDuplicator<Filter, Coefficients> saturationPreEQ, saturationPostEQ;
 
     DelayProcessor delayInstance;
+    bool isMono = true;
     
     
     template<typename ParamType, typename Params, typename Funcs>
