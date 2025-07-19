@@ -43,6 +43,9 @@ private:
     int subdivisionIndex = 2; // Default to 1/4 note
     
     bool outputToLeft = true;
+    
+    float prevFilteredL = 0.0f;
+    float prevFilteredR = 0.0f;
 
     float getDelayInSamples() const;
 };

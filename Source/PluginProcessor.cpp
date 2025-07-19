@@ -15,6 +15,7 @@ IRFxAudioProcessor::IRFxAudioProcessor()
      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
                       #if ! JucePlugin_IsSynth
+//                       .withInput  ("Input",  juce::AudioChannelSet::mono(), true)
                        .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
@@ -341,7 +342,7 @@ void IRFxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     spec.maximumBlockSize = samplesPerBlock;
     spec.sampleRate = sampleRate;
     spec.numChannels = getTotalNumOutputChannels();
-    
+    DBG("Channels: " << getTotalNumOutputChannels());
     irLoader1 = std::make_unique<juce::dsp::Convolution>();
     irLoader2 = std::make_unique<juce::dsp::Convolution>();
     irLoader1->reset();
@@ -474,19 +475,53 @@ void IRFxAudioProcessor::releaseResources()
 //}
 //#endif
 
-bool IRFxAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+//bool IRFxAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+//{
+//    if (isMono)
+//        {
+//            // Mono output supported
+//            return layouts.getMainOutputChannelSet() == juce::AudioChannelSet::mono()
+//                || layouts.getMainOutputChannelSet() == juce::AudioChannelSet::stereo(); // you can allow stereo output too
+//        }
+//        else
+//        {
+//            // Stereo output required for ping-pong
+//            return layouts.getMainOutputChannelSet() == juce::AudioChannelSet::stereo();
+//        }
+//}
+
+//bool IRFxAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) const
+//{
+//    // Only support configurations with 1 or 2 input/output channels
+//    const auto& mainInput  = layouts.getChannelSet(true,  0);
+//    const auto& mainOutput = layouts.getChannelSet(false, 0);
+//
+//    // Allow: Mono->Mono, Mono->Stereo, Stereo->Stereo
+//    if ((mainInput == juce::AudioChannelSet::mono() &&
+//         (mainOutput == juce::AudioChannelSet::mono() ||
+//          mainOutput == juce::AudioChannelSet::stereo())) ||
+//
+//        (mainInput == juce::AudioChannelSet::stereo() &&
+//         mainOutput == juce::AudioChannelSet::stereo()))
+//    {
+//        return true;
+//    }
+//
+//    return false;
+//}
+
+bool IRFxAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) const
 {
-    if (isMono)
-        {
-            // Mono output supported
-            return layouts.getMainOutputChannelSet() == juce::AudioChannelSet::mono()
-                || layouts.getMainOutputChannelSet() == juce::AudioChannelSet::stereo(); // you can allow stereo output too
-        }
-        else
-        {
-            // Stereo output required for ping-pong
-            return layouts.getMainOutputChannelSet() == juce::AudioChannelSet::stereo();
-        }
+    const auto mono = juce::AudioChannelSet::mono();
+    const auto stereo = juce::AudioChannelSet::stereo();
+    const auto mainIn = layouts.getMainInputChannelSet();
+    const auto mainOut = layouts.getMainOutputChannelSet();
+    
+    if (mainIn == mono && mainOut == mono) {return true;}
+    if (mainIn == mono && mainOut == stereo) {return true;}
+    if (mainIn == stereo && mainOut == stereo) {return true;}
+    
+    return false;
 }
 
 void IRFxAudioProcessor::loadIR1(const juce::File &irFile)
@@ -739,12 +774,31 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
          */
         
         //========================    DELAY part    ========================
+//        if (!delayBypassParam->get())
+//        {
+//            
+//            delayInstance.setFeedback(delayFeedbackParamSmoother.getCurrentValue());
+//            delayInstance.setMix(delayMixParamSmoother.getCurrentValue());
+//            delayInstance.setMode(delayModeParam->getIndex() == 0 ? DelayProcessor::Mode::Digital : DelayProcessor::Mode::Tape);
+//            bool isSync = delaySyncParam->get();
+//            delayInstance.setSyncEnabled(isSync);
+//            if (isSync)
+//                delayInstance.setSubdivision(delayNoteParam->getIndex());
+//            else
+//                delayInstance.setDelayTime(delayTimeParamSmoother.getCurrentValue());
+//            
+//            delayInstance.setHostBpm(getPlayHead()->getPosition()->getBpm().orFallback(120.0));
+//            
+//            isMono = delayMonoStereoParam->getIndex() == 0 ? true : false;
+//            delayInstance.process(buffer, buffer.getNumSamples(), isMono);
+//        }
         if (!delayBypassParam->get())
         {
-            
             delayInstance.setFeedback(delayFeedbackParamSmoother.getCurrentValue());
             delayInstance.setMix(delayMixParamSmoother.getCurrentValue());
-            delayInstance.setMode(delayModeParam->getIndex() == 0 ? DelayProcessor::Mode::Digital : DelayProcessor::Mode::Tape);
+            using Mode = DelayProcessor::Mode;
+            delayInstance.setMode(delayModeParam->getIndex() == 0 ? Mode::Digital : Mode::Tape);
+            
             bool isSync = delaySyncParam->get();
             delayInstance.setSyncEnabled(isSync);
             if (isSync)
@@ -754,16 +808,34 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
             
             delayInstance.setHostBpm(getPlayHead()->getPosition()->getBpm().orFallback(120.0));
             
-            isMono = delayMonoStereoParam->getIndex() == 0 ? true : false;
-            if (!isMono)
-            {
-                jassert(buffer.getNumChannels() >= 2);
-//                setBusesLayout(juce::AudioChannelSet::stereo());
-            }
+            auto mainInput = getBusBuffer(buffer, true, 0);
+            auto mainOutput = getBusBuffer(buffer, false, 0);
             
-            delayInstance.process(buffer, buffer.getNumSamples(), isMono);
+            const int numSamples = buffer.getNumSamples();
+            const bool isStereoIn = mainInput.getNumChannels() > 1;
+            const bool isStereoOut = mainOutput.getNumChannels() > 1;
+            
+            juce::AudioBuffer<float> workingBuffer;
+            workingBuffer.setSize(2, numSamples);
+            workingBuffer.clear();
+            
+            workingBuffer.copyFrom(0, 0, mainInput.getReadPointer(0), numSamples);
+            workingBuffer.copyFrom(1, 0, mainInput.getReadPointer(isStereoIn ? 1 : 0), numSamples);
+            
+            const bool isMono = delayMonoStereoParam->getIndex() == 0;
+            delayInstance.process(workingBuffer, numSamples, isMono);
+            
+            mainOutput.copyFrom(0, 0, workingBuffer.getReadPointer(0), numSamples);
+            if (isStereoOut)
+                mainOutput.copyFrom(1, 0, workingBuffer.getReadPointer(1), numSamples);
         }
         
+        
+        
+        
+        
+        
+        //========================    OUTPUT GAIN part    ========================
         outputGain.setGainDecibels(outputGainParamSmoother.getCurrentValue());
         applyGain(buffer, outputGain);
         

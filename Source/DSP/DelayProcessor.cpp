@@ -22,6 +22,8 @@ void DelayProcessor::prepare(double newSampleRate, int samplesPerBlock, int numC
     delayBuffer.setSize(2, maxDelaySamples); // Stereo buffer for ping-pong
     delayBuffer.clear();
     writePosition = 0;
+    prevFilteredL = 0.f;
+    prevFilteredR = 0.f;
 }
 
 float DelayProcessor::getDelayInSamples() const
@@ -59,7 +61,6 @@ void DelayProcessor::process(juce::AudioBuffer<float>& buffer, int numSamples, b
 {
     float delaySamples = getDelayInSamples();
     int bufferSize = delayBuffer.getNumSamples();
-    int numInputChannels = buffer.getNumChannels();
 
     // Ensure buffer has 2 channels for ping-pong output
 //    buffer.setSize(2, numSamples, true, true, true);
@@ -71,14 +72,15 @@ void DelayProcessor::process(juce::AudioBuffer<float>& buffer, int numSamples, b
     auto* leftChannelData = buffer.getWritePointer(0);
     auto* rightChannelData = buffer.getNumChannels() > 1 ? buffer.getWritePointer(1) : nullptr;
 
-
-
-    // Static filter states for tape low-pass (consider member variables for thread safety)
-    static float prevFilteredL = 0.0f;
-    static float prevFilteredR = 0.0f;
+    
+//    float prevFilteredL = 0.0f;
+//    float prevFilteredR = 0.0f;
     const float filterCoeff = 0.2f;  // Adjust for tone darkness
 
     int localWritePos = writePosition;
+    
+    auto* readL = buffer.getReadPointer(0);
+    auto* readR = buffer.getReadPointer(1);
 
     for (int i = 0; i < numSamples; ++i)
     {
@@ -99,8 +101,8 @@ void DelayProcessor::process(juce::AudioBuffer<float>& buffer, int numSamples, b
         }
 
 //        float inputSampleL = numInputChannels > 0 ? buffer.getReadPointer(0)[i] : 0.0f;
-        float inputSampleL = buffer.getReadPointer(0)[i];
-        float inputSampleR = (numInputChannels > 1) ? buffer.getReadPointer(1)[i] : inputSampleL;
+        float inputSampleL = readL[i];
+        float inputSampleR = isMono ? inputSampleL : readR [i];
 
         float dryL = inputSampleL * (1.0f - mix);
         float dryR = inputSampleR * (1.0f - mix);
@@ -129,21 +131,21 @@ void DelayProcessor::process(juce::AudioBuffer<float>& buffer, int numSamples, b
         {
             //PingPong
             // Wet output alternates left/right on each repeat
-//            wetL = delayedR * mix;  // Use delayed RIGHT for LEFT output
-//            wetR = delayedL * mix;  // Use delayed LEFT for RIGHT output
+            wetL = delayedR * mix;  // Use delayed RIGHT for LEFT output
+            wetR = delayedL * mix;  // Use delayed LEFT for RIGHT output
 //            wetL = -delayedR * mix;
 //            wetR = delayedL * mix;
-            
-            if (outputToLeft)
-            {
-                wetL = delayedR * mix;   // output delayed right signal on left channel
-                wetR = 0.0f;
-            }
-            else
-            {
-                wetL = 0.0f;
-                wetR = delayedL * mix;   // output delayed left signal on right channel
-            }
+//            
+//            if (outputToLeft)
+//            {
+//                wetL = delayedR * mix * 0.707f;   // output delayed right signal on left channel
+//                wetR = 0.0f;
+//            }
+//            else
+//            {
+//                wetL = 0.0f;
+//                wetR = delayedL * mix * 0.707f;   // output delayed left signal on right channel
+//            }
 
 
             // Cross-feedback: left gets right's delayed + input, right gets left's
