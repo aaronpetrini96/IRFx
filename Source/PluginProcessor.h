@@ -86,7 +86,10 @@ public:
     juce::AudioParameterFloat* highCutFreqParam {nullptr};
     juce::AudioParameterFloat* ir1LevelParam {nullptr};
     juce::AudioParameterFloat* ir2LevelParam {nullptr};
+    juce::AudioParameterFloat* ir1PanParam {nullptr};
+    juce::AudioParameterFloat* ir2PanParam {nullptr};
     juce::AudioParameterBool* irLoaderBypassParam {nullptr};
+    
     
     //TONE STACK
     juce::AudioParameterFloat* lowEQGainParam {nullptr};
@@ -124,6 +127,8 @@ public:
     highCutFreqParamSmoother,
     ir1LevelParamSmoother,
     ir2LevelParamSmoother,
+    ir1PanParamSmoother,
+    ir2PanParamSmoother,
     lowEQGainParamSmoother,
     midEQGainParamSmoother,
     midEQFreqParamSmoother,
@@ -173,10 +178,7 @@ private:
     using Coefficients = juce::dsp::IIR::Coefficients<float>;
     using irEQMonoChain = juce::dsp::ProcessorChain<Filter, Filter>;
     std::array<irEQMonoChain, 2> irEQMonoChainArray;
-//    juce::LinearSmoothedValue<float> smoothedIRBypassValue {1.f},
-//                                     smoothedEQBypassValue {1.f},
-//                                     smoothedDistBypassValue {1.f},
-//                                     smoothedDelayBypassValue {1.f};
+
     
     using toneStackMonoChain = juce::dsp::ProcessorChain<Filter, Filter, Filter>;
     std::array<toneStackMonoChain, 3> toneStackMonoChainAray;

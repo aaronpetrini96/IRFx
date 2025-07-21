@@ -74,6 +74,8 @@ private:
     
     ImageKnob lowCutSlider{"LowCut", audioProcessor.apvts, juce::ParameterID(ParamNames::getIRLowCutName(), versionHint), knobImage, " Hz", 80};
     ImageKnob highCutSlider{"HighCut", audioProcessor.apvts, juce::ParameterID(ParamNames::getIRHighCutName(), versionHint), knobImage, " Hz", 80};
+    ImageKnob ir1PanSlider{"IR1 Pan", audioProcessor.apvts, juce::ParameterID(ParamNames::getIR1PanName(), versionHint), knobImage, " %", 40, true};
+    ImageKnob ir2PanSlider{"IR2 Pan", audioProcessor.apvts, juce::ParameterID(ParamNames::getIR2PanName(), versionHint), knobImage, " %", 40, true};
     
     ImageKnob lowEQGainSlider{"Bass", audioProcessor.apvts, juce::ParameterID(ParamNames::getEQLowGainName(), versionHint), knobImage, " dB", 80, true};
     ImageKnob midEQGainSlider{"Mid", audioProcessor.apvts, juce::ParameterID(ParamNames::getEQMidGainName(), versionHint), knobImage, " dB", 80, true};
@@ -91,6 +93,8 @@ private:
 //    Dials Name Labels
     juce::Label lowCutSliderLabel {"Low Cut"};
     juce::Label highCutSliderLabel {"High Cut"};
+    juce::Label ir1PanSliderLabel {"Pan1"};
+    juce::Label ir2PanSliderLabel {"Pan2"};
     juce::Label lowEQGainSliderLabel {"Bass"};
     juce::Label midEQGainSliderLabel {"Mid"};
     juce::Label midEQFreqSliderLabel {"Mid Freq"};
@@ -105,6 +109,8 @@ private:
     {
         &lowCutSliderLabel,
         &highCutSliderLabel,
+        &ir1PanSliderLabel,
+        &ir2PanSliderLabel,
         &lowEQGainSliderLabel,
         &midEQGainSliderLabel,
         &midEQFreqSliderLabel,

@@ -15,7 +15,6 @@ IRFxAudioProcessor::IRFxAudioProcessor()
      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
                       #if ! JucePlugin_IsSynth
-//                       .withInput  ("Input",  juce::AudioChannelSet::mono(), true)
                        .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
@@ -32,6 +31,8 @@ IRFxAudioProcessor::IRFxAudioProcessor()
         &highCutFreqParam,
         &ir1LevelParam,
         &ir2LevelParam,
+        &ir1PanParam,
+        &ir2PanParam,
         
 //        EQ
         &lowEQGainParam,
@@ -61,6 +62,8 @@ IRFxAudioProcessor::IRFxAudioProcessor()
         &ParamNames::getIRHighCutName,
         &ParamNames::getIR1LevelName,
         &ParamNames::getIR2LevelName,
+        &ParamNames::getIR1PanName,
+        &ParamNames::getIR2PanName,
         
         //        EQ
         &ParamNames::getEQLowGainName,
@@ -225,6 +228,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout IRFxAudioProcessor::createPa
     params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(-60.f, 0.f, 0.1f, 1.f), 0.f));
     name = ParamNames::getIR2LevelName();
     params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(-60.f, 0.f, 0.1f, 1.f), 0.f));
+    name = ParamNames::getIR1PanName();
+    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(-100.f, 100.f, 1.f, 1.f), 0.f));
+    name = ParamNames::getIR2PanName();
+    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(-100.f, 100.f, 1.f, 1.f), 0.f));
     
 //   EQ
     name = ParamNames::getEQBypassName();
@@ -389,6 +396,8 @@ void IRFxAudioProcessor::updateSmootherFromParams(int numSamplesToSkip, Smoother
         highCutFreqParam,
         ir1LevelParam,
         ir2LevelParam,
+        ir1PanParam,
+        ir2PanParam,
         lowEQGainParam,
         midEQGainParam,
         midEQFreqParam,
@@ -427,6 +436,8 @@ std::vector<juce::SmoothedValue<float>*> IRFxAudioProcessor::getSmoothers()
         &highCutFreqParamSmoother,
         &ir1LevelParamSmoother,
         &ir2LevelParamSmoother,
+        &ir1PanParamSmoother,
+        &ir2PanParamSmoother,
         &lowEQGainParamSmoother,
         &midEQGainParamSmoother,
         &midEQFreqParamSmoother,
@@ -731,10 +742,6 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
                 }
             }
         }
-        
-        
-        
-        
         
         
         //========================    OUTPUT GAIN part    ========================

@@ -11,6 +11,8 @@ namespace ParamNames
     inline juce::String getIRHighCutName()    { return "IRHighCut"; }
     inline juce::String getIR1LevelName()    { return "IR1Level"; }
     inline juce::String getIR2LevelName()    { return "IR2Level"; }
+    inline juce::String getIR1PanName()     {return "IR1Pan";}
+    inline juce::String getIR2PanName()     {return "IR2Pan";}
 
     // === EQ ===
     inline juce::String getEQBypassName()     { return "EQBypass"; }
@@ -55,6 +57,8 @@ namespace ParamNames
             getIRHighCutName(),
             getIR1LevelName(),
             getIR2LevelName(),
+            getIR1PanName(),
+            getIR2PanName(),
             getEQBypassName(),
             getEQLowGainName(),
             getEQMidGainName(),
