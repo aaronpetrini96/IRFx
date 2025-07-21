@@ -67,7 +67,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     
 //  DELAY BOXES
     delayMonoStereoBox.addItem("Mono", 1);
-    delayMonoStereoBox.addItem("Ping-Pong", 2);
+    delayMonoStereoBox.addItem("Stereo", 2);
     delayMonoStereoBox.setSelectedId(1);
     delayMonoStereoBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, darkPink);
     delayMonoStereoBox.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);

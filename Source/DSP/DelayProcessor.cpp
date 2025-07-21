@@ -129,23 +129,12 @@ void DelayProcessor::process(juce::AudioBuffer<float>& buffer, int numSamples, b
         }
         else
         {
-            //PingPong
+            //Stereo
             // Wet output alternates left/right on each repeat
-            wetL = delayedR * mix;  // Use delayed RIGHT for LEFT output
-            wetR = delayedL * mix;  // Use delayed LEFT for RIGHT output
-//            wetL = -delayedR * mix;
-//            wetR = delayedL * mix;
-//            
-//            if (outputToLeft)
-//            {
-//                wetL = delayedR * mix * 0.707f;   // output delayed right signal on left channel
-//                wetR = 0.0f;
-//            }
-//            else
-//            {
-//                wetL = 0.0f;
-//                wetR = delayedL * mix * 0.707f;   // output delayed left signal on right channel
-//            }
+//            wetL = delayedR * mix;  // Use delayed RIGHT for LEFT output
+//            wetR = delayedL * mix;  // Use delayed LEFT for RIGHT output
+            wetL = -delayedR * mix * 0.707f; //flip phase
+            wetR = delayedL * mix * 0.707f;
 
 
             // Cross-feedback: left gets right's delayed + input, right gets left's
