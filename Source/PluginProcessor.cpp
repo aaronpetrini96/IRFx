@@ -567,8 +567,6 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     juce::ScopedNoDenormals noDenormals;
     [[maybe_unused]] auto totalNumInputChannels  = getTotalNumInputChannels();
     [[maybe_unused]] auto totalNumOutputChannels = getTotalNumOutputChannels();
-    
-
 
     //========================    IN GAIN part    ========================
     juce::AudioBuffer<float> dryBuffer;
@@ -672,93 +670,10 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
             float mix = (saturationMixParamSmoother.getCurrentValue()) * 0.01f;
             saturationInstance.processBlock(buffer, drive, saturationModeParam->getIndex(), mix);
         }
-        /*
-        if (!saturationBypassParam->get() && drive > 0.f )
-        {
-            juce::dsp::AudioBlock<float> saturationBlock(buffer);
-            juce::dsp::ProcessContextReplacing<float> preSaturationContext(saturationBlock);
-            saturationPreEQ.process(preSaturationContext);
-            
-            float mix = (saturationMixParamSmoother.getCurrentValue()) * 0.01f;
-            
-            std::vector<float> dryBuffer(block.getNumSamples()), wetBuffer(block.getNumSamples());
-            
-            for (size_t ch {0}; ch < saturationBlock.getNumChannels(); ++ch)
-            {
-                auto* samples = block.getChannelPointer(ch);
-                
-                for (size_t i{0}; i < block.getNumSamples(); ++i)
-                {
-                    float dry = samples [i];
-                    dryBuffer[i] = dry;
-                    switch (saturationModeParam->getIndex())
-                    {
-                        case 0:
-                            wetBuffer[i] = neveStyleSaturation(dry, drive);
-                            break;
-                        case 1:
-                            wetBuffer[i] = sslStyleSaturation(dry, drive);
-                            break;
-                        case 2:
-                            wetBuffer[i] = apiStyleSaturation(dry, drive);
-                            break;
-                    }
-                }
-                
-                float dryRMS = computeRMS(dryBuffer.data(), block.getNumSamples());
-                float wetRMS = computeRMS(wetBuffer.data(), block.getNumSamples());
-                float targetRMS = 0.1f;
-                static float smoothedGain = 1.f;
-                static bool gainInitialized = false;
-                
-                float makeUpGain = (wetRMS > 0.0001f) ? targetRMS/wetRMS : 1.f;
-                
-                if (!gainInitialized)
-                {
-                    smoothedGain = makeUpGain * 0.3f;
-                    gainInitialized = true;
-                }
-                else
-                {
-                    float smoothingCoeff = 0.99f;
-                    smoothedGain = smoothedGain * smoothingCoeff + makeUpGain * (1.f - smoothingCoeff);
-                }
-                if (dryRMS < 0.0001f)
-                {
-                    gainInitialized = false;
-                    smoothedGain = 1.0f;
-                }
 
-                for (size_t i{0}; i < block.getNumSamples(); ++i)
-                {
-                    wetBuffer[i] *= smoothedGain;
-                    samples[i] = dryBuffer[i] * (1.0f - mix) + wetBuffer[i] * mix;
-                }
-            }
-            juce::dsp::ProcessContextReplacing<float> postSaturationContext(saturationBlock);
-            saturationPostEQ.process(postSaturationContext);
-        }
-         */
         
         //========================    DELAY part    ========================
-//        if (!delayBypassParam->get())
-//        {
-//            
-//            delayInstance.setFeedback(delayFeedbackParamSmoother.getCurrentValue());
-//            delayInstance.setMix(delayMixParamSmoother.getCurrentValue());
-//            delayInstance.setMode(delayModeParam->getIndex() == 0 ? DelayProcessor::Mode::Digital : DelayProcessor::Mode::Tape);
-//            bool isSync = delaySyncParam->get();
-//            delayInstance.setSyncEnabled(isSync);
-//            if (isSync)
-//                delayInstance.setSubdivision(delayNoteParam->getIndex());
-//            else
-//                delayInstance.setDelayTime(delayTimeParamSmoother.getCurrentValue());
-//            
-//            delayInstance.setHostBpm(getPlayHead()->getPosition()->getBpm().orFallback(120.0));
-//            
-//            isMono = delayMonoStereoParam->getIndex() == 0 ? true : false;
-//            delayInstance.process(buffer, buffer.getNumSamples(), isMono);
-//        }
+
         if (!delayBypassParam->get())
         {
             delayInstance.setFeedback(delayFeedbackParamSmoother.getCurrentValue());
@@ -795,6 +710,26 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
             mainOutput.copyFrom(0, 0, workingBuffer.getReadPointer(0), numSamples);
             if (isStereoOut)
                 mainOutput.copyFrom(1, 0, workingBuffer.getReadPointer(1), numSamples);
+        }
+        else
+        {
+            const int numSamples = buffer.getNumSamples();
+            
+            if (totalNumInputChannels == 1 && totalNumOutputChannels == 2)
+            {
+                auto* input = buffer.getReadPointer(0);
+                
+                buffer.copyFrom(0, 0, input, numSamples);
+                buffer.copyFrom(1, 0, input, numSamples);
+            }
+            else
+            {
+                for (int ch = 0; ch < juce::jmin(totalNumInputChannels, totalNumOutputChannels); ++ch)
+                {
+                    auto* input = buffer.getReadPointer(ch);
+                    buffer.copyFrom(ch, 0, input, numSamples);
+                }
+            }
         }
         
         
