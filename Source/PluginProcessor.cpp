@@ -475,40 +475,7 @@ void IRFxAudioProcessor::releaseResources()
 //}
 //#endif
 
-//bool IRFxAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
-//{
-//    if (isMono)
-//        {
-//            // Mono output supported
-//            return layouts.getMainOutputChannelSet() == juce::AudioChannelSet::mono()
-//                || layouts.getMainOutputChannelSet() == juce::AudioChannelSet::stereo(); // you can allow stereo output too
-//        }
-//        else
-//        {
-//            // Stereo output required for ping-pong
-//            return layouts.getMainOutputChannelSet() == juce::AudioChannelSet::stereo();
-//        }
-//}
 
-//bool IRFxAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) const
-//{
-//    // Only support configurations with 1 or 2 input/output channels
-//    const auto& mainInput  = layouts.getChannelSet(true,  0);
-//    const auto& mainOutput = layouts.getChannelSet(false, 0);
-//
-//    // Allow: Mono->Mono, Mono->Stereo, Stereo->Stereo
-//    if ((mainInput == juce::AudioChannelSet::mono() &&
-//         (mainOutput == juce::AudioChannelSet::mono() ||
-//          mainOutput == juce::AudioChannelSet::stereo())) ||
-//
-//        (mainInput == juce::AudioChannelSet::stereo() &&
-//         mainOutput == juce::AudioChannelSet::stereo()))
-//    {
-//        return true;
-//    }
-//
-//    return false;
-//}
 
 bool IRFxAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) const
 {
