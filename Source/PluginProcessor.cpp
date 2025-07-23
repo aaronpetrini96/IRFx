@@ -349,7 +349,14 @@ void IRFxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     spec.maximumBlockSize = samplesPerBlock;
     spec.sampleRate = sampleRate;
     spec.numChannels = getTotalNumOutputChannels();
-    DBG("Channels: " << getTotalNumOutputChannels());
+//    DBG("Channels: " << getTotalNumOutputChannels());
+    
+    if (deferredIR1File.existsAsFile())
+            loadIR1(deferredIR1File);
+
+    if (deferredIR2File.existsAsFile())
+        loadIR2(deferredIR2File);
+    
     irLoader1 = std::make_unique<juce::dsp::Convolution>();
     irLoader2 = std::make_unique<juce::dsp::Convolution>();
     irLoader1->reset();
@@ -504,6 +511,16 @@ bool IRFxAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) cons
 
 void IRFxAudioProcessor::loadIR1(const juce::File &irFile)
 {
+    // Store the file path for later use
+    apvts.state.setProperty("IR1FilePath", irFile.getFullPathName(), nullptr);
+    
+    if (spec.sampleRate == 0)
+    {
+        // Can't prepare yet; defer loading
+        deferredIR1File = irFile;
+        return;
+    }
+    
     auto newIR = std::make_unique<juce::dsp::Convolution>();
     newIR->loadImpulseResponse(irFile,
                                juce::dsp::Convolution::Stereo::yes,
@@ -518,12 +535,22 @@ void IRFxAudioProcessor::loadIR1(const juce::File &irFile)
     ir1PendingUpdate.store(true);
     isIR1Loaded = true;
     
-    apvts.state.setProperty("IR1FilePath", irFile.getFullPathName(), nullptr);
+//    apvts.state.setProperty("IR1FilePath", irFile.getFullPathName(), nullptr);
 }
 
 
 void IRFxAudioProcessor::loadIR2(const juce::File& irFile)
 {
+    // Store the file path for later use
+    apvts.state.setProperty("IR2FilePath", irFile.getFullPathName(), nullptr);
+    
+    if (spec.sampleRate == 0)
+    {
+        // Can't prepare yet; defer loading
+        deferredIR2File = irFile;
+        return;
+    }
+    
     auto newIR = std::make_unique<juce::dsp::Convolution>();
     newIR->loadImpulseResponse(irFile,
                                juce::dsp::Convolution::Stereo::yes,
@@ -537,7 +564,7 @@ void IRFxAudioProcessor::loadIR2(const juce::File& irFile)
     ir2PendingUpdate.store(true);
     isIR2Loaded = true;
 
-    apvts.state.setProperty("IR2FilePath", irFile.getFullPathName(), nullptr);
+//    apvts.state.setProperty("IR2FilePath", irFile.getFullPathName(), nullptr);
 }
 
 
@@ -620,6 +647,9 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
                 juce::dsp::AudioBlock<float> block2(tempBuffer);
                 irLoader1->process(juce::dsp::ProcessContextReplacing<float>(block1));
                 irLoader2->process(juce::dsp::ProcessContextReplacing<float>(block2));
+                
+                applyEqualPowerPan(buffer, ir1PanParamSmoother.getCurrentValue() * 0.01f);
+                applyEqualPowerPan(tempBuffer, ir2PanParamSmoother.getCurrentValue() * 0.01f);
 
 
                 for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
@@ -634,6 +664,9 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
                 buffer.applyGain(juce::Decibels::decibelsToGain(ir1LevelParamSmoother.getCurrentValue()));
                 juce::dsp::AudioBlock<float> block(buffer);
                 irLoader1->process(juce::dsp::ProcessContextReplacing<float>(block));
+                
+                applyEqualPowerPan(buffer, ir1PanParamSmoother.getCurrentValue() * 0.01f);
+                
                 buffer.applyGain(juce::Decibels::decibelsToGain(9.f));
             }
             else if (useIR2)
@@ -643,6 +676,9 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
                 buffer.applyGain(juce::Decibels::decibelsToGain(ir2LevelParamSmoother.getCurrentValue()));
                 juce::dsp::AudioBlock<float> block(buffer);
                 irLoader2->process(juce::dsp::ProcessContextReplacing<float>(block));
+                
+                applyEqualPowerPan(buffer, ir2PanParamSmoother.getCurrentValue() * 0.01);
+                
                 buffer.applyGain(juce::Decibels::decibelsToGain(9.f));
             }
 

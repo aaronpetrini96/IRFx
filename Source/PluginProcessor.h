@@ -12,6 +12,7 @@
 #include "ParamNames.h"
 #include "DSP/Saturation.h"
 #include "DSP/DelayProcessor.h"
+#include "DSP/EqualPowerPan.h"
 
 //==============================================================================
 /**
@@ -155,6 +156,9 @@ public:
     std::atomic<bool> ir2PendingUpdate { false };
     juce::File irFile2ToLoad;
     std::unique_ptr<juce::dsp::Convolution> pendingIR2;
+    juce::File deferredIR1File;
+    juce::File deferredIR2File;
+
 
 
 

@@ -15,6 +15,7 @@
               file="Source/DSP/DelayProcessor.cpp"/>
         <FILE id="emD7HM" name="DelayProcessor.h" compile="0" resource="0"
               file="Source/DSP/DelayProcessor.h"/>
+        <FILE id="uOpSp1" name="EqualPowerPan.h" compile="0" resource="0" file="Source/DSP/EqualPowerPan.h"/>
         <FILE id="HrDYS7" name="Saturation.cpp" compile="1" resource="0" file="Source/DSP/Saturation.cpp"/>
         <FILE id="sQlX02" name="Saturation.h" compile="0" resource="0" file="Source/DSP/Saturation.h"/>
       </GROUP>

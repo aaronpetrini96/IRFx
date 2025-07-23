@@ -332,8 +332,9 @@ void IRFxAudioProcessorEditor::resized()
     highCutSlider.setBounds(IRGroup.getRight() - dialSize * 0.74, lowCutSlider.getY(), dialSize * 0.75, dialSize * 0.75);
     highCutSliderLabel.setBounds(highCutSlider.getX(), highCutSlider.getY() * 0.85, labelWidth, labelHeight);
     
-    ir1PanSlider.setBounds((IRGroup.getWidth() - dialSize * 0.25) * 0.5, lowCutSlider.getY() * 0.9, dialSize * 0.35, dialSize * 0.35);
-//    ir2PanSlider.setBounds((IRGroup.getWidth() - dialSize * 0.25) * 0.5, ir1PanSlider.getBottom() * JUCE_LIVE_CONSTANT(1.01), dialSize * 0.35, dialSize * 0.35);
+    auto irPanDialSize = dialSize * 0.35;
+    ir1PanSlider.setBounds((IRGroup.getWidth() - dialSize * 0.25) * 0.5, lowCutSlider.getY() * 0.9, irPanDialSize, irPanDialSize);
+    ir2PanSlider.setBounds((IRGroup.getWidth() - dialSize * 0.25) * 0.5, ir1PanSlider.getBottom() * 1.03, irPanDialSize, irPanDialSize);
     
 //    EQ GROUP
     eqBypassButton.setBounds(EQGroup.getWidth() * 0.9, EQGroup.getHeight() * 0.05, bypassButtonSize, bypassButtonSize);
