@@ -158,9 +158,8 @@ public:
     std::unique_ptr<juce::dsp::Convolution> pendingIR2;
     juce::File deferredIR1File;
     juce::File deferredIR2File;
-
-
-
+    
+    bool shouldDisplayPanDials {false};
 
 private:
     
@@ -194,8 +193,7 @@ private:
 
     DelayProcessor delayInstance;
     bool isMono = true;
-    
-    
+
     template<typename ParamType, typename Params, typename Funcs>
     void initCachedParams(Params paramsArray, Funcs funcsArray)
     {

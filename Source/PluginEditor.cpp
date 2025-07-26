@@ -238,6 +238,11 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     delayNoteKnob.setVisible(false);
     restoreLoadedIRFiles();
     updateDelaySyncState();
+    if (!audioProcessor.shouldDisplayPanDials)
+    {
+        ir1PanSlider.setVisible(false);
+        ir2PanSlider.setVisible(false);
+    }
     
     setSize (600, 650);
 }
@@ -471,6 +476,18 @@ void IRFxAudioProcessorEditor::timerCallback()
     sat1Button.setToggleState(currentSatMode == 0, juce::dontSendNotification);
     sat2Button.setToggleState(currentSatMode == 1, juce::dontSendNotification);
     sat3Button.setToggleState(currentSatMode == 2, juce::dontSendNotification);
+    
+
+    if (audioProcessor.shouldDisplayPanDials)
+    {
+        ir1PanSlider.setVisible(true);
+        ir2PanSlider.setVisible(true);
+    }
+    else
+    {
+        ir1PanSlider.setVisible(false);
+        ir2PanSlider.setVisible(false);
+    }
 
 
 // === Clipping light logic ===

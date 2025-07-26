@@ -751,7 +751,8 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
             workingBuffer.copyFrom(0, 0, mainInput.getReadPointer(0), numSamples);
             workingBuffer.copyFrom(1, 0, mainInput.getReadPointer(isStereoIn ? 1 : 0), numSamples);
             
-            const bool isMono = delayMonoStereoParam->getIndex() == 0;
+            isMono = delayMonoStereoParam->getIndex() == 0;
+            shouldDisplayPanDials = !isMono;
             delayInstance.process(workingBuffer, numSamples, isMono);
             
             mainOutput.copyFrom(0, 0, workingBuffer.getReadPointer(0), numSamples);
