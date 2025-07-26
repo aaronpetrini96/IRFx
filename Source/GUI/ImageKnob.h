@@ -11,7 +11,8 @@ public:
                const juce::Image& knobImage,
                const juce::String& suffix,
                int size,
-               bool drawFromMiddle = false);
+               bool drawFromMiddle = false,
+               bool drawLabel = true);
     
     ~ImageKnob() override;
     

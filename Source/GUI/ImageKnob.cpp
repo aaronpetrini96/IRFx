@@ -1,6 +1,6 @@
 #include "ImageKnob.h"
 
-ImageKnob::ImageKnob (const juce::String& sliderName, juce::AudioProcessorValueTreeState& apvts, const juce::ParameterID& parameterID, const juce::Image& knobImage, const juce::String& suffix, int size, bool drawFromMiddle )
+ImageKnob::ImageKnob (const juce::String& sliderName, juce::AudioProcessorValueTreeState& apvts, const juce::ParameterID& parameterID, const juce::Image& knobImage, const juce::String& suffix, int size, bool drawFromMiddle, bool drawLabel )
 : attachment(apvts, parameterID.getParamID(), slider)
 {
     imageKnobLookAndFeel = std::make_unique<ImageKnobLookAndFeel>(knobImage);
@@ -37,7 +37,8 @@ ImageKnob::ImageKnob (const juce::String& sliderName, juce::AudioProcessorValueT
     valueLabel.setJustificationType(juce::Justification::centred);
     valueLabel.setColour(juce::Label::textColourId, juce::Colours::white.darker(0.2f));
     valueLabel.setSize(size, 20);
-    addAndMakeVisible(valueLabel);
+    if(drawLabel)
+        addAndMakeVisible(valueLabel);
     valueLabel.setText(juce::String(slider.getValue(), 0) + suffix, juce::dontSendNotification);
     
     slider.onValueChange();

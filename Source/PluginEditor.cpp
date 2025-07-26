@@ -98,7 +98,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
 //    IR Loaders Buttons General setup
     for (auto button : irLoaderButtons)
     {
-        button->setSize(150, 35);
+        button->setSize(115, 35);
         button->setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white.withAlpha(0.5f));
     }
 
@@ -317,7 +317,7 @@ void IRFxAudioProcessorEditor::resized()
 //    IR GROUP
     irBypassButton.setBounds(IRGroup.getWidth() * 0.9, IRGroup.getHeight() * 0.05, bypassButtonSize, bypassButtonSize);
 
-    irLoader1Button.setBounds(IRGroup.getWidth() * 0.1, IRGroup.getHeight() * 0.16, irLoaderButtonWidth , irLoaderButtonHeight);
+    irLoader1Button.setBounds(IRGroup.getWidth() * 0.09, IRGroup.getHeight() * 0.16, irLoaderButtonWidth , irLoaderButtonHeight);
     unloadIR1Button.setBounds(irLoader1Button.getRight() * 1.05, irLoader1Button.getY() + (irLoaderButtonHeight - unloadIRButtonSize) * 0.5, unloadIRButtonSize, unloadIRButtonSize);
     muteIR1Button.setBounds(unloadIR1Button.getRight() * 1.05, irLoader1Button.getY() + (irLoaderButtonHeight - muteIRButtonSize) * 0.5, muteIRButtonSize, muteIRButtonSize);
     ir1LevelSlider.setBounds(irLoader1Button.getX(), IRGroup.getHeight() * 0.055, irLevelSliderWidth, irLevelSliderHeight);
@@ -327,14 +327,14 @@ void IRFxAudioProcessorEditor::resized()
     muteIR2Button.setBounds(unloadIR2Button.getRight() * 1.05, irLoader2Button.getY() + (irLoaderButtonHeight - muteIRButtonSize) * 0.5, muteIRButtonSize, muteIRButtonSize);
     ir2LevelSlider.setBounds(irLoader2Button.getX(), irLoader2Button.getY() * 1.4, irLevelSliderWidth, irLevelSliderHeight);
     
-    lowCutSlider.setBounds(IRGroup.getWidth() * 0.075, IRGroup.getHeight() * 0.65, dialSize * 0.75, dialSize * 0.75);
+    lowCutSlider.setBounds(IRGroup.getWidth() * 0.11, IRGroup.getHeight() * 0.65, dialSize * 0.75, dialSize * 0.75);
     lowCutSliderLabel.setBounds(lowCutSlider.getX(), lowCutSlider.getY() * 0.85, labelWidth, labelHeight);
-    highCutSlider.setBounds(IRGroup.getRight() - dialSize * 0.74, lowCutSlider.getY(), dialSize * 0.75, dialSize * 0.75);
+    highCutSlider.setBounds(IRGroup.getRight() - dialSize * 0.85, lowCutSlider.getY(), dialSize * 0.75, dialSize * 0.75);
     highCutSliderLabel.setBounds(highCutSlider.getX(), highCutSlider.getY() * 0.85, labelWidth, labelHeight);
     
     auto irPanDialSize = dialSize * 0.35;
-    ir1PanSlider.setBounds((IRGroup.getWidth() - dialSize * 0.25) * 0.5, lowCutSlider.getY() * 0.9, irPanDialSize, irPanDialSize);
-    ir2PanSlider.setBounds((IRGroup.getWidth() - dialSize * 0.25) * 0.5, ir1PanSlider.getBottom() * 1.03, irPanDialSize, irPanDialSize);
+    ir1PanSlider.setBounds(muteIR1Button.getRight() * 1.04, muteIR1Button.getY(), irPanDialSize, irPanDialSize);
+    ir2PanSlider.setBounds(ir1PanSlider.getX(), muteIR2Button.getY(), irPanDialSize, irPanDialSize);
     
 //    EQ GROUP
     eqBypassButton.setBounds(EQGroup.getWidth() * 0.9, EQGroup.getHeight() * 0.05, bypassButtonSize, bypassButtonSize);

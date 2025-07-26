@@ -349,10 +349,9 @@ void IRFxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     spec.maximumBlockSize = samplesPerBlock;
     spec.sampleRate = sampleRate;
     spec.numChannels = getTotalNumOutputChannels();
-//    DBG("Channels: " << getTotalNumOutputChannels());
     
     if (deferredIR1File.existsAsFile())
-            loadIR1(deferredIR1File);
+        loadIR1(deferredIR1File);
 
     if (deferredIR2File.existsAsFile())
         loadIR2(deferredIR2File);
@@ -514,12 +513,15 @@ void IRFxAudioProcessor::loadIR1(const juce::File &irFile)
     // Store the file path for later use
     apvts.state.setProperty("IR1FilePath", irFile.getFullPathName(), nullptr);
     
+    if (!irFile.existsAsFile())
+        return;
+
     if (spec.sampleRate == 0)
     {
-        // Can't prepare yet; defer loading
         deferredIR1File = irFile;
         return;
     }
+
     
     auto newIR = std::make_unique<juce::dsp::Convolution>();
     newIR->loadImpulseResponse(irFile,
@@ -534,8 +536,6 @@ void IRFxAudioProcessor::loadIR1(const juce::File &irFile)
     pendingIR1 = std::move(newIR);
     ir1PendingUpdate.store(true);
     isIR1Loaded = true;
-    
-//    apvts.state.setProperty("IR1FilePath", irFile.getFullPathName(), nullptr);
 }
 
 
@@ -544,9 +544,11 @@ void IRFxAudioProcessor::loadIR2(const juce::File& irFile)
     // Store the file path for later use
     apvts.state.setProperty("IR2FilePath", irFile.getFullPathName(), nullptr);
     
+    if (!irFile.existsAsFile())
+        return;
+
     if (spec.sampleRate == 0)
     {
-        // Can't prepare yet; defer loading
         deferredIR2File = irFile;
         return;
     }
@@ -563,8 +565,6 @@ void IRFxAudioProcessor::loadIR2(const juce::File& irFile)
     pendingIR2 = std::move(newIR);
     ir2PendingUpdate.store(true);
     isIR2Loaded = true;
-
-//    apvts.state.setProperty("IR2FilePath", irFile.getFullPathName(), nullptr);
 }
 
 
@@ -813,6 +813,7 @@ void IRFxAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
     copyXmlToBinary(*xml, destData);
 }
 
+
 void IRFxAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     std::unique_ptr<juce::XmlElement> xml (getXmlFromBinary(data, sizeInBytes));
@@ -820,19 +821,13 @@ void IRFxAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
     {
         juce::ValueTree state = juce::ValueTree::fromXml(*xml);
         apvts.replaceState(state);
-        if (auto* ir1Path = apvts.state.getPropertyPointer("IR1FilePath"))
-        {
-            juce::File file(*ir1Path);
-            if (file.existsAsFile())
-                loadIR1(file);
-        }
 
+        // Just cache file path, don't try to load yet!
+        if (auto* ir1Path = apvts.state.getPropertyPointer("IR1FilePath"))
+            deferredIR1File = juce::File(*ir1Path);
+        
         if (auto* ir2Path = apvts.state.getPropertyPointer("IR2FilePath"))
-        {
-            juce::File file(*ir2Path);
-            if (file.existsAsFile())
-                loadIR2(file);
-        }
+            deferredIR2File = juce::File(*ir2Path);
     }
 }
 

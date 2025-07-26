@@ -74,8 +74,8 @@ private:
     
     ImageKnob lowCutSlider{"LowCut", audioProcessor.apvts, juce::ParameterID(ParamNames::getIRLowCutName(), versionHint), knobImage, " Hz", 80};
     ImageKnob highCutSlider{"HighCut", audioProcessor.apvts, juce::ParameterID(ParamNames::getIRHighCutName(), versionHint), knobImage, " Hz", 80};
-    ImageKnob ir1PanSlider{"IR1 Pan", audioProcessor.apvts, juce::ParameterID(ParamNames::getIR1PanName(), versionHint), knobImage, " %", 40, true};
-    ImageKnob ir2PanSlider{"IR2 Pan", audioProcessor.apvts, juce::ParameterID(ParamNames::getIR2PanName(), versionHint), knobImage, " %", 40, true};
+    ImageKnob ir1PanSlider{"IR1 Pan", audioProcessor.apvts, juce::ParameterID(ParamNames::getIR1PanName(), versionHint), knobImage, " %", 35, true, false};
+    ImageKnob ir2PanSlider{"IR2 Pan", audioProcessor.apvts, juce::ParameterID(ParamNames::getIR2PanName(), versionHint), knobImage, " %", 35, true, false};
     
     ImageKnob lowEQGainSlider{"Bass", audioProcessor.apvts, juce::ParameterID(ParamNames::getEQLowGainName(), versionHint), knobImage, " dB", 80, true};
     ImageKnob midEQGainSlider{"Mid", audioProcessor.apvts, juce::ParameterID(ParamNames::getEQMidGainName(), versionHint), knobImage, " dB", 80, true};
