@@ -13,39 +13,37 @@
 
 /**
  * Applies equal-power panning to a buffer.
- * Pan range: -1.0 (full left) to +1.0 (full right), 0.0 is center.
- * - If the buffer is mono, it will be expanded to stereo.
- * - If the buffer is stereo, left and right gain will be applied directly.
+ * Pan range: -1.0 (left) to +1.0 (right), 0.0 is center.
+ * Expands mono to stereo if needed.
  */
 inline void applyEqualPowerPan(juce::AudioBuffer<float>& buffer, float pan)
 {
-    // Clamp pan
+    // Clamp pan value
     pan = juce::jlimit(-1.0f, 1.0f, pan);
 
-    // Convert pan to equal-power gains
-    const float angle = 0.5f * juce::MathConstants<float>::pi * (pan + 1.0f);
-    const float leftGain = std::cos(angle);
-    const float rightGain = std::sin(angle);
+    // Convert pan value to angle between 45° (left) and 135° (right)
+    const float angle = (juce::MathConstants<float>::pi * 0.25f) * (1.0f - pan); // Left: pi/2, Right: 0
+    const float leftGain = std::sin(angle);
+    const float rightGain = std::cos(angle);
 
     const int numSamples = buffer.getNumSamples();
     const int numChannels = buffer.getNumChannels();
 
     if (numChannels == 1)
     {
-        // Expand mono to stereo
+        // Expand to stereo
         juce::AudioBuffer<float> stereoBuffer(2, numSamples);
         stereoBuffer.clear();
 
-        auto* monoData = buffer.getReadPointer(0);
-        stereoBuffer.copyFrom(0, 0, monoData, numSamples); // Left
-        stereoBuffer.copyFrom(1, 0, monoData, numSamples); // Right
+        const float* mono = buffer.getReadPointer(0);
+
+        stereoBuffer.copyFrom(0, 0, mono, numSamples); // Left
+        stereoBuffer.copyFrom(1, 0, mono, numSamples); // Right
 
         stereoBuffer.applyGain(0, 0, numSamples, leftGain);
         stereoBuffer.applyGain(1, 0, numSamples, rightGain);
 
-        buffer.setSize(2, numSamples, false, false, true);
-        buffer.copyFrom(0, 0, stereoBuffer.getReadPointer(0), numSamples);
-        buffer.copyFrom(1, 0, stereoBuffer.getReadPointer(1), numSamples);
+        buffer = std::move(stereoBuffer); // Replace original
     }
     else if (numChannels >= 2)
     {
