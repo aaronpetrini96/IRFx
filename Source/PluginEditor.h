@@ -179,6 +179,10 @@ private:
     juce::TextButton savePresetButton {"Save"};
     void setPresetButtonStyle(juce::TextButton&);
     
+//    OUTPUT MONO/STEREO
+    juce::ComboBox outputMonoStereoBox;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> outputMonoStereoBoxAttachment;
+    
 //    SCREW IMAGE
     juce::Image screwImage = juce::ImageCache::getFromMemory(BinaryData::screw_png, BinaryData::screw_pngSize);
 

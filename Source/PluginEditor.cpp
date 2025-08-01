@@ -18,6 +18,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     addAndMakeVisible(inputGainSlider);
     addAndMakeVisible(outputGainSlider);
     addAndMakeVisible(generalBypassButton);
+    addAndMakeVisible(outputMonoStereoBox);
 
 //    GROUP GENERAL SETTINGS
     IRGroup.setText("IR Loader");
@@ -66,8 +67,8 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     
     
 //  DELAY BOXES
-    delayMonoStereoBox.addItem("Mono", 1);
-    delayMonoStereoBox.addItem("Stereo", 2);
+    delayMonoStereoBox.addItem("Centre", 1);
+    delayMonoStereoBox.addItem("Wide", 2);
     delayMonoStereoBox.setSelectedId(1);
     delayMonoStereoBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, darkPink);
     delayMonoStereoBox.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
@@ -84,6 +85,15 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     delayModeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, ParamNames::getDelayModeName(), delayModeBox);
     
     
+//    OUTPUT BOXES
+    outputMonoStereoBox.addItem("Mono", 1);
+    outputMonoStereoBox.addItem("Stereo", 2);
+    outputMonoStereoBox.setSelectedId(1);
+    outputMonoStereoBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colour(100, 100, 110).darker(0.5f));
+    outputMonoStereoBox.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
+    outputMonoStereoBox.setLookAndFeel(ComboBoxLookAndFeel::get());
+    outputMonoStereoBoxAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, ParamNames::getOutputMonoStereoName(), outputMonoStereoBox);
+    
     
 //    DIAL'S LABELS GENERAL SETUP
     for (auto label : dialLabels)
@@ -98,7 +108,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
 //    IR Loaders Buttons General setup
     for (auto button : irLoaderButtons)
     {
-        button->setSize(115, 35);
+        button->setSize(115, 40);
         button->setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white.withAlpha(0.5f));
     }
 
@@ -238,7 +248,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     delayNoteKnob.setVisible(false);
     restoreLoadedIRFiles();
     updateDelaySyncState();
-    if (!audioProcessor.shouldDisplayPanDials)
+    if (!audioProcessor.outputIsStereo)
     {
         ir1PanSlider.setVisible(false);
         ir2PanSlider.setVisible(false);
@@ -316,8 +326,10 @@ void IRFxAudioProcessorEditor::resized()
     
     
 //   PRESET BOX
-    presetBox.setBounds(totalBounds.getWidth() * 0.31, totalBounds.getHeight() * 0.955, boundsWidth * 0.25 , boundsWidth * 0.04);
+    presetBox.setBounds(totalBounds.getWidth() * 0.285, totalBounds.getHeight() * 0.955, boundsWidth * 0.25 , boundsWidth * 0.04);
     savePresetButton.setBounds(presetBox.getRight() * 1.05, presetBox.getY(), presetBox.getWidth() * 0.5, presetBox.getHeight());
+    
+    outputMonoStereoBox.setBounds(savePresetButton.getRight() * 1.035, savePresetButton.getY(), savePresetButton.getWidth(), savePresetButton.getHeight());
     
 //    IR GROUP
     irBypassButton.setBounds(IRGroup.getWidth() * 0.9, IRGroup.getHeight() * 0.05, bypassButtonSize, bypassButtonSize);
@@ -330,7 +342,7 @@ void IRFxAudioProcessorEditor::resized()
     irLoader2Button.setBounds(irLoader1Button.getX(), irLoader1Button.getBottom() * 1.1, irLoaderButtonWidth, irLoaderButtonHeight);
     unloadIR2Button.setBounds(unloadIR1Button.getX(), irLoader2Button.getY() + (irLoaderButtonHeight - unloadIRButtonSize) * 0.5, unloadIRButtonSize, unloadIRButtonSize);
     muteIR2Button.setBounds(unloadIR2Button.getRight() * 1.05, irLoader2Button.getY() + (irLoaderButtonHeight - muteIRButtonSize) * 0.5, muteIRButtonSize, muteIRButtonSize);
-    ir2LevelSlider.setBounds(irLoader2Button.getX(), irLoader2Button.getY() * 1.4, irLevelSliderWidth, irLevelSliderHeight);
+    ir2LevelSlider.setBounds(irLoader2Button.getX(), irLoader2Button.getY() * 1.45, irLevelSliderWidth, irLevelSliderHeight);
     
     lowCutSlider.setBounds(IRGroup.getWidth() * 0.11, IRGroup.getHeight() * 0.65, dialSize * 0.75, dialSize * 0.75);
     lowCutSliderLabel.setBounds(lowCutSlider.getX(), lowCutSlider.getY() * 0.85, labelWidth, labelHeight);
@@ -382,7 +394,7 @@ void IRFxAudioProcessorEditor::resized()
     inputGainSlider.setBounds(IRGroup.getX(), distGroup.getBottom() * 0.98, inputGainSlider.getWidth(), inputGainSlider.getHeight());
     outputGainSlider.setBounds(delayGroup.getX() * 1.09, inputGainSlider.getY(), outputGainSlider.getWidth(), outputGainSlider.getHeight());
     
-    generalBypassButton.setBounds(savePresetButton.getRight() * 1.16, savePresetButton.getY(), bypassButtonSize, bypassButtonSize);
+    generalBypassButton.setBounds(outputMonoStereoBox.getRight() * 1.065, outputMonoStereoBox.getY() * 1.0025, bypassButtonSize, bypassButtonSize);
 
 }
 
@@ -478,7 +490,7 @@ void IRFxAudioProcessorEditor::timerCallback()
     sat3Button.setToggleState(currentSatMode == 2, juce::dontSendNotification);
     
 
-    if (audioProcessor.shouldDisplayPanDials)
+    if (audioProcessor.outputIsStereo)
     {
         ir1PanSlider.setVisible(true);
         ir2PanSlider.setVisible(true);
@@ -487,6 +499,10 @@ void IRFxAudioProcessorEditor::timerCallback()
     {
         ir1PanSlider.setVisible(false);
         ir2PanSlider.setVisible(false);
+    }
+    
+    if (!audioProcessor.delayIsMono) {
+        outputMonoStereoBox.setSelectedItemIndex(1);
     }
 
 
@@ -581,5 +597,6 @@ void IRFxAudioProcessorEditor::setPresetButtonStyle(juce::TextButton& button)
     button.setColour(juce::ComboBox::outlineColourId, juce::Colours::transparentBlack);
     button.setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colours::white);
     button.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white);
-    button.setSize(25, 25);
+//    button.setSize(25, 25);
+    button.setSize(25, presetBox.getHeight());
 }

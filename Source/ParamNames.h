@@ -44,6 +44,7 @@ namespace ParamNames
     
     // === General ===
     inline juce::String getGeneralBypassName()  { return "PluginBypass"; }
+    inline juce::String getOutputMonoStereoName() {return "OutputMonoStereo";}
 
 
 
@@ -79,6 +80,7 @@ namespace ParamNames
             getInGainName(),
             getOutGainName(),
             getGeneralBypassName(),
+            getOutputMonoStereoName(),
         };
     }
 }

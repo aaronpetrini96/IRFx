@@ -19,48 +19,48 @@
 */
 class IRFxAudioProcessor  : public juce::AudioProcessor
 {
-public:
+    public:
     //==============================================================================
     IRFxAudioProcessor();
     ~IRFxAudioProcessor() override;
-
+    
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
-
-   #ifndef JucePlugin_PreferredChannelConfigurations
+    
+#ifndef JucePlugin_PreferredChannelConfigurations
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
-   #endif
-
+#endif
+    
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
-
+    
     //==============================================================================
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override;
-
+    
     //==============================================================================
     const juce::String getName() const override;
-
+    
     bool acceptsMidi() const override;
     bool producesMidi() const override;
     bool isMidiEffect() const override;
     double getTailLengthSeconds() const override;
-
+    
     //==============================================================================
     int getNumPrograms() override;
     int getCurrentProgram() override;
     void setCurrentProgram (int index) override;
     const juce::String getProgramName (int index) override;
     void changeProgramName (int index, const juce::String& newName) override;
-
+    
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
-       
+    
     //======================DSP FUNCTIONS==========================================
     
     void loadIR1(const juce::File&);
     void loadIR2(const juce::File&);
-//    void checkAndLoadPendingIRs();
+    //    void checkAndLoadPendingIRs();
     bool isIR1Loaded {false}, isIR2Loaded {false};
     bool isIR1Muted {false}, isIR2Muted {false};
     
@@ -114,13 +114,14 @@ public:
     juce::AudioParameterBool* delaySyncParam {nullptr};
     juce::AudioParameterChoice* delayNoteParam {nullptr};
     juce::AudioParameterBool* delayBypassParam{nullptr};
-
+    
     
     //IN-OUT GAIN
     juce::AudioParameterFloat* inputGainParam {nullptr};
     juce::AudioParameterFloat* outputGainParam {nullptr};
     
     juce::AudioParameterBool* pluginBypassParam {nullptr};
+    juce::AudioParameterChoice* outputMonoStereoParam {nullptr};
     
     //======================= SMOOTHED PARAMS ================================================
     juce::SmoothedValue<float>
@@ -148,7 +149,7 @@ public:
     std::atomic<bool> clipFlagIn { false };
     std::atomic<bool> clipFlagOut { false };
     
-
+    
     
     std::atomic<bool> ir1PendingUpdate { false };
     juce::File irFile1ToLoad;
@@ -159,7 +160,8 @@ public:
     juce::File deferredIR1File;
     juce::File deferredIR2File;
     
-    bool shouldDisplayPanDials {false};
+    bool outputIsStereo {false};
+    bool delayIsMono {true};
 
 private:
     
@@ -192,7 +194,7 @@ private:
 
 
     DelayProcessor delayInstance;
-    bool isMono = true;
+    
 
     template<typename ParamType, typename Params, typename Funcs>
     void initCachedParams(Params paramsArray, Funcs funcsArray)

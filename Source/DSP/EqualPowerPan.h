@@ -47,6 +47,19 @@ inline void applyEqualPowerPan(juce::AudioBuffer<float>& buffer, float pan)
     }
     else if (numChannels >= 2)
     {
+        // Handle pseudo-mono: one channel has signal, one is silent
+        const float leftLevel  = buffer.getRMSLevel(0, 0, numSamples);
+        const float rightLevel = buffer.getRMSLevel(1, 0, numSamples);
+
+        if (leftLevel > 0.0001f && rightLevel < 0.0001f)
+        {
+            buffer.copyFrom(1, 0, buffer, 0, 0, numSamples); // duplicate L to R
+        }
+        else if (rightLevel > 0.0001f && leftLevel < 0.0001f)
+        {
+            buffer.copyFrom(0, 0, buffer, 1, 0, numSamples); // duplicate R to L
+        }
+
         buffer.applyGain(0, 0, numSamples, leftGain);
         buffer.applyGain(1, 0, numSamples, rightGain);
     }

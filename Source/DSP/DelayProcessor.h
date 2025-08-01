@@ -18,7 +18,7 @@ public:
 
     DelayProcessor();
     void prepare(double sampleRate, int samplesPerBlock, int numChannels);
-    void process(juce::AudioBuffer<float>& buffer, int numSamples, bool isMono);
+    void process(juce::AudioBuffer<float>& buffer, int numSamples, bool isMono, bool isCentre);
     
     void setDelayTime(float timeMs);
     void setFeedback(float feedback);
