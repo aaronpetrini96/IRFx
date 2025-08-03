@@ -28,7 +28,7 @@ HorizontalSlider::HorizontalSlider(const juce::String& text,
     if (suffix != "") {
         slider.setTextValueSuffix(suffix);
     }
-    slider.setBounds(0, 0, 155, 30);
+    slider.setBounds(0, 0, 210, 30);
     addAndMakeVisible(slider);
      
 //    label.setText(text, juce::NotificationType::dontSendNotification);
@@ -38,7 +38,7 @@ HorizontalSlider::HorizontalSlider(const juce::String& text,
 //    label.attachToComponent(&slider, false);
 //    addAndMakeVisible(label);
     
-    setSize(155, 30);
+    setSize(210, 30);
 
     
     slider.setRotaryParameters(1.25f*pi, 2.75f*pi, true);

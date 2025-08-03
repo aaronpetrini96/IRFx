@@ -66,7 +66,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     
     
     
-////  DELAY BOXES
+//  DELAY BOXES
 //    delayMonoStereoBox.addItem("Centre", 1);
 //    delayMonoStereoBox.addItem("Wide", 2);
 //    delayMonoStereoBox.setSelectedId(1);
@@ -108,7 +108,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
 //    IR Loaders Buttons General setup
     for (auto button : irLoaderButtons)
     {
-        button->setSize(115, 40);
+        button->setSize(125, 40);
         button->setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white.withAlpha(0.5f));
     }
 
@@ -328,12 +328,12 @@ void IRFxAudioProcessorEditor::resized()
     presetBox.setBounds(totalBounds.getWidth() * 0.285, totalBounds.getHeight() * 0.955, boundsWidth * 0.25 , boundsWidth * 0.04);
     savePresetButton.setBounds(presetBox.getRight() * 1.05, presetBox.getY(), presetBox.getWidth() * 0.5, presetBox.getHeight());
     
-    outputMonoStereoBox.setBounds(savePresetButton.getRight() * 1.035, savePresetButton.getY(), savePresetButton.getWidth(), savePresetButton.getHeight());
+    outputMonoStereoBox.setBounds(savePresetButton.getRight() * 1.04, savePresetButton.getY(), savePresetButton.getWidth(), savePresetButton.getHeight());
     
 //    IR GROUP
     irBypassButton.setBounds(IRGroup.getWidth() * 0.9, IRGroup.getHeight() * 0.05, bypassButtonSize, bypassButtonSize);
 
-    irLoader1Button.setBounds(IRGroup.getWidth() * 0.09, IRGroup.getHeight() * 0.16, irLoaderButtonWidth , irLoaderButtonHeight);
+    irLoader1Button.setBounds(IRGroup.getWidth() * 0.065, IRGroup.getHeight() * 0.16, irLoaderButtonWidth , irLoaderButtonHeight);
     unloadIR1Button.setBounds(irLoader1Button.getRight() * 1.05, irLoader1Button.getY() + (irLoaderButtonHeight - unloadIRButtonSize) * 0.5, unloadIRButtonSize, unloadIRButtonSize);
     muteIR1Button.setBounds(unloadIR1Button.getRight() * 1.05, irLoader1Button.getY() + (irLoaderButtonHeight - muteIRButtonSize) * 0.5, muteIRButtonSize, muteIRButtonSize);
     ir1LevelSlider.setBounds(irLoader1Button.getX(), IRGroup.getHeight() * 0.055, irLevelSliderWidth, irLevelSliderHeight);
@@ -394,7 +394,7 @@ void IRFxAudioProcessorEditor::resized()
     inputGainSlider.setBounds(IRGroup.getX(), distGroup.getBottom() * 0.98, inputGainSlider.getWidth(), inputGainSlider.getHeight());
     outputGainSlider.setBounds(delayGroup.getX() * 1.09, inputGainSlider.getY(), outputGainSlider.getWidth(), outputGainSlider.getHeight());
     
-    generalBypassButton.setBounds(outputMonoStereoBox.getRight() * 1.065, outputMonoStereoBox.getY() * 1.0025, bypassButtonSize, bypassButtonSize);
+    generalBypassButton.setBounds(outputMonoStereoBox.getRight() * 1.059, outputMonoStereoBox.getY() * 1.0025, bypassButtonSize, bypassButtonSize);
 
 }
 

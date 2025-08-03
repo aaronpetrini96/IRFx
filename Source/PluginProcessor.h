@@ -60,7 +60,6 @@ class IRFxAudioProcessor  : public juce::AudioProcessor
     
     void loadIR1(const juce::File&);
     void loadIR2(const juce::File&);
-    //    void checkAndLoadPendingIRs();
     bool isIR1Loaded {false}, isIR2Loaded {false};
     bool isIR1Muted {false}, isIR2Muted {false};
     
@@ -74,7 +73,6 @@ class IRFxAudioProcessor  : public juce::AudioProcessor
     
     void savePreset(const juce::File& file);
     void loadPreset(const juce::File& file);
-    void loadDefaultPreset();
     
     //==============================================================================
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
@@ -110,7 +108,6 @@ class IRFxAudioProcessor  : public juce::AudioProcessor
     juce::AudioParameterFloat* delayFeedbackParam {nullptr};
     juce::AudioParameterFloat* delayTimeParam {nullptr};
     juce::AudioParameterChoice* delayModeParam {nullptr};
-    juce::AudioParameterChoice* delayMonoStereoParam {nullptr};
     juce::AudioParameterBool* delaySyncParam {nullptr};
     juce::AudioParameterChoice* delayNoteParam {nullptr};
     juce::AudioParameterBool* delayBypassParam{nullptr};
