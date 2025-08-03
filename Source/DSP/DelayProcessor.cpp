@@ -57,7 +57,7 @@ float DelayProcessor::getDelayInSamples() const
     }
 }
 
-void DelayProcessor::process(juce::AudioBuffer<float>& buffer, int numSamples, bool isMono, bool isCentre)
+void DelayProcessor::process(juce::AudioBuffer<float>& buffer, int numSamples, bool isMono)
 {
     float delaySamples = getDelayInSamples();
     int bufferSize = delayBuffer.getNumSamples();
@@ -110,7 +110,7 @@ void DelayProcessor::process(juce::AudioBuffer<float>& buffer, int numSamples, b
         float wetL = 0.0f;
         float wetR = 0.0f;
 
-        if (isMono || isCentre)
+        if (isMono)
         {
             // Mono delay: average inputs, write same feedback to both delay buffers
             float monoInput = 0.5f * (inputSampleL + inputSampleR);

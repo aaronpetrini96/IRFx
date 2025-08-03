@@ -601,21 +601,8 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         applyGain(buffer, inputGain);
         
         delayIsMono = delayMonoStereoParam->getIndex() == 0;
-        outputIsStereo = outputMonoStereoParam->getIndex() == 1;
-        if (!delayIsMono)
-            outputIsStereo = true;
-        bool delayIsCentre = (delayIsMono && outputIsStereo);
-        
-        // Force mono buffer to stereo before IR processing
-        if (delayIsCentre)
-        {
-            if (buffer.getNumChannels() >= 2)
-            {
-                // Duplicate mono signal from channel 0 to channel 1
-                buffer.copyFrom(1, 0, buffer, 0, 0, buffer.getNumSamples());
-            }
-        }
-        
+        outputIsStereo = !delayIsMono;
+
         //========================    IR LOADER part    ========================
         if (irLoaderBypassParam->get() == false)
         {
@@ -751,7 +738,7 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
 //                shouldDisplayPanDials = true;
 //            bool isCentre = (isMono && shouldDisplayPanDials);
             
-            delayInstance.process(workingBuffer, numSamples, delayIsMono, delayIsCentre);
+            delayInstance.process(workingBuffer, numSamples, delayIsMono);
             
             mainOutput.copyFrom(0, 0, workingBuffer.getReadPointer(0), numSamples);
             if (isStereoOut)
@@ -775,6 +762,13 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
                     auto* input = buffer.getReadPointer(ch);
                     buffer.copyFrom(ch, 0, input, numSamples);
                 }
+            }
+            
+            //========================    FORCE STEREO WHEN DELAY BYPASSED    ========================
+            if (outputIsStereo && buffer.getNumChannels() == 1)
+            {
+                buffer.setSize(2, numSamples, true, true, true); // expand to stereo
+                buffer.copyFrom(1, 0, buffer.getReadPointer(0), numSamples); // copy L -> R
             }
         }
         

@@ -92,7 +92,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     outputMonoStereoBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colour(100, 100, 110).darker(0.5f));
     outputMonoStereoBox.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
     outputMonoStereoBox.setLookAndFeel(ComboBoxLookAndFeel::get());
-    outputMonoStereoBoxAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, ParamNames::getOutputMonoStereoName(), outputMonoStereoBox);
+    outputMonoStereoBoxAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, ParamNames::getDelayMonoStereoName(), outputMonoStereoBox);
     
     
 //    DIAL'S LABELS GENERAL SETUP
@@ -239,7 +239,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     
     delayGroup.addAndMakeVisible(delaySyncButton);
     delayGroup.addAndMakeVisible(delayModeBox);
-    delayGroup.addAndMakeVisible(delayMonoStereoBox);
+//    delayGroup.addAndMakeVisible(delayMonoStereoBox);
    
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
