@@ -27,11 +27,13 @@ public:
     void reset();
     float processSample(float x, float drive, Type type);
     void processBlock(juce::AudioBuffer<float>& buffer, float drive, int typeIndex, float mix);
+    void resizeAndPrepareFiltersIfNeeded(int numChannels, double sr);
 
 private:
     using Coefficients = juce::dsp::IIR::Coefficients<float>;
     using Filter = juce::dsp::IIR::Filter<float>;
     juce::dsp::ProcessorDuplicator<Filter, Coefficients> saturationPreEQ, saturationPostEQ;
+    std::vector<juce::dsp::ProcessorDuplicator<Filter, Coefficients>> preFilters, postFilters;
     Type currentType { Type::Neve };
 
     float neve(float x);
@@ -39,4 +41,5 @@ private:
     float api(float x);
     float gainReductionDb = -6.0f;
     float gainFactor = std::pow(10.f, (gainReductionDb)/20.f); //Reduce output to match previous level
+    double sampleRate = 44100.0;
 };

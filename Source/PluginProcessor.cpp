@@ -466,33 +466,20 @@ void IRFxAudioProcessor::releaseResources()
     // spare memory, etc.
 }
 
-//bool IRFxAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) const
-//{
-//    const auto mono = juce::AudioChannelSet::mono();
-//    const auto stereo = juce::AudioChannelSet::stereo();
-//    const auto mainIn = layouts.getMainInputChannelSet();
-//    const auto mainOut = layouts.getMainOutputChannelSet();
-//    
-//    if (mainIn == mono && mainOut == mono) {return true;}
-//    if (mainIn == mono && mainOut == stereo) {return true;}
-//    if (mainIn == stereo && mainOut == stereo) {return true;}
-//    
-//    return false;
-//}
-bool IRFxAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
+bool IRFxAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) const
 {
-    const auto& mainIn  = layouts.getChannelSet(true, 0);
-    const auto& mainOut = layouts.getChannelSet(false, 0);
-
-    // Allow only matching stereo in/out (or mono in, stereo out)
-    if (mainIn == juce::AudioChannelSet::stereo() && mainOut == juce::AudioChannelSet::stereo())
-        return true;
-
-    if (mainIn == juce::AudioChannelSet::mono() && mainOut == juce::AudioChannelSet::stereo())
-        return true;
-
+    const auto mono = juce::AudioChannelSet::mono();
+    const auto stereo = juce::AudioChannelSet::stereo();
+    const auto mainIn = layouts.getMainInputChannelSet();
+    const auto mainOut = layouts.getMainOutputChannelSet();
+    
+    if (mainIn == mono && mainOut == mono) {return true;}
+    if (mainIn == mono && mainOut == stereo) {return true;}
+    if (mainIn == stereo && mainOut == stereo) {return true;}
+    
     return false;
 }
+
 
 void IRFxAudioProcessor::loadIR1(const juce::File &irFile)
 {
@@ -609,8 +596,8 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     if (pluginBypassParam->get() == false)
     {
         applyGain(buffer, inputGain);
-        
         outputIsStereo = outputMonoStereoParam->getIndex() == 1;
+
 
         //========================    IR LOADER part    ========================
         if (irLoaderBypassParam->get() == false)
@@ -638,9 +625,11 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
                 irLoader1->process(juce::dsp::ProcessContextReplacing<float>(block1));
                 irLoader2->process(juce::dsp::ProcessContextReplacing<float>(block2));
                 
-                applyEqualPowerPan(buffer, ir1PanParamSmoother.getCurrentValue() * 0.01f);
-                applyEqualPowerPan(tempBuffer, ir2PanParamSmoother.getCurrentValue() * 0.01f);
-
+                if (outputIsStereo)
+                {
+                    applyEqualPowerPan(buffer, ir1PanParamSmoother.getCurrentValue() * 0.01f);
+                    applyEqualPowerPan(tempBuffer, ir2PanParamSmoother.getCurrentValue() * 0.01f);
+                }
 
                 for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
                     buffer.addFrom(ch, 0, tempBuffer, ch, 0, buffer.getNumSamples());
@@ -655,8 +644,11 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
                 juce::dsp::AudioBlock<float> block(buffer);
                 irLoader1->process(juce::dsp::ProcessContextReplacing<float>(block));
                 
-                applyEqualPowerPan(buffer, ir1PanParamSmoother.getCurrentValue() * 0.01f);
-                
+                if (outputIsStereo)
+                {
+                    applyEqualPowerPan(buffer, ir1PanParamSmoother.getCurrentValue() * 0.01f);
+                }
+
                 buffer.applyGain(juce::Decibels::decibelsToGain(9.f));
             }
             else if (useIR2)
@@ -667,9 +659,17 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
                 juce::dsp::AudioBlock<float> block(buffer);
                 irLoader2->process(juce::dsp::ProcessContextReplacing<float>(block));
                 
-                applyEqualPowerPan(buffer, ir2PanParamSmoother.getCurrentValue() * 0.01);
-                
+                if (outputIsStereo)
+                {
+                    applyEqualPowerPan(buffer, ir2PanParamSmoother.getCurrentValue() * 0.01);
+                }
+
                 buffer.applyGain(juce::Decibels::decibelsToGain(9.f));
+            }
+            else if (isIR1Muted && isIR2Muted)
+            {
+                buffer.applyGain(juce::Decibels::decibelsToGain(-100.f));
+                return;
             }
 
 

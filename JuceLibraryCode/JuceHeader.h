@@ -44,7 +44,7 @@ namespace ProjectInfo
 {
     const char* const  projectName    = "IRFx";
     const char* const  companyName    = "Aaron Petrini";
-    const char* const  versionString  = "1.0.1";
-    const int          versionNumber  = 0x10001;
+    const char* const  versionString  = "1.0.4";
+    const int          versionNumber  = 0x10004;
 }
 #endif

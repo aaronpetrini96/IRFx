@@ -62,10 +62,6 @@ void DelayProcessor::process(juce::AudioBuffer<float>& buffer, int numSamples, b
     float delaySamples = getDelayInSamples();
     int bufferSize = delayBuffer.getNumSamples();
 
-    // Ensure buffer has 2 channels for ping-pong output
-//    buffer.setSize(2, numSamples, true, true, true);
-    jassert(delayBuffer.getNumChannels() >= 2); //check stereo
-
     auto* leftDelayData = delayBuffer.getWritePointer(0);
     auto* rightDelayData = delayBuffer.getWritePointer(1);
     
