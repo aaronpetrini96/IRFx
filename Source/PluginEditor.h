@@ -105,6 +105,8 @@ private:
     juce::Label delayMixLabel {"Mix"};
     juce::Label delayFeedbackLabel {"Feedback"};
     juce::Label delayTimeLabel {"Time"};
+    juce::Label delaySettingsLabel {"Settings"};
+    
     std::vector <juce::Label*> dialLabels
     {
         &lowCutSliderLabel,
@@ -121,6 +123,7 @@ private:
         &delayMixLabel,
         &delayFeedbackLabel,
         &delayTimeLabel,
+        &delaySettingsLabel,
     };
     
 //   Bypass Buttons

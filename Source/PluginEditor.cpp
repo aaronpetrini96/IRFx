@@ -66,14 +66,14 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     
     
     
-//  DELAY BOXES
-    delayMonoStereoBox.addItem("Centre", 1);
-    delayMonoStereoBox.addItem("Wide", 2);
-    delayMonoStereoBox.setSelectedId(1);
-    delayMonoStereoBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, darkPink);
-    delayMonoStereoBox.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
-    delayMonoStereoBox.setLookAndFeel(ComboBoxLookAndFeel::get());
-    delayMonoStereoAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, ParamNames::getDelayMonoStereoName(), delayMonoStereoBox);
+////  DELAY BOXES
+//    delayMonoStereoBox.addItem("Centre", 1);
+//    delayMonoStereoBox.addItem("Wide", 2);
+//    delayMonoStereoBox.setSelectedId(1);
+//    delayMonoStereoBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, darkPink);
+//    delayMonoStereoBox.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
+//    delayMonoStereoBox.setLookAndFeel(ComboBoxLookAndFeel::get());
+//    delayMonoStereoAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, ParamNames::getDelayMonoStereoName(), delayMonoStereoBox);
     
     
     delayModeBox.addItem("Digital", 1);
@@ -92,7 +92,7 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     outputMonoStereoBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colour(100, 100, 110).darker(0.5f));
     outputMonoStereoBox.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
     outputMonoStereoBox.setLookAndFeel(ComboBoxLookAndFeel::get());
-    outputMonoStereoBoxAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, ParamNames::getDelayMonoStereoName(), outputMonoStereoBox);
+    outputMonoStereoBoxAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, ParamNames::getOutputMonoStereoName(), outputMonoStereoBox);
     
     
 //    DIAL'S LABELS GENERAL SETUP
@@ -236,10 +236,9 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     delayGroup.addAndMakeVisible(delayTimeKnob);
     delayGroup.addAndMakeVisible(delayTimeLabel);
     delayGroup.addAndMakeVisible(delayNoteKnob);
-    
+    delayGroup.addAndMakeVisible(delaySettingsLabel);
     delayGroup.addAndMakeVisible(delaySyncButton);
     delayGroup.addAndMakeVisible(delayModeBox);
-//    delayGroup.addAndMakeVisible(delayMonoStereoBox);
    
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -386,9 +385,10 @@ void IRFxAudioProcessorEditor::resized()
     delayMixKnob.setBounds(delayTimeKnob.getX(), delayGroup.getHeight() * 0.65, dialSize, dialSize);
     delayMixLabel.setBounds(delayMixKnob.getX(), delayMixKnob.getY() * 0.85, labelWidth, labelHeight);
     
-    delaySyncButton.setBounds(delayFeedbackKnob.getX(), delayFeedbackKnob.getBottom() * 0.83, savePresetButton.getWidth(), savePresetButton.getHeight());
-    delayMonoStereoBox.setBounds(delayFeedbackKnob.getX(), delaySyncButton.getBottom() * 1.05, savePresetButton.getWidth(), savePresetButton.getHeight());
-    delayModeBox.setBounds(delayMonoStereoBox.getX(), delayMonoStereoBox.getBottom() * 1.05, savePresetButton.getWidth(), savePresetButton.getHeight());
+    delaySettingsLabel.setBounds(delayFeedbackKnob.getX(), delayMixLabel.getY(), labelWidth, labelHeight);
+    
+    delaySyncButton.setBounds(delayFeedbackKnob.getX(), delayFeedbackKnob.getBottom() * 0.95, savePresetButton.getWidth(), savePresetButton.getHeight());
+    delayModeBox.setBounds(delaySyncButton.getX(), delaySyncButton.getBottom() * 1.05, savePresetButton.getWidth(), savePresetButton.getHeight());
  
 //    IN OUT GAIN
     inputGainSlider.setBounds(IRGroup.getX(), distGroup.getBottom() * 0.98, inputGainSlider.getWidth(), inputGainSlider.getHeight());

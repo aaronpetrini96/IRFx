@@ -600,8 +600,8 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     {
         applyGain(buffer, inputGain);
         
-        delayIsMono = delayMonoStereoParam->getIndex() == 0;
-        outputIsStereo = !delayIsMono;
+        outputIsStereo = outputMonoStereoParam->getIndex() == 1;
+        delayIsMono = !outputIsStereo;
 
         //========================    IR LOADER part    ========================
         if (irLoaderBypassParam->get() == false)
