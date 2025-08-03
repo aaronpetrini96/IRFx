@@ -14,14 +14,24 @@ Saturation::Saturation()
 {
 }
 
+//void Saturation::prepare(const juce::dsp::ProcessSpec& spec)
+//{
+//    saturationPreEQ.state = Coefficients::makeLowShelf(spec.sampleRate, 150.f, 0.707f, juce::Decibels::decibelsToGain(2.f));
+//    saturationPostEQ.state = Coefficients::makeLowPass(spec.sampleRate, 15000.f);
+//    saturationPreEQ.prepare(spec);
+//    saturationPostEQ.prepare(spec);
+//}
 void Saturation::prepare(const juce::dsp::ProcessSpec& spec)
 {
-
+    auto specCopy = spec; //because we pass a reference
+    //Mono or Stereo support
+    specCopy.numChannels = juce::jmin(2u, spec.numChannels);
     
     saturationPreEQ.state = Coefficients::makeLowShelf(spec.sampleRate, 150.f, 0.707f, juce::Decibels::decibelsToGain(2.f));
     saturationPostEQ.state = Coefficients::makeLowPass(spec.sampleRate, 15000.f);
-    saturationPreEQ.prepare(spec);
-    saturationPostEQ.prepare(spec);
+    
+    saturationPreEQ.prepare(specCopy);
+    saturationPostEQ.prepare(specCopy);
 }
 
 void Saturation::reset()
@@ -46,7 +56,9 @@ float Saturation::processSample(float x, float drive, Type type)
 
 void Saturation::processBlock(juce::AudioBuffer<float>& buffer, float drive, int typeIndex, float mix)
 {
-    juce::dsp::AudioBlock<float> block(buffer);
+    const int numChannels = buffer.getNumChannels();
+    juce::dsp::AudioBlock<float> block(buffer.getArrayOfWritePointers(), static_cast<size_t>(numChannels), static_cast<size_t>(buffer.getNumChannels()));
+//    juce::dsp::AudioBlock<float> block(buffer);
 
     // Pre-EQ
     juce::dsp::ProcessContextReplacing<float> preCtx(block);

@@ -466,17 +466,31 @@ void IRFxAudioProcessor::releaseResources()
     // spare memory, etc.
 }
 
-bool IRFxAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) const
+//bool IRFxAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) const
+//{
+//    const auto mono = juce::AudioChannelSet::mono();
+//    const auto stereo = juce::AudioChannelSet::stereo();
+//    const auto mainIn = layouts.getMainInputChannelSet();
+//    const auto mainOut = layouts.getMainOutputChannelSet();
+//    
+//    if (mainIn == mono && mainOut == mono) {return true;}
+//    if (mainIn == mono && mainOut == stereo) {return true;}
+//    if (mainIn == stereo && mainOut == stereo) {return true;}
+//    
+//    return false;
+//}
+bool IRFxAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
 {
-    const auto mono = juce::AudioChannelSet::mono();
-    const auto stereo = juce::AudioChannelSet::stereo();
-    const auto mainIn = layouts.getMainInputChannelSet();
-    const auto mainOut = layouts.getMainOutputChannelSet();
-    
-    if (mainIn == mono && mainOut == mono) {return true;}
-    if (mainIn == mono && mainOut == stereo) {return true;}
-    if (mainIn == stereo && mainOut == stereo) {return true;}
-    
+    const auto& mainIn  = layouts.getChannelSet(true, 0);
+    const auto& mainOut = layouts.getChannelSet(false, 0);
+
+    // Allow only matching stereo in/out (or mono in, stereo out)
+    if (mainIn == juce::AudioChannelSet::stereo() && mainOut == juce::AudioChannelSet::stereo())
+        return true;
+
+    if (mainIn == juce::AudioChannelSet::mono() && mainOut == juce::AudioChannelSet::stereo())
+        return true;
+
     return false;
 }
 

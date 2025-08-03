@@ -42,8 +42,8 @@
       allowLocationSimulation = "YES">
       <PathRunnable
          runnableDebuggingMode = "0"
-         BundleIdentifier = "com.juce.audiopluginhost"
-         FilePath = "/Users/aaronpetrini/Programming/JUCEProjects/JUCE 8.08/extras/AudioPluginHost/Builds/MacOSX/build/Debug/AudioPluginHost.app">
+         BundleIdentifier = "com.cockos.reaper"
+         FilePath = "/Applications/REAPER.app">
       </PathRunnable>
    </LaunchAction>
    <ProfileAction

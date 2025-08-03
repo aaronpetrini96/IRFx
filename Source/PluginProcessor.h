@@ -146,8 +146,6 @@ class IRFxAudioProcessor  : public juce::AudioProcessor
     std::atomic<bool> clipFlagIn { false };
     std::atomic<bool> clipFlagOut { false };
     
-    
-    
     std::atomic<bool> ir1PendingUpdate { false };
     juce::File irFile1ToLoad;
     std::unique_ptr<juce::dsp::Convolution> pendingIR1;
@@ -173,9 +171,7 @@ private:
         auto ctx = juce::dsp::ProcessContextReplacing<float>(block);
         gain.process(ctx);
     }
-    
-    
-    
+
     using Filter = juce::dsp::IIR::Filter<float>;
     using Coefficients = juce::dsp::IIR::Coefficients<float>;
     using irEQMonoChain = juce::dsp::ProcessorChain<Filter, Filter>;
