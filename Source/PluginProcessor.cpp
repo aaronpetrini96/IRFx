@@ -473,7 +473,7 @@ bool IRFxAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) cons
     const auto mainIn = layouts.getMainInputChannelSet();
     const auto mainOut = layouts.getMainOutputChannelSet();
     
-    if (mainIn == mono && mainOut == mono) {return true;}
+//    if (mainIn == mono && mainOut == mono) {return true;}
     if (mainIn == mono && mainOut == stereo) {return true;}
     if (mainIn == stereo && mainOut == stereo) {return true;}
     
