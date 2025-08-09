@@ -155,7 +155,7 @@
  #define JucePlugin_ARAFactoryID           "com.AaronPetrini.IRFx.factory"
 #endif
 #ifndef  JucePlugin_ARADocumentArchiveID
- #define JucePlugin_ARADocumentArchiveID   "com.AaronPetrini.IRFx.aradocumentarchive.1.0.4"
+ #define JucePlugin_ARADocumentArchiveID   "com.AaronPetrini.IRFx.aradocumentarchive.1.0.5"
 #endif
 #ifndef  JucePlugin_ARACompatibleArchiveIDs
  #define JucePlugin_ARACompatibleArchiveIDs  ""
