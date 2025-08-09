@@ -236,7 +236,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout IRFxAudioProcessor::createPa
     
 //   EQ
     name = ParamNames::getEQBypassName();
-    params.emplace_back(std::make_unique<juce::AudioParameterBool>(juce::ParameterID(name, versionHint), name, false));
+    params.emplace_back(std::make_unique<juce::AudioParameterBool>(juce::ParameterID(name, versionHint), name, true));
     name = ParamNames::getEQLowGainName();
     params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(-24.f, 24.f, 0.1f, 1.f), 0.f));
     name = ParamNames::getEQMidGainName();
@@ -248,7 +248,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout IRFxAudioProcessor::createPa
     
 //   DIST
     name = ParamNames::getDistBypassName();
-    params.emplace_back(std::make_unique<juce::AudioParameterBool>(juce::ParameterID(name, versionHint), name, false));
+    params.emplace_back(std::make_unique<juce::AudioParameterBool>(juce::ParameterID(name, versionHint), name, true));
     name = ParamNames::getDistDriveName();
     params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(0.f, 12.f, 0.1f, 1.f), 6.f));
     name = ParamNames::getDistMixName();
@@ -262,7 +262,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout IRFxAudioProcessor::createPa
     
 //   DELAY
     name = ParamNames::getDelayBypassName();
-    params.emplace_back(std::make_unique<juce::AudioParameterBool>(juce::ParameterID(name, versionHint), name, false));
+    params.emplace_back(std::make_unique<juce::AudioParameterBool>(juce::ParameterID(name, versionHint), name, true));
     name = ParamNames::getDelayMixName();
     params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(0.f, 100.f, 1.f, 1.f), 0.f));
     name = ParamNames::getDelayFeedbackName();
@@ -576,8 +576,13 @@ bool clipDetection(juce::AudioBuffer<float>& buffer)
 void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
-    [[maybe_unused]] auto totalNumInputChannels  = getTotalNumInputChannels();
-    [[maybe_unused]] auto totalNumOutputChannels = getTotalNumOutputChannels();
+    [[maybe_unused]] int totalNumInputChannels  = getTotalNumInputChannels();
+    [[maybe_unused]] int totalNumOutputChannels = getTotalNumOutputChannels();
+    if (buffer.getNumChannels() == 1 && totalNumOutputChannels == 2)
+    {
+        buffer.copyFrom(1, 0, buffer, 0, 0, buffer.getNumSamples());
+    }
+
 
     //========================    IN GAIN part    ========================
     juce::AudioBuffer<float> dryBuffer;
@@ -591,8 +596,6 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     updateSmootherFromParams(buffer.getNumSamples(), SmootherUpdateMode::liveInRealTime);
     updateParams();
     
-    
-
     if (pluginBypassParam->get() == false)
     {
         applyGain(buffer, inputGain);
@@ -627,8 +630,8 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
                 
                 if (outputIsStereo)
                 {
-                    applyEqualPowerPan(buffer, ir1PanParamSmoother.getCurrentValue() * 0.01f);
-                    applyEqualPowerPan(tempBuffer, ir2PanParamSmoother.getCurrentValue() * 0.01f);
+                    applyEqualPowerPan(buffer, ir1PanParamSmoother.getCurrentValue() * 0.01f, totalNumInputChannels);
+                    applyEqualPowerPan(tempBuffer, ir2PanParamSmoother.getCurrentValue() * 0.01f, totalNumInputChannels);
                 }
 
                 for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
@@ -646,7 +649,7 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
                 
                 if (outputIsStereo)
                 {
-                    applyEqualPowerPan(buffer, ir1PanParamSmoother.getCurrentValue() * 0.01f);
+                    applyEqualPowerPan(buffer, ir1PanParamSmoother.getCurrentValue() * 0.01f, totalNumInputChannels);
                 }
 
                 buffer.applyGain(juce::Decibels::decibelsToGain(9.f));
@@ -661,7 +664,7 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
                 
                 if (outputIsStereo)
                 {
-                    applyEqualPowerPan(buffer, ir2PanParamSmoother.getCurrentValue() * 0.01);
+                    applyEqualPowerPan(buffer, ir2PanParamSmoother.getCurrentValue() * 0.01f, totalNumInputChannels);
                 }
 
                 buffer.applyGain(juce::Decibels::decibelsToGain(9.f));
