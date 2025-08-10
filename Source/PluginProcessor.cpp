@@ -654,9 +654,6 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
                 
                 if (outputIsStereo)
                 {
-                    DBG("Buffer num channels: " << buffer.getNumChannels());
-                    DBG("Buffer Left RMS: " << buffer.getRMSLevel(0, 0, buffer.getNumSamples()));
-                    DBG("Buffer Right RMS: " << buffer.getRMSLevel(1, 0, buffer.getNumSamples()));
                     applyEqualPowerPan(buffer, ir1PanParamSmoother.getCurrentValue() * 0.01f);
                 }
 
@@ -743,21 +740,22 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
             auto mainOutput = getBusBuffer(buffer, false, 0);
             
             const int numSamples = buffer.getNumSamples();
-            const bool isStereoIn = mainInput.getNumChannels() > 1;
-            const bool isStereoOut = mainOutput.getNumChannels() > 1;
+//            const bool isStereoIn = mainInput.getNumChannels() > 1;
+//            const bool isStereoOut = mainOutput.getNumChannels() > 1;
+//            
+//            juce::AudioBuffer<float> workingBuffer;
+//            workingBuffer.setSize(2, numSamples);
+//            workingBuffer.clear();
+//            
+//            workingBuffer.copyFrom(0, 0, mainInput.getReadPointer(0), numSamples);
+//            workingBuffer.copyFrom(1, 0, mainInput.getReadPointer(isStereoIn ? 1 : 0), numSamples);
             
-            juce::AudioBuffer<float> workingBuffer;
-            workingBuffer.setSize(2, numSamples);
-            workingBuffer.clear();
+//            delayInstance.process(workingBuffer, numSamples, delayIsMono);
+            delayInstance.process(buffer, numSamples, delayIsMono);
             
-            workingBuffer.copyFrom(0, 0, mainInput.getReadPointer(0), numSamples);
-            workingBuffer.copyFrom(1, 0, mainInput.getReadPointer(isStereoIn ? 1 : 0), numSamples);
-            
-            delayInstance.process(workingBuffer, numSamples, delayIsMono);
-            
-            mainOutput.copyFrom(0, 0, workingBuffer.getReadPointer(0), numSamples);
-            if (isStereoOut)
-                mainOutput.copyFrom(1, 0, workingBuffer.getReadPointer(1), numSamples);
+//            mainOutput.copyFrom(0, 0, workingBuffer.getReadPointer(0), numSamples);
+//            if (isStereoOut)
+//                mainOutput.copyFrom(1, 0, workingBuffer.getReadPointer(1), numSamples);
         }
         else
         {
