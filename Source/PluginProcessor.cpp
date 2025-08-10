@@ -736,54 +736,12 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
             
             delayInstance.setHostBpm(getPlayHead()->getPosition()->getBpm().orFallback(120.0));
             
-            auto mainInput = getBusBuffer(buffer, true, 0);
-            auto mainOutput = getBusBuffer(buffer, false, 0);
+//            auto mainInput = getBusBuffer(buffer, true, 0);
+//            auto mainOutput = getBusBuffer(buffer, false, 0);
             
-            const int numSamples = buffer.getNumSamples();
-//            const bool isStereoIn = mainInput.getNumChannels() > 1;
-//            const bool isStereoOut = mainOutput.getNumChannels() > 1;
-//            
-//            juce::AudioBuffer<float> workingBuffer;
-//            workingBuffer.setSize(2, numSamples);
-//            workingBuffer.clear();
-//            
-//            workingBuffer.copyFrom(0, 0, mainInput.getReadPointer(0), numSamples);
-//            workingBuffer.copyFrom(1, 0, mainInput.getReadPointer(isStereoIn ? 1 : 0), numSamples);
-            
-//            delayInstance.process(workingBuffer, numSamples, delayIsMono);
-            delayInstance.process(buffer, numSamples, delayIsMono);
-            
-//            mainOutput.copyFrom(0, 0, workingBuffer.getReadPointer(0), numSamples);
-//            if (isStereoOut)
-//                mainOutput.copyFrom(1, 0, workingBuffer.getReadPointer(1), numSamples);
+            delayInstance.process(buffer, buffer.getNumSamples(), delayIsMono);
         }
-        else
-        {
-            const int numSamples = buffer.getNumSamples();
-            
-//            if (totalNumInputChannels == 1 && totalNumOutputChannels == 2)
-//            {
-//                auto* input = buffer.getReadPointer(0);
-//                
-//                buffer.copyFrom(0, 0, input, numSamples);
-//                buffer.copyFrom(1, 0, input, numSamples);
-//            }
-//            else
-//            {
-//                for (int ch = 0; ch < juce::jmin(totalNumInputChannels, totalNumOutputChannels); ++ch)
-//                {
-//                    auto* input = buffer.getReadPointer(ch);
-//                    buffer.copyFrom(ch, 0, input, numSamples);
-//                }
-//            }
-            
-            //========================    FORCE STEREO WHEN DELAY BYPASSED    ========================
-            if (outputIsStereo && buffer.getNumChannels() == 1)
-            {
-                buffer.setSize(2, numSamples, true, true, true); // expand to stereo
-                buffer.copyFrom(1, 0, buffer.getReadPointer(0), numSamples); // copy L -> R
-            }
-        }
+
 
         //========================    OUTPUT GAIN part    ========================
         outputGain.setGainDecibels(outputGainParamSmoother.getCurrentValue());
