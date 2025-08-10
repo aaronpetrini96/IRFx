@@ -13,7 +13,8 @@
 IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p), presetManager(p, presetBox)
 {
-    startTimerHz(30);
+//    startTimerHz(30);
+    
 //    IN-OUT GAIN
     addAndMakeVisible(inputGainSlider);
     addAndMakeVisible(outputGainSlider);
@@ -67,14 +68,6 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     
     
 //  DELAY BOXES
-//    delayMonoStereoBox.addItem("Centre", 1);
-//    delayMonoStereoBox.addItem("Wide", 2);
-//    delayMonoStereoBox.setSelectedId(1);
-//    delayMonoStereoBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, darkPink);
-//    delayMonoStereoBox.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
-//    delayMonoStereoBox.setLookAndFeel(ComboBoxLookAndFeel::get());
-//    delayMonoStereoAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, ParamNames::getDelayMonoStereoName(), delayMonoStereoBox);
-    
     
     delayModeBox.addItem("Digital", 1);
     delayModeBox.addItem("Tape", 2);
@@ -84,15 +77,33 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     delayModeBox.setLookAndFeel(ComboBoxLookAndFeel::get());
     delayModeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, ParamNames::getDelayModeName(), delayModeBox);
     
+//    delayMonoStereoBox.addItem("Centre", 1);
+//    delayMonoStereoBox.addItem("Wide", 2);
+//    delayMonoStereoBox.setSelectedId(1);
+//    delayMonoStereoBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, darkPink);
+//    delayMonoStereoBox.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
+//    delayMonoStereoBox.setLookAndFeel(ComboBoxLookAndFeel::get());
+//    delayMonoStereoAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, ParamNames::getDelayMonoStereoName(), delayMonoStereoBox);
+    
+    
+
+    
     
 //    OUTPUT BOXES
     outputMonoStereoBox.addItem("Mono", 1);
     outputMonoStereoBox.addItem("Stereo", 2);
-    outputMonoStereoBox.setSelectedId(1);
+    outputMonoStereoBox.setSelectedId(2);
     outputMonoStereoBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colour(100, 100, 110).darker(0.5f));
     outputMonoStereoBox.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
     outputMonoStereoBox.setLookAndFeel(ComboBoxLookAndFeel::get());
-    outputMonoStereoBoxAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, ParamNames::getOutputMonoStereoName(), outputMonoStereoBox);
+//    outputMonoStereoBoxAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, ParamNames::getOutputMonoStereoName(), outputMonoStereoBox);
+    outputMonoStereoBox.onChange = [this]()
+    {
+        audioProcessor.outputMonoStereoParam->beginChangeGesture();
+        audioProcessor.outputMonoStereoParam->setValueNotifyingHost(static_cast<float>(outputMonoStereoBox.getSelectedId() - 1));
+        audioProcessor.outputMonoStereoParam->endChangeGesture();
+    };
+ 
     
     
 //    DIAL'S LABELS GENERAL SETUP
@@ -240,19 +251,17 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     delayGroup.addAndMakeVisible(delaySyncButton);
     delayGroup.addAndMakeVisible(delayModeBox);
    
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
+
     ir1LevelSlider.setVisible(false);
     ir2LevelSlider.setVisible(false);
     delayNoteKnob.setVisible(false);
     restoreLoadedIRFiles();
     updateDelaySyncState();
-    if (!audioProcessor.outputIsStereo)
-    {
-        ir1PanSlider.setVisible(false);
-        ir2PanSlider.setVisible(false);
-    }
+
+    startTimerHz(60);
     
+    // Make sure that before the constructor has finished, you've set the
+    // editor's size to whatever you need it to be.
     setSize (600, 650);
 }
 
@@ -477,24 +486,20 @@ void IRFxAudioProcessorEditor::timerCallback()
     sat1Button.setToggleState(currentSatMode == 0, juce::dontSendNotification);
     sat2Button.setToggleState(currentSatMode == 1, juce::dontSendNotification);
     sat3Button.setToggleState(currentSatMode == 2, juce::dontSendNotification);
-    
 
-    if (audioProcessor.outputIsStereo)
+    
+    if (outputMonoStereoBox.getSelectedId() == 2)
     {
         ir1PanSlider.setVisible(true);
         ir2PanSlider.setVisible(true);
-
     }
-    else
+    else if (outputMonoStereoBox.getSelectedId() == 1)
     {
         ir1PanSlider.setVisible(false);
         ir2PanSlider.setVisible(false);
-
     }
     
-//    if (!audioProcessor.delayIsMono) {
-//        outputMonoStereoBox.setSelectedItemIndex(1);
-//    }
+
 
 
 // === Clipping light logic ===
@@ -591,3 +596,5 @@ void IRFxAudioProcessorEditor::setPresetButtonStyle(juce::TextButton& button)
 //    button.setSize(25, 25);
     button.setSize(25, presetBox.getHeight());
 }
+
+

@@ -46,6 +46,7 @@ class IRFxAudioProcessor  : public juce::AudioProcessor
     bool isMidiEffect() const override;
     double getTailLengthSeconds() const override;
     
+    
     //==============================================================================
     int getNumPrograms() override;
     int getCurrentProgram() override;
@@ -154,13 +155,10 @@ class IRFxAudioProcessor  : public juce::AudioProcessor
     std::unique_ptr<juce::dsp::Convolution> pendingIR2;
     juce::File deferredIR1File;
     juce::File deferredIR2File;
-    
-    bool outputIsStereo {false};
-    bool delayIsMono {true};
-
 
 private:
     
+    bool outputIsStereo {false};
     float inputLevelL{0.f}, inputLevelR {0.f}, outputLevelL{0.f}, outputLevelR{0.f};
     juce::dsp::Gain<float> inputGain, outputGain;
     juce::dsp::Gain<float> gain;
@@ -189,7 +187,11 @@ private:
 
     DelayProcessor delayInstance;
     
-
+    
+    
+    
+    
+    
     template<typename ParamType, typename Params, typename Funcs>
     void initCachedParams(Params paramsArray, Funcs funcsArray)
     {

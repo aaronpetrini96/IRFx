@@ -22,7 +22,7 @@ IRFxAudioProcessor::IRFxAudioProcessor()
                        )
 #endif
 {
-    
+
 //============ FLOAT PARAMS ============
     auto floatParams = std::array
     {
@@ -295,7 +295,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout IRFxAudioProcessor::createPa
 //    PLUGIN OUTPUT
     name = ParamNames::getOutputMonoStereoName();
     juce::StringArray outputMonoStereoArray {"Mono", "Stereo"};
-    params.emplace_back(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID(name, versionHint), name, outputMonoStereoArray, 0));
+    params.emplace_back(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID(name, versionHint), name, outputMonoStereoArray, 1));
     
 
     return {params.begin(), params.end()};
@@ -340,7 +340,6 @@ void IRFxAudioProcessor::updateParams()
         *midPeak.coefficients = *midEQCoefficients;
         *highShelf.coefficients = *highEQCoefficients;
     }
-        
 }
 //==============================================================================
 //==============================================================================
@@ -349,6 +348,8 @@ void IRFxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     spec.maximumBlockSize = samplesPerBlock;
     spec.sampleRate = sampleRate;
     spec.numChannels = getTotalNumOutputChannels();
+    
+    outputIsStereo = outputMonoStereoParam->getIndex() == 1;
     
     if (deferredIR1File.existsAsFile())
         loadIR1(deferredIR1File);
@@ -387,11 +388,11 @@ void IRFxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     
     delayInstance.prepare(sampleRate, samplesPerBlock, getTotalNumOutputChannels());
     
-    
     for(auto smoother : getSmoothers())
         smoother->reset(sampleRate, 0.05);
     
     updateSmootherFromParams(1, SmootherUpdateMode::initialize);
+    updateParams();
 }
 
 void IRFxAudioProcessor::updateSmootherFromParams(int numSamplesToSkip, SmootherUpdateMode init)
@@ -554,7 +555,6 @@ float computeRMS(const float* data, size_t numSamples)
 
 bool clipDetection(juce::AudioBuffer<float>& buffer)
 {
-// CLIP DETECTION
     bool isClipping = false;
     for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
     {
@@ -598,7 +598,7 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     inputLevelL = buffer.getRMSLevel(0, 0, buffer.getNumSamples());
     inputLevelR = buffer.getNumChannels() > 1 ? buffer.getRMSLevel(1, 0, buffer.getNumSamples()) : inputLevelL;
     //========================                    ========================
-    
+        
     updateSmootherFromParams(buffer.getNumSamples(), SmootherUpdateMode::liveInRealTime);
     updateParams();
     
@@ -606,7 +606,6 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     {
         applyGain(buffer, inputGain);
         outputIsStereo = outputMonoStereoParam->getIndex() == 1;
-
 
         //========================    IR LOADER part    ========================
         if (irLoaderBypassParam->get() == false)
@@ -639,6 +638,11 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
                     applyEqualPowerPan(buffer, ir1PanParamSmoother.getCurrentValue() * 0.01f);
                     applyEqualPowerPan(tempBuffer, ir2PanParamSmoother.getCurrentValue() * 0.01f);
                 }
+                else
+                {
+                    applyEqualPowerPan(buffer, 0.f);
+                    applyEqualPowerPan(tempBuffer, 0.f);
+                }
 
                 for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
                     buffer.addFrom(ch, 0, tempBuffer, ch, 0, buffer.getNumSamples());
@@ -657,7 +661,11 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
                 {
                     applyEqualPowerPan(buffer, ir1PanParamSmoother.getCurrentValue() * 0.01f);
                 }
-
+                else
+                {
+                    applyEqualPowerPan(buffer, 0.f);
+                }
+                
                 buffer.applyGain(juce::Decibels::decibelsToGain(9.f));
             }
             else if (useIR2)
@@ -671,6 +679,10 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
                 if (outputIsStereo)
                 {
                     applyEqualPowerPan(buffer, ir2PanParamSmoother.getCurrentValue() * 0.01f);
+                }
+                else
+                {
+                    applyEqualPowerPan(buffer, 0.f);
                 }
 
                 buffer.applyGain(juce::Decibels::decibelsToGain(9.f));
@@ -722,7 +734,7 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
 
         if (!delayBypassParam->get())
         {
-            delayIsMono = !outputIsStereo;
+            bool delayIsMono = !outputIsStereo;
             delayInstance.setFeedback(delayFeedbackParamSmoother.getCurrentValue());
             delayInstance.setMix(delayMixParamSmoother.getCurrentValue());
             using Mode = DelayProcessor::Mode;

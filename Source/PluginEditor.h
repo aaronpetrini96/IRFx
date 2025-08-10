@@ -43,7 +43,7 @@ private:
     IRFxAudioProcessor& audioProcessor;
     const int versionHint = 1;
     void timerCallback() override;
-    
+   
     
     juce::Image backgroundImg = juce::ImageCache::getFromMemory(BinaryData::BlackSnakeskin_png, BinaryData::BlackSnakeskin_pngSize);
     
