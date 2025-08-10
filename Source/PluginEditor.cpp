@@ -267,18 +267,7 @@ void IRFxAudioProcessorEditor::paint (juce::Graphics& g)
     g.fillAll (juce::Colours::black);
     g.setColour(juce::Colours::grey.withAlpha(0.1f));
     g.fillRect(0, 615, 600, 35);
-    
-//    g.fillAll(juce::Colours::grey);
-//    if (backgroundImg.isValid())
-//    {
-//        g.drawImage(backgroundImg, 0, 0, backgroundImg.getBounds().getWidth(), backgroundImg.getBounds().getHeight(), getLocalBounds().getX(), getLocalBounds().getY(), getLocalBounds().getWidth(), getLocalBounds().getHeight());
-//        g.setColour (juce::Colours::black.withAlpha (0.45f)); // 0.0 = transparent, 1.0 = opaque
-//            g.fillRect (getLocalBounds());
-//    }
-//    else
-//    {
-//        g.fillAll(juce::Colours::black);
-//    }
+
     
     clipLight(g);
     
@@ -494,16 +483,18 @@ void IRFxAudioProcessorEditor::timerCallback()
     {
         ir1PanSlider.setVisible(true);
         ir2PanSlider.setVisible(true);
+
     }
     else
     {
         ir1PanSlider.setVisible(false);
         ir2PanSlider.setVisible(false);
+
     }
     
-    if (!audioProcessor.delayIsMono) {
-        outputMonoStereoBox.setSelectedItemIndex(1);
-    }
+//    if (!audioProcessor.delayIsMono) {
+//        outputMonoStereoBox.setSelectedItemIndex(1);
+//    }
 
 
 // === Clipping light logic ===

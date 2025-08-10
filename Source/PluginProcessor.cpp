@@ -236,7 +236,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout IRFxAudioProcessor::createPa
     
 //   EQ
     name = ParamNames::getEQBypassName();
-    params.emplace_back(std::make_unique<juce::AudioParameterBool>(juce::ParameterID(name, versionHint), name, true));
+    params.emplace_back(std::make_unique<juce::AudioParameterBool>(juce::ParameterID(name, versionHint), name, false));
     name = ParamNames::getEQLowGainName();
     params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(-24.f, 24.f, 0.1f, 1.f), 0.f));
     name = ParamNames::getEQMidGainName();
@@ -248,7 +248,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout IRFxAudioProcessor::createPa
     
 //   DIST
     name = ParamNames::getDistBypassName();
-    params.emplace_back(std::make_unique<juce::AudioParameterBool>(juce::ParameterID(name, versionHint), name, true));
+    params.emplace_back(std::make_unique<juce::AudioParameterBool>(juce::ParameterID(name, versionHint), name, false));
     name = ParamNames::getDistDriveName();
     params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(0.f, 12.f, 0.1f, 1.f), 6.f));
     name = ParamNames::getDistMixName();
@@ -262,7 +262,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout IRFxAudioProcessor::createPa
     
 //   DELAY
     name = ParamNames::getDelayBypassName();
-    params.emplace_back(std::make_unique<juce::AudioParameterBool>(juce::ParameterID(name, versionHint), name, true));
+    params.emplace_back(std::make_unique<juce::AudioParameterBool>(juce::ParameterID(name, versionHint), name, false));
     name = ParamNames::getDelayMixName();
     params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(0.f, 100.f, 1.f, 1.f), 0.f));
     name = ParamNames::getDelayFeedbackName();
@@ -578,6 +578,7 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     juce::ScopedNoDenormals noDenormals;
     [[maybe_unused]] int totalNumInputChannels  = getTotalNumInputChannels();
     [[maybe_unused]] int totalNumOutputChannels = getTotalNumOutputChannels();
+
 
     if (totalNumInputChannels == 1 && totalNumOutputChannels == 2)
     {

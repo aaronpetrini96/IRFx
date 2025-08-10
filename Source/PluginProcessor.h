@@ -158,6 +158,7 @@ class IRFxAudioProcessor  : public juce::AudioProcessor
     bool outputIsStereo {false};
     bool delayIsMono {true};
 
+
 private:
     
     float inputLevelL{0.f}, inputLevelR {0.f}, outputLevelL{0.f}, outputLevelR{0.f};
