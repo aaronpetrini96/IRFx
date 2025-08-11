@@ -59,7 +59,7 @@
  #define JucePlugin_ManufacturerCode       0x4d616e75
 #endif
 #ifndef  JucePlugin_PluginCode
- #define JucePlugin_PluginCode             0x42306e75
+ #define JucePlugin_PluginCode             0x49726678
 #endif
 #ifndef  JucePlugin_IsSynth
  #define JucePlugin_IsSynth                0
@@ -155,7 +155,7 @@
  #define JucePlugin_ARAFactoryID           "com.AaronPetrini.IRFx.factory"
 #endif
 #ifndef  JucePlugin_ARADocumentArchiveID
- #define JucePlugin_ARADocumentArchiveID   "com.AaronPetrini.IRFx.aradocumentarchive.1.0.5"
+ #define JucePlugin_ARADocumentArchiveID   "com.AaronPetrini.IRFx.aradocumentarchive.1.0.6"
 #endif
 #ifndef  JucePlugin_ARACompatibleArchiveIDs
  #define JucePlugin_ARACompatibleArchiveIDs  ""
