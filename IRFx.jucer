@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="b0NU9j" name="IRFx" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" cppLanguageStandard="20"
-              companyName="Aaron Petrini" version="1.0.6" pluginCode="Irfx">
+              companyName="Aaron Petrini" version="1.0.7" pluginCode="Irfx">
   <MAINGROUP id="YWPSGD" name="IRFx">
     <GROUP id="{CB8DDF6B-6843-253E-84F4-ADDA0FA5C9EE}" name="Source">
       <GROUP id="{5E34FB08-22CA-2F3D-F203-36B9E1525893}" name="Utilities">

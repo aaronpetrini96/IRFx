@@ -74,6 +74,8 @@ class IRFxAudioProcessor  : public juce::AudioProcessor
     
     void savePreset(const juce::File& file);
     void loadPreset(const juce::File& file);
+    void setCurrentPresetName(const juce::String& name) {currentPresetName = name;}
+    juce::String getCurrentPresetName() const {return currentPresetName;}
     
     //==============================================================================
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
@@ -155,6 +157,8 @@ class IRFxAudioProcessor  : public juce::AudioProcessor
     std::unique_ptr<juce::dsp::Convolution> pendingIR2;
     juce::File deferredIR1File;
     juce::File deferredIR2File;
+    
+    juce::String currentPresetName;
 
 private:
     

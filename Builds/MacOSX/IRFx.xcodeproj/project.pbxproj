@@ -768,7 +768,7 @@
 			name = "Update manifest";
 			alwaysOutOfDate = 1;
 			shellPath = /bin/sh;
-			shellScript = "set -euo pipefail\n\necho Running codesign --verbose=4 --force --sign - \\\"${CONFIGURATION_BUILD_DIR}/${WRAPPER_NAME}\\\"\ncodesign --verbose=4 --force --sign - \"${CONFIGURATION_BUILD_DIR}/${WRAPPER_NAME}\"\n\necho Running \\\"${CONFIGURATION_BUILD_DIR}/juce_vst3_helper\\\" -create -version \\\"1.0.6\\\" -path \\\"${CONFIGURATION_BUILD_DIR}/${WRAPPER_NAME}\\\" -output \\\"${CONFIGURATION_BUILD_DIR}/${WRAPPER_NAME}/Contents/Resources/moduleinfo.json\\\"\n\"${CONFIGURATION_BUILD_DIR}/juce_vst3_helper\" -create -version \"1.0.6\" -path \"${CONFIGURATION_BUILD_DIR}/${WRAPPER_NAME}\" -output \"${CONFIGURATION_BUILD_DIR}/${WRAPPER_NAME}/Contents/Resources/moduleinfo.json\"\n";
+			shellScript = "set -euo pipefail\n\necho Running codesign --verbose=4 --force --sign - \\\"${CONFIGURATION_BUILD_DIR}/${WRAPPER_NAME}\\\"\ncodesign --verbose=4 --force --sign - \"${CONFIGURATION_BUILD_DIR}/${WRAPPER_NAME}\"\n\necho Running \\\"${CONFIGURATION_BUILD_DIR}/juce_vst3_helper\\\" -create -version \\\"1.0.7\\\" -path \\\"${CONFIGURATION_BUILD_DIR}/${WRAPPER_NAME}\\\" -output \\\"${CONFIGURATION_BUILD_DIR}/${WRAPPER_NAME}/Contents/Resources/moduleinfo.json\\\"\n\"${CONFIGURATION_BUILD_DIR}/juce_vst3_helper\" -create -version \"1.0.7\" -path \"${CONFIGURATION_BUILD_DIR}/${WRAPPER_NAME}\" -output \"${CONFIGURATION_BUILD_DIR}/${WRAPPER_NAME}/Contents/Resources/moduleinfo.json\"\n";
 		};
 		82E9AE6C0A17FD87F639FC9A /* Plugin Copy Step */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -964,9 +964,9 @@
 					"JucePlugin_ProducesMidiOutput=0",
 					"JucePlugin_IsMidiEffect=0",
 					"JucePlugin_EditorRequiresKeyboardFocus=0",
-					"JucePlugin_Version=1.0.6",
-					"JucePlugin_VersionCode=0x10006",
-					"JucePlugin_VersionString=\\\"1.0.6\\\"",
+					"JucePlugin_Version=1.0.7",
+					"JucePlugin_VersionCode=0x10007",
+					"JucePlugin_VersionString=\\\"1.0.7\\\"",
 					"JucePlugin_VSTUniqueID=JucePlugin_PluginCode",
 					"JucePlugin_VSTCategory=kPlugCategEffect",
 					"JucePlugin_Vst3Category=\\\"Fx\\\"",
@@ -994,8 +994,8 @@
 					"JucePlugin_ARACompatibleArchiveIDs=\\\"\\\"",
 					"JUCE_STANDALONE_APPLICATION=JucePlugin_Build_Standalone",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=1.0.6",
-					"JUCE_APP_VERSION_HEX=0x10006",
+					"JUCE_APP_VERSION=1.0.7",
+					"JUCE_APP_VERSION_HEX=0x10007",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GENERATE_PKGINFO_FILE = YES;
@@ -1077,9 +1077,9 @@
 					"JucePlugin_ProducesMidiOutput=0",
 					"JucePlugin_IsMidiEffect=0",
 					"JucePlugin_EditorRequiresKeyboardFocus=0",
-					"JucePlugin_Version=1.0.6",
-					"JucePlugin_VersionCode=0x10006",
-					"JucePlugin_VersionString=\\\"1.0.6\\\"",
+					"JucePlugin_Version=1.0.7",
+					"JucePlugin_VersionCode=0x10007",
+					"JucePlugin_VersionString=\\\"1.0.7\\\"",
 					"JucePlugin_VSTUniqueID=JucePlugin_PluginCode",
 					"JucePlugin_VSTCategory=kPlugCategEffect",
 					"JucePlugin_Vst3Category=\\\"Fx\\\"",
@@ -1107,8 +1107,8 @@
 					"JucePlugin_ARACompatibleArchiveIDs=\\\"\\\"",
 					"JUCE_STANDALONE_APPLICATION=JucePlugin_Build_Standalone",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=1.0.6",
-					"JUCE_APP_VERSION_HEX=0x10006",
+					"JUCE_APP_VERSION=1.0.7",
+					"JUCE_APP_VERSION_HEX=0x10007",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GENERATE_PKGINFO_FILE = YES;
@@ -1191,9 +1191,9 @@
 					"JucePlugin_ProducesMidiOutput=0",
 					"JucePlugin_IsMidiEffect=0",
 					"JucePlugin_EditorRequiresKeyboardFocus=0",
-					"JucePlugin_Version=1.0.6",
-					"JucePlugin_VersionCode=0x10006",
-					"JucePlugin_VersionString=\\\"1.0.6\\\"",
+					"JucePlugin_Version=1.0.7",
+					"JucePlugin_VersionCode=0x10007",
+					"JucePlugin_VersionString=\\\"1.0.7\\\"",
 					"JucePlugin_VSTUniqueID=JucePlugin_PluginCode",
 					"JucePlugin_VSTCategory=kPlugCategEffect",
 					"JucePlugin_Vst3Category=\\\"Fx\\\"",
@@ -1221,8 +1221,8 @@
 					"JucePlugin_ARACompatibleArchiveIDs=\\\"\\\"",
 					"JUCE_STANDALONE_APPLICATION=JucePlugin_Build_Standalone",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=1.0.6",
-					"JUCE_APP_VERSION_HEX=0x10006",
+					"JUCE_APP_VERSION=1.0.7",
+					"JUCE_APP_VERSION_HEX=0x10007",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
@@ -1298,9 +1298,9 @@
 					"JucePlugin_ProducesMidiOutput=0",
 					"JucePlugin_IsMidiEffect=0",
 					"JucePlugin_EditorRequiresKeyboardFocus=0",
-					"JucePlugin_Version=1.0.6",
-					"JucePlugin_VersionCode=0x10006",
-					"JucePlugin_VersionString=\\\"1.0.6\\\"",
+					"JucePlugin_Version=1.0.7",
+					"JucePlugin_VersionCode=0x10007",
+					"JucePlugin_VersionString=\\\"1.0.7\\\"",
 					"JucePlugin_VSTUniqueID=JucePlugin_PluginCode",
 					"JucePlugin_VSTCategory=kPlugCategEffect",
 					"JucePlugin_Vst3Category=\\\"Fx\\\"",
@@ -1328,8 +1328,8 @@
 					"JucePlugin_ARACompatibleArchiveIDs=\\\"\\\"",
 					"JUCE_STANDALONE_APPLICATION=JucePlugin_Build_Standalone",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=1.0.6",
-					"JUCE_APP_VERSION_HEX=0x10006",
+					"JUCE_APP_VERSION=1.0.7",
+					"JUCE_APP_VERSION_HEX=0x10007",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
@@ -1414,9 +1414,9 @@
 					"JucePlugin_ProducesMidiOutput=0",
 					"JucePlugin_IsMidiEffect=0",
 					"JucePlugin_EditorRequiresKeyboardFocus=0",
-					"JucePlugin_Version=1.0.6",
-					"JucePlugin_VersionCode=0x10006",
-					"JucePlugin_VersionString=\\\"1.0.6\\\"",
+					"JucePlugin_Version=1.0.7",
+					"JucePlugin_VersionCode=0x10007",
+					"JucePlugin_VersionString=\\\"1.0.7\\\"",
 					"JucePlugin_VSTUniqueID=JucePlugin_PluginCode",
 					"JucePlugin_VSTCategory=kPlugCategEffect",
 					"JucePlugin_Vst3Category=\\\"Fx\\\"",
@@ -1444,8 +1444,8 @@
 					"JucePlugin_ARACompatibleArchiveIDs=\\\"\\\"",
 					"JUCE_STANDALONE_APPLICATION=JucePlugin_Build_Standalone",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=1.0.6",
-					"JUCE_APP_VERSION_HEX=0x10006",
+					"JUCE_APP_VERSION=1.0.7",
+					"JUCE_APP_VERSION_HEX=0x10007",
 					"JUCE_SHARED_CODE=1",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -1522,9 +1522,9 @@
 					"JucePlugin_ProducesMidiOutput=0",
 					"JucePlugin_IsMidiEffect=0",
 					"JucePlugin_EditorRequiresKeyboardFocus=0",
-					"JucePlugin_Version=1.0.6",
-					"JucePlugin_VersionCode=0x10006",
-					"JucePlugin_VersionString=\\\"1.0.6\\\"",
+					"JucePlugin_Version=1.0.7",
+					"JucePlugin_VersionCode=0x10007",
+					"JucePlugin_VersionString=\\\"1.0.7\\\"",
 					"JucePlugin_VSTUniqueID=JucePlugin_PluginCode",
 					"JucePlugin_VSTCategory=kPlugCategEffect",
 					"JucePlugin_Vst3Category=\\\"Fx\\\"",
@@ -1552,8 +1552,8 @@
 					"JucePlugin_ARACompatibleArchiveIDs=\\\"\\\"",
 					"JUCE_STANDALONE_APPLICATION=JucePlugin_Build_Standalone",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=1.0.6",
-					"JUCE_APP_VERSION_HEX=0x10006",
+					"JUCE_APP_VERSION=1.0.7",
+					"JUCE_APP_VERSION_HEX=0x10007",
 					"JUCE_SHARED_CODE=1",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -1631,9 +1631,9 @@
 					"JucePlugin_ProducesMidiOutput=0",
 					"JucePlugin_IsMidiEffect=0",
 					"JucePlugin_EditorRequiresKeyboardFocus=0",
-					"JucePlugin_Version=1.0.6",
-					"JucePlugin_VersionCode=0x10006",
-					"JucePlugin_VersionString=\\\"1.0.6\\\"",
+					"JucePlugin_Version=1.0.7",
+					"JucePlugin_VersionCode=0x10007",
+					"JucePlugin_VersionString=\\\"1.0.7\\\"",
 					"JucePlugin_VSTUniqueID=JucePlugin_PluginCode",
 					"JucePlugin_VSTCategory=kPlugCategEffect",
 					"JucePlugin_Vst3Category=\\\"Fx\\\"",
@@ -1661,8 +1661,8 @@
 					"JucePlugin_ARACompatibleArchiveIDs=\\\"\\\"",
 					"JUCE_STANDALONE_APPLICATION=JucePlugin_Build_Standalone",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=1.0.6",
-					"JUCE_APP_VERSION_HEX=0x10006",
+					"JUCE_APP_VERSION=1.0.7",
+					"JUCE_APP_VERSION_HEX=0x10007",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
@@ -1739,9 +1739,9 @@
 					"JucePlugin_ProducesMidiOutput=0",
 					"JucePlugin_IsMidiEffect=0",
 					"JucePlugin_EditorRequiresKeyboardFocus=0",
-					"JucePlugin_Version=1.0.6",
-					"JucePlugin_VersionCode=0x10006",
-					"JucePlugin_VersionString=\\\"1.0.6\\\"",
+					"JucePlugin_Version=1.0.7",
+					"JucePlugin_VersionCode=0x10007",
+					"JucePlugin_VersionString=\\\"1.0.7\\\"",
 					"JucePlugin_VSTUniqueID=JucePlugin_PluginCode",
 					"JucePlugin_VSTCategory=kPlugCategEffect",
 					"JucePlugin_Vst3Category=\\\"Fx\\\"",
@@ -1769,8 +1769,8 @@
 					"JucePlugin_ARACompatibleArchiveIDs=\\\"\\\"",
 					"JUCE_STANDALONE_APPLICATION=JucePlugin_Build_Standalone",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=1.0.6",
-					"JUCE_APP_VERSION_HEX=0x10006",
+					"JUCE_APP_VERSION=1.0.7",
+					"JUCE_APP_VERSION_HEX=0x10007",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
@@ -1894,9 +1894,9 @@
 					"JucePlugin_ProducesMidiOutput=0",
 					"JucePlugin_IsMidiEffect=0",
 					"JucePlugin_EditorRequiresKeyboardFocus=0",
-					"JucePlugin_Version=1.0.6",
-					"JucePlugin_VersionCode=0x10006",
-					"JucePlugin_VersionString=\\\"1.0.6\\\"",
+					"JucePlugin_Version=1.0.7",
+					"JucePlugin_VersionCode=0x10007",
+					"JucePlugin_VersionString=\\\"1.0.7\\\"",
 					"JucePlugin_VSTUniqueID=JucePlugin_PluginCode",
 					"JucePlugin_VSTCategory=kPlugCategEffect",
 					"JucePlugin_Vst3Category=\\\"Fx\\\"",
@@ -1924,8 +1924,8 @@
 					"JucePlugin_ARACompatibleArchiveIDs=\\\"\\\"",
 					"JUCE_STANDALONE_APPLICATION=JucePlugin_Build_Standalone",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=1.0.6",
-					"JUCE_APP_VERSION_HEX=0x10006",
+					"JUCE_APP_VERSION=1.0.7",
+					"JUCE_APP_VERSION_HEX=0x10007",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GENERATE_PKGINFO_FILE = YES;
@@ -2064,9 +2064,9 @@
 					"JucePlugin_ProducesMidiOutput=0",
 					"JucePlugin_IsMidiEffect=0",
 					"JucePlugin_EditorRequiresKeyboardFocus=0",
-					"JucePlugin_Version=1.0.6",
-					"JucePlugin_VersionCode=0x10006",
-					"JucePlugin_VersionString=\\\"1.0.6\\\"",
+					"JucePlugin_Version=1.0.7",
+					"JucePlugin_VersionCode=0x10007",
+					"JucePlugin_VersionString=\\\"1.0.7\\\"",
 					"JucePlugin_VSTUniqueID=JucePlugin_PluginCode",
 					"JucePlugin_VSTCategory=kPlugCategEffect",
 					"JucePlugin_Vst3Category=\\\"Fx\\\"",
@@ -2094,8 +2094,8 @@
 					"JucePlugin_ARACompatibleArchiveIDs=\\\"\\\"",
 					"JUCE_STANDALONE_APPLICATION=JucePlugin_Build_Standalone",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=1.0.6",
-					"JUCE_APP_VERSION_HEX=0x10006",
+					"JUCE_APP_VERSION=1.0.7",
+					"JUCE_APP_VERSION_HEX=0x10007",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GENERATE_PKGINFO_FILE = YES;

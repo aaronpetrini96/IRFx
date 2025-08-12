@@ -37,15 +37,28 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
 //  PRESET BUTTONS
     setPresetButtonStyle(savePresetButton);
     addAndMakeVisible(savePresetButton);
-    savePresetButton.onClick = [this] {presetManager.savePreset();};
+    savePresetButton.onClick = [this]
+    {
+        presetManager.savePreset();
+    };
     
 //  PRESET DROPDOWN MENU
     presetBox.setTextWhenNothingSelected("Select Preset");
     presetBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colour(100, 100, 110).darker(0.5f));
     presetBox.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
     presetBox.setLookAndFeel(ComboBoxLookAndFeel::get());
-    presetBox.onChange = [this]() {presetManager.presetSelected();};
+    presetBox.onChange = [this]()
+    {
+        presetManager.presetSelected();
+    };
     presetManager.refreshPresetList();
+    auto presetName = audioProcessor.getCurrentPresetName();
+    if (presetName.isNotEmpty())
+    {
+        int id = presetManager.getItemIdForText(presetBox, presetName);
+        if (id != 0)
+            presetBox.setSelectedId(id);
+    }
     addAndMakeVisible(presetBox);
     
     
@@ -77,16 +90,6 @@ IRFxAudioProcessorEditor::IRFxAudioProcessorEditor (IRFxAudioProcessor& p)
     delayModeBox.setLookAndFeel(ComboBoxLookAndFeel::get());
     delayModeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, ParamNames::getDelayModeName(), delayModeBox);
     
-//    delayMonoStereoBox.addItem("Centre", 1);
-//    delayMonoStereoBox.addItem("Wide", 2);
-//    delayMonoStereoBox.setSelectedId(1);
-//    delayMonoStereoBox.setColour(juce::ComboBox::ColourIds::backgroundColourId, darkPink);
-//    delayMonoStereoBox.setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::transparentBlack);
-//    delayMonoStereoBox.setLookAndFeel(ComboBoxLookAndFeel::get());
-//    delayMonoStereoAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, ParamNames::getDelayMonoStereoName(), delayMonoStereoBox);
-    
-    
-
     
     
 //    OUTPUT BOXES

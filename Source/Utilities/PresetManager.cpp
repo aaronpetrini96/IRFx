@@ -28,6 +28,11 @@ void PresetManager::savePreset()
             
             // Optionally, refresh the preset list in the UI or do other actions
             refreshPresetList();
+            
+            auto presetName = selectedFile.getFileNameWithoutExtension();
+            presetBox.setSelectedId(getItemIdForText(presetBox, presetName));
+            audioProcessor.setCurrentPresetName(presetName);
+
         }
         else
         {
@@ -43,6 +48,10 @@ void PresetManager::loadPreset()
 
     auto file = chooser.getResult();
     audioProcessor.loadPreset (file);  // Calls your processor’s loadPreset
+    
+    auto presetName = file.getFileNameWithoutExtension();
+    audioProcessor.setCurrentPresetName(presetName);
+    presetBox.setSelectedId(getItemIdForText(presetBox, presetName));
 }
 
 void PresetManager::presetSelected()
@@ -53,6 +62,8 @@ void PresetManager::presetSelected()
         auto presetName = presetBox.getItemText(selectedId - 1);
         auto presetFile = getPresetFolder().getChildFile(presetName + ".xml");
         audioProcessor.loadPreset(presetFile);
+        presetBox.setSelectedId(getItemIdForText(presetBox, presetName));
+        audioProcessor.setCurrentPresetName(presetName);
     }
 }
 
@@ -78,3 +89,12 @@ juce::File PresetManager::getPresetFolder()
 }
 
 
+int PresetManager::getItemIdForText(const juce::ComboBox& box, const juce::String& textToFind)
+{
+    for (int i = 0; i < box.getNumItems(); ++i)
+    {
+        if (box.getItemText(i) == textToFind)
+            return box.getItemId(i);
+    }
+    return 0; // 0 means "not found"
+}

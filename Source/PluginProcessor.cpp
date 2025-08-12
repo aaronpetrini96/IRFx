@@ -784,6 +784,7 @@ juce::AudioProcessorEditor* IRFxAudioProcessor::createEditor()
 void IRFxAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto state = apvts.copyState();
+    state.setProperty("CurrentPresetName", currentPresetName, nullptr);
     std::unique_ptr<juce::XmlElement> xml (state.createXml());
     copyXmlToBinary(*xml, destData);
 }
@@ -803,6 +804,9 @@ void IRFxAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
         
         if (auto* ir2Path = apvts.state.getPropertyPointer("IR2FilePath"))
             deferredIR2File = juce::File(*ir2Path);
+        
+        if (auto* presetNameProp = state.getPropertyPointer("CurrentPresetName"))
+            currentPresetName = presetNameProp->toString(); // restore preset name
     }
 }
 
