@@ -46,7 +46,6 @@ class IRFxAudioProcessor  : public juce::AudioProcessor
     bool isMidiEffect() const override;
     double getTailLengthSeconds() const override;
     
-    
     //==============================================================================
     int getNumPrograms() override;
     int getCurrentProgram() override;
@@ -57,7 +56,7 @@ class IRFxAudioProcessor  : public juce::AudioProcessor
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
     
-    //======================DSP FUNCTIONS==========================================
+    //====================== DSP FUNCTIONS ======================
     
     void loadIR1(const juce::File&);
     void loadIR2(const juce::File&);
@@ -66,23 +65,17 @@ class IRFxAudioProcessor  : public juce::AudioProcessor
     
     void updateParams();
     
-    float getInputLevelL() const { return inputLevelL; }
-    float getInputLevelR() const { return inputLevelR; }
-    float getOutputLevelL() const { return outputLevelL; }
-    float getOutputLevelR() const { return outputLevelR; }
-    
-    
     void savePreset(const juce::File& file);
     void loadPreset(const juce::File& file);
     void setCurrentPresetName(const juce::String& name) {currentPresetName = name;}
     juce::String getCurrentPresetName() const {return currentPresetName;}
     
     //==============================================================================
+    //======================= PARAMETER LAYOUT =======================
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     juce::AudioProcessorValueTreeState apvts {*this, nullptr, "Parameters", createParameterLayout()};
     
-    //======================= PARAMETERS PTRS ================================================
-    
+    //======================= PARAMETERS PTRS =======================
     //IR MODULE
     juce::AudioParameterFloat* lowCutFreqParam {nullptr};
     juce::AudioParameterFloat* highCutFreqParam {nullptr};
@@ -91,21 +84,17 @@ class IRFxAudioProcessor  : public juce::AudioProcessor
     juce::AudioParameterFloat* ir1PanParam {nullptr};
     juce::AudioParameterFloat* ir2PanParam {nullptr};
     juce::AudioParameterBool* irLoaderBypassParam {nullptr};
-    
-    
     //TONE STACK
     juce::AudioParameterFloat* lowEQGainParam {nullptr};
     juce::AudioParameterFloat* midEQGainParam {nullptr};
     juce::AudioParameterFloat* midEQFreqParam {nullptr};
     juce::AudioParameterFloat* highEQGainParam {nullptr};
     juce::AudioParameterBool* eqBypassParam {nullptr};
-    
     //SATURATION
     juce::AudioParameterFloat* saturationDriveParam {nullptr};
     juce::AudioParameterFloat* saturationMixParam {nullptr};
     juce::AudioParameterBool* saturationBypassParam {nullptr};
     juce::AudioParameterChoice* saturationModeParam {nullptr};
-    
     //DELAY
     juce::AudioParameterFloat* delayMixParam {nullptr};
     juce::AudioParameterFloat* delayFeedbackParam {nullptr};
@@ -114,16 +103,14 @@ class IRFxAudioProcessor  : public juce::AudioProcessor
     juce::AudioParameterBool* delaySyncParam {nullptr};
     juce::AudioParameterChoice* delayNoteParam {nullptr};
     juce::AudioParameterBool* delayBypassParam{nullptr};
-    
-    
     //IN-OUT GAIN
     juce::AudioParameterFloat* inputGainParam {nullptr};
     juce::AudioParameterFloat* outputGainParam {nullptr};
-    
+    //PLUGIN GENERAL PARAMS
     juce::AudioParameterBool* pluginBypassParam {nullptr};
     juce::AudioParameterChoice* outputMonoStereoParam {nullptr};
     
-    //======================= SMOOTHED PARAMS ================================================
+    //======================= SMOOTHED PARAMS =======================
     juce::SmoothedValue<float>
     lowCutFreqParamSmoother,
     highCutFreqParamSmoother,
@@ -142,6 +129,7 @@ class IRFxAudioProcessor  : public juce::AudioProcessor
     delayTimeParamSmoother,
     inputGainParamSmoother,
     outputGainParamSmoother;
+    //=======================
     
     juce::dsp::ProcessSpec spec;
     std::unique_ptr<juce::dsp::Convolution> irLoader1, irLoader2;
@@ -163,7 +151,7 @@ class IRFxAudioProcessor  : public juce::AudioProcessor
 private:
     
     bool outputIsStereo {false};
-    float inputLevelL{0.f}, inputLevelR {0.f}, outputLevelL{0.f}, outputLevelR{0.f};
+//    float inputLevelL{0.f}, inputLevelR {0.f}, outputLevelL{0.f}, outputLevelR{0.f};
     juce::dsp::Gain<float> inputGain, outputGain;
     juce::dsp::Gain<float> gain;
     float mixIR1, mixIR2;
@@ -188,14 +176,9 @@ private:
     
     Saturation saturationInstance;
 
-
     DelayProcessor delayInstance;
     
-    
-    
-    
-    
-    
+//  ======== PARAMETERS FUNCTIONS ========
     template<typename ParamType, typename Params, typename Funcs>
     void initCachedParams(Params paramsArray, Funcs funcsArray)
     {

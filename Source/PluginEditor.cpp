@@ -579,13 +579,9 @@ void IRFxAudioProcessorEditor::setSatButtonColour (juce::TextButton& b, bool isO
     juce::Colour darkPink = juce::Colour::fromRGB(200, 30, 100).withAlpha(0.8f); // Dark Trash pink
 
     if (isOn)
-    {
         b.setColour(juce::TextButton::ColourIds::buttonOnColourId, darkPink.brighter());
-    }
     else
-    {
         b.setColour(juce::TextButton::ColourIds::buttonColourId, darkPink.withAlpha(0.5f));
-    }
 }
 
 void IRFxAudioProcessorEditor::setPresetButtonStyle(juce::TextButton& button)

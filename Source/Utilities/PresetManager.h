@@ -23,6 +23,7 @@ public:
     void presetSelected();
     void refreshPresetList();
     int getItemIdForText(const juce::ComboBox&, const juce::String&);
+    void applyPresetSelection(const juce::String&);
     
     
 private:

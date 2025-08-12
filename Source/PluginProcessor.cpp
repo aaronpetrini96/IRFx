@@ -238,13 +238,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout IRFxAudioProcessor::createPa
     name = ParamNames::getEQBypassName();
     params.emplace_back(std::make_unique<juce::AudioParameterBool>(juce::ParameterID(name, versionHint), name, false));
     name = ParamNames::getEQLowGainName();
-    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(-24.f, 24.f, 0.1f, 1.f), 0.f));
+    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(-12.f, 12.f, 0.1f, 1.f), 0.f));
     name = ParamNames::getEQMidGainName();
-    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(-24.f, 24.f, 0.1f, 1.f), 0.f));
+    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(-12.f, 12.f, 0.1f, 1.f), 0.f));
     name = ParamNames::getEQMidFreqName();
     params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(250.f, 5000.f, 1.f, 1.f), 550.f));
     name = ParamNames::getEQHighGainName();
-    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(-24.f, 24.f, 0.1f, 1.f), 0.f));
+    params.emplace_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID(name, versionHint), name, juce::NormalisableRange<float>(-12.f, 12.f, 0.1f, 1.f), 0.f));
     
 //   DIST
     name = ParamNames::getDistBypassName();
@@ -590,13 +590,7 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     }
 
 
-    //========================    IN GAIN part    ========================
-    juce::AudioBuffer<float> dryBuffer;
-    dryBuffer.makeCopyOf(buffer);
-    inputGain.setGainDecibels(inputGainParamSmoother.getCurrentValue());
-    
-    inputLevelL = buffer.getRMSLevel(0, 0, buffer.getNumSamples());
-    inputLevelR = buffer.getNumChannels() > 1 ? buffer.getRMSLevel(1, 0, buffer.getNumSamples()) : inputLevelL;
+
     //========================                    ========================
         
     updateSmootherFromParams(buffer.getNumSamples(), SmootherUpdateMode::liveInRealTime);
@@ -604,9 +598,11 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     
     if (pluginBypassParam->get() == false)
     {
-        applyGain(buffer, inputGain);
         outputIsStereo = outputMonoStereoParam->getIndex() == 1;
-
+        //========================    IN GAIN part    ========================
+        inputGain.setGainDecibels(inputGainParamSmoother.getCurrentValue());
+        applyGain(buffer, inputGain);
+        
         //========================    IR LOADER part    ========================
         if (irLoaderBypassParam->get() == false)
         {
@@ -739,19 +735,13 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
             delayInstance.setMix(delayMixParamSmoother.getCurrentValue());
             using Mode = DelayProcessor::Mode;
             delayInstance.setMode(delayModeParam->getIndex() == 0 ? Mode::Digital : Mode::Tape);
-            
             bool isSync = delaySyncParam->get();
             delayInstance.setSyncEnabled(isSync);
             if (isSync)
                 delayInstance.setSubdivision(delayNoteParam->getIndex());
             else
                 delayInstance.setDelayTime(delayTimeParamSmoother.getCurrentValue());
-            
             delayInstance.setHostBpm(getPlayHead()->getPosition()->getBpm().orFallback(120.0));
-            
-//            auto mainInput = getBusBuffer(buffer, true, 0);
-//            auto mainOutput = getBusBuffer(buffer, false, 0);
-            
             delayInstance.process(buffer, buffer.getNumSamples(), delayIsMono);
         }
 
@@ -764,9 +754,6 @@ void IRFxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         if (clipDetection(buffer))
             clipFlagOut.store(true); // atomic flag to be safe for GUI thread
     }
-
-    outputLevelL = buffer.getRMSLevel(0, 0, buffer.getNumSamples());
-    outputLevelR = buffer.getNumChannels() > 1 ? buffer.getRMSLevel(1, 0, buffer.getNumSamples()) : outputLevelL;
 }
 
 //==============================================================================
@@ -823,6 +810,8 @@ void IRFxAudioProcessor::loadPreset(const juce::File& file)
     if (xml && xml->hasTagName(apvts.state.getType()))
     {
         juce::ValueTree state = juce::ValueTree::fromXml(*xml);
+        if (auto* presetNameProp = state.getPropertyPointer("CurrentPresetName"))
+            currentPresetName = presetNameProp->toString(); // restore preset name
         apvts.replaceState(state);
         updateParams();
     }
